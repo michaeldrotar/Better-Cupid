@@ -1,0 +1,40 @@
+<script type="text/javascript" src="core.js"></script>
+<script type="text/javascript">
+	chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+		switch ( request.type ) {
+		
+			case "db.get":
+				sendResponse({
+					type: "db.set",
+					key: request.key,
+					value: localStorage.getItem(request.key)
+				})
+				return
+				
+			case "db.get.all":
+				var data = {}
+				for ( k in localStorage ) {
+					data[k] = localStorage[k]
+				}
+				sendResponse({
+					type: "db.set.all",
+					data: data
+				})
+				return
+			
+		}
+		sendResponse({})
+	})
+	
+	chrome.browserAction.onClicked.addListener(function(tab) {
+		window.open("http://www.okcupid.com")
+	})
+	/*
+	chrome.browserAction.setPopup({popup:"popup.html"})
+	setTimeout(function() {
+		chrome.browserAction.setPopup({popup:""})
+	}, 1000)
+	chrome.browserAction.setBadgeBackgroundColor({color:[255,255,255,100]})
+	chrome.browserAction.setBadgeText({text:"1"})
+	//*/
+</script>

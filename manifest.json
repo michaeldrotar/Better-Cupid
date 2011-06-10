@@ -1,0 +1,43 @@
+{
+	"name": "BetterCupid",
+	"version": "0.5.0",
+	"description": "Enhances the functionality of the OkCupid website. This extension was written by a bored fan and is not endorsed by OkCupid.",
+	
+	"icons": {
+		"128": "res/icon128.png",
+		"48": "res/icon48.png",
+		"16": "res/icon16.png"
+	},
+	
+	"minimum_chrome_version": "5.0.316.0",
+	"incognito": "spanning",
+	
+	"background_page": "background.html",
+	"options_page": "options.html",
+	
+	"browser_action": {
+		"default_icon": "res/icon19.png"
+	},
+	
+	"content_scripts": [
+		{
+			"matches": ["http://*.okcupid.com/*", "https://*.okcupid.com/*"],
+			"js": [
+				"prototype.js", "jquery.js", "core.js",
+				"scripts/match.js",
+				"scripts/move_right_with_you.js",
+				"scripts/photobrowser.js"
+			],
+			"run_at": "document_start"
+		},
+		{
+			"matches": ["http://*.okcupid.com/*", "https://*.okcupid.com/*"],
+			"js": [
+				"scripts/questions.js",
+				"scripts/people_summary.js",
+				"scripts/skip_any_question.js"
+			],
+			"run_at": "document_end"
+		}
+	]
+}

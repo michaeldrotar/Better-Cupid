@@ -1,0 +1,679 @@
+<html>
+<head>
+	<title>BetterCupid Options</title>
+	<script type="text/javascript" src="jQuery.js"></script>
+	<script type="text/javascript" src="core.js"></script>
+	<style type="text/css">
+	body
+	{
+		background-color: #2963a4;
+		color: #777777;
+		font: normal 12px Verdana, 'Bitsream Vera Sans', sans-serif;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	h1
+	{
+		background-image: url(res/icon48.png);
+		background-position: 25 center;
+		background-repeat: no-repeat;
+		color: #F83265;
+		font-size: 24px;
+		font-weight: normal;
+		letter-spacing: -1px;
+		line-height: 24px;
+		margin: 0px;
+		padding: 40px 0px 40px 75px;
+	}
+
+	h2
+	{
+		clear: left;
+		color: #555555;
+		font-size: 18px;
+		font-weight: normal;
+		line-height: 19px;
+		margin: 0px;
+		padding: 30px 0px 5px 0px;
+	}
+
+	.btn
+	{
+		background-color: white;
+		background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#efefef));
+		border: 1px solid #dddddd;
+		border-radius: 3px;
+		color: #555555;
+		cursor: pointer;
+		display: block;
+		font-size: 10px;
+		font-weight: bold;
+		height: 23px;
+		float: right;
+		line-height: 23px;
+		margin-right: 5px;
+		text-align: center;
+		width: 120px;
+	}
+
+	.btn:hover
+	{
+		background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#e7e7e7));
+	}
+
+	.btn:active
+	{
+		background-image: -webkit-gradient(linear, left top, left bottom, from(#efefef), to(white));
+	}
+
+	.clearfix
+	{
+		clear: both;
+	}
+
+	.page
+	{
+		background-color: #eaeaea;
+		border-left: 1px solid black;
+		border-right: 1px solid black;
+		margin: auto;
+		padding: 0px 0px 40px 0px;
+		position: relative;
+		width: 780px;
+	}
+
+	.options
+	{
+		background-color: #f6f6f6;
+		margin-bottom: 10px;
+		opacity: 1;
+		padding: 0px 15px 20px 15px;
+	}
+
+	.options input
+	{
+		clear: left;
+		float: left;
+	}
+
+	.options label
+	{
+		color: #333333;
+		cursor: pointer;
+		display: block;
+		float: left;
+		font-size: 11px;
+		margin: 0 0 8px 15px;
+		width: 700px;
+	}
+	
+	.tab_content
+	{
+		background-color: #F6F6F6;
+		clear: both;
+		margin-bottom: 10px;
+		padding: 20px 15px;
+	}
+	
+	.tab_content_left
+	{
+		width: 485px;
+	}
+	
+	.tab_content_nav
+	{
+		float: right;
+		margin: 0px -15px 0px 0px;
+		width: 250px;
+	}
+	
+	.tab_content_nav ul
+	{
+		background-color: #EEE;
+		list-style: none;
+		margin: 0px 0px 15px 0px;
+		padding: 0px 0px 50px 0px;
+	}
+	
+	.tab_content_nav li
+	{
+		border-bottom: 1px solid #F6F6F6;
+		color: #2963A4;
+		cursor: pointer;
+		font-size: 11px;
+		height: 27px;
+		line-height: 28px;
+		margin: 0px;
+		padding: 0px 12px;
+	}
+	
+	.tab_content_nav li:hover
+	{
+		background-color: #E0EAF2;
+	}
+	
+	.tab_content_nav li.active
+	{
+		background-color: #E8F2E0;
+		background-image: url(res/green_arrow.png);
+		background-repeat: no-repeat;
+		color: #569424;
+		font-weight: bold;
+		margin-left: -13px;
+		padding-left: 25px;
+	}
+	
+	.tab_content_nav li.active:hover
+	{
+	
+	}
+	
+	.tab_content_nav .title
+	{
+		background-color: #EEE;
+		color: #777;
+		font-size: 16px;
+		margin: 0px 0px 1px 0px;
+		padding: 18px 12px 5px 12px;
+	}
+	
+	.tabgroup
+	{
+		display: block;
+		height: 28px;
+		list-style: none;
+		margin: 0px;
+		padding: 0px 25px;
+	}
+	
+	.tabgroup li
+	{
+		border-style: none;
+		border-top-left-radius: 5px;
+		border-top-right-radius: 5px;
+		color: #777777;
+		cursor: pointer;
+		float: left;
+		font-size: 11px;
+		font-weight: bold;
+		height: 28px;
+		line-height: 28px;
+		padding: 0px 20px;
+		text-shadow: 0px 1px 0px white;
+	}
+	
+	.tabgroup li:hover
+	{
+		color: #3D85CE;
+	}
+	
+	.tabgroup li.active
+	{
+		background-color: #F6F6F6;
+		border-left: 1px soid #D6D6D6;
+		border-right: 1px solid #D6D6D6;
+		border-top: 1px solid white;
+		line-height: 26px;
+		margin-bottom: 0px;
+		padding: 1px 20px 0px 20px;
+	}
+	
+	.tabgroup li.active:hover
+	{
+		color: inherit;
+	}
+	
+	.tabgroup li.right
+	{
+		float: right;
+	}
+	
+	#reset_button
+	{
+		float: none;
+		position: absolute;
+		right: 20px;
+		top: 20px;
+	}
+	
+	</style>
+	<script type="text/javascript">
+	$(function(){
+		var show_content = function(){ $("#"+this.id+"_content").show() }
+		var hide_content = function(){ $("#"+this.id+"_content").hide() }
+		var tab_onclick = function(e) {
+			$(this).parent().children().removeClass("active").each(hide_content)
+			$(this).addClass("active").each(show_content)
+		}
+		$(".switcher").each(function(uli){
+			var group = $(this)
+			group.find("li").each(function(lii){
+				var tab = $(this)
+				tab.click(tab_onclick)
+			})
+			group.find("li:first").click()
+		})
+		$("#changelog_tab").click()
+		/*
+		var options = [
+			{
+				heading: L("optionHeadingGeneral"),
+				options: [
+					{
+						key: "show_hide_button",
+						type: "boolean",
+						text: L("optionShowHideButton")
+					},
+					{
+						key: "show_count",
+						type: "boolean",
+						text: "Show count"
+					},
+					{
+						key: "show_nav_above",
+						type: "boolean",
+						text: L("optionShowPageNavAbove")
+					},
+					{
+						key: "show_nav_below",
+						type: "boolean",
+						text: L("optionShowPageNavBelow")
+					},
+					{
+						key: "show_people_summaries",
+						type: "boolean",
+						text: L("optionShowPeopleSummaries")
+					}
+				]
+			},
+			{
+				heading: L("optionHeadingMatchSearch"),
+				options: [
+					{
+						key: "show_match_minibar",
+						type: "boolean",
+						text: L("optionShowMinibar")
+					}
+				]
+			},
+			{
+				heading: L("optionHeadingProfiles"),
+				options: [
+					{
+						key: "fancy_questions",
+						type: "boolean",
+						text: L("optionFancyQuestions")
+					}
+				]
+			}
+		]
+		
+		var title = L("optionPageTitle")
+		document.title = title
+		$("h1").text(title)
+		
+		function handle_checkbox() {
+			db.set(this.id, this.checked)
+		}
+		
+		function setup_checkbox() {
+			$(this).click(handle_checkbox)
+			this.checked = db.get(this.id)
+		}
+		
+		function processOptions(data) {
+			var ret = ""
+			for ( var i = 0, l = data.length; i < l; i++ ) {
+				var d = data[i]
+				
+				if ( d.heading ) {
+					ret += "<h2>"+d.heading+"</h2>" + processOptions(d.options)
+					
+				} else {
+					switch ( d.type ) {
+						case "boolean":
+							ret += "<input type='checkbox' id='"+d.key+"' /><label for='"+d.key+"'>"+d.text+"</label>"
+							break
+					}
+				}
+			}
+			return ret
+		}
+		
+		$(".options").prepend(processOptions(options))
+		$("input[type=checkbox]").each(setup_checkbox)
+		*/
+		
+		$("#reset_button").click(function(e){
+			if ( window.confirm("This will reset all of your BetterCupid settings.\nPlease be sure this is what you wish to do before proceeding.") ) {
+				db.clear()
+				window.location.reload()
+			}
+		})
+		
+		//$(".tab_content > *:has(.tab_content_nav)").css("width", "480px")
+	})
+	</script>
+</head>
+<body>
+	<div class="page">
+		<h1>BetterCupid Options</h1>
+		<div id="reset_button" class="btn">
+			Reset Settings
+		</div>
+		<ul class="tabgroup switcher">
+			<li id="general_tab">
+				General
+			</li>
+			<!--
+			<li id="modules_tab">
+				Modules
+			</li>
+			-->
+			<li id="about_tab" class="right">
+				About
+			</li>
+			<li id="changelog_tab" class="right">
+				Changelog
+			</li>
+		</ul>
+		<div class="tab_content">
+			<div id="general_tab_content">
+				General
+			</div>
+			<!--
+			<div id="tab_modules_content">
+				<div class="description">
+					Enable/Disable any of the various modules used by BetterCupid.
+					There are 
+				</div>
+			</div>
+			-->
+			<div id="changelog_tab_content">
+				<div class="tab_content_nav">
+					<div class="title">Versions</div>
+					<ul class="switcher">
+						<li id="changelog_000500">0.5.0</li>
+						<li id="changelog_000400">0.4.0</li>
+						<li id="changelog_000300">0.3.0</li>
+						<li id="changelog_000200">0.2.0</li>
+						<li id="changelog_000100">0.1.0</li>
+					</ul>
+				</div>
+				<div class="tab_content_left">
+					<div id="changelog_000500_content">
+						<h2>Version 0.5.0</h2>
+						<div class="date">6/5/2011</div>
+						<h3>General</h3>
+						<p>
+							This version sports a major overhaul to the back-end.
+							It is not 100% complete, but I won't be able to work on it for a few days and I wanted
+								to get it released now rather than delay it for the sake of the couple things
+								that aren't updated.
+						</p>
+						<p>
+							I'll spare you the boring details since they were mostly for my benefit, but one big change
+								you can expect to see is that there's no more delay in modifying the page layout.
+							Previously, BetterCupid would wait until the page was finished loading before working its
+								magic, so you would briefly see the standard page, and then things would change.
+							Now, BetterCupid modifies the page as its being built by the browser so that it almost
+								appears as if it was already designed that way.
+							Personally, I think the effect is really slick and well worth the extra effort.
+						</p>
+						<p>
+							Continue on for a list of the other things to expect in this new version...
+						</p>
+						</ul>
+						<h3>Move Right With You</h3>
+						<ul>
+							<li>Panels are now less jumpy when moved and they better respect their boundaries. There
+								shouldn't be any more issues where it doesn't move all the way up or moves down
+								too far and lengthens the screen.</li>
+							<li>More right-hand panels have been added to the list of moveable panels.</li>
+						</ul>
+						<h3>Photobrowser</h3>
+						<ul>
+							<li>Thumbnails are bigger and even more visible than before.</li>
+							<li>The "Improve matches" and "See more matches" links have been moved up under the
+								thumbnails so that the whole thing takes up that much less space.</li>
+						</ul>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>
+								The photobrowser only affects the home screen now.
+								It was breaking the one on Quick Match.
+								I'll have to handle that one differently.
+							</li>
+							<li>
+								The thumbnails on the match search page will no longer get really big and run together
+									when addons are changed. This was happening due to a bug in Chrome
+									(<a href="http://code.google.com/p/chromium/issues/detail?id=66806">66806</a>).
+								Until it's fixed, I'll have to do all my styling through javascript instead of css.
+							</li>
+							<li>
+								The page numbers are back at the bottom of the Match Search page as well as at the top.
+								I never intended to remove them from the bottom, but I accidentally did when I got
+									rid of the options from v0.1.0.
+							</li>
+						</ul>
+					</div>
+					<div id="changelog_000400_content">
+						<h2>Version 0.4.0</h2>
+						<div class="date">6/1/2011</div>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>
+								A search filter will not start running until all the pages have been loaded.
+								This way, everything gets filtered instead of just what's available at the time.
+							</li>
+							<li>
+								On the questions page, the loading message will now visibly count all the way up to
+									the last page.
+								Before, it would show like 17/18 and then freeze as it sorted all the questions.
+							</li>
+						</ul>
+						<h3>Questions</h3>
+						<ul>
+							<li>
+								During the initial load, once it's loaded all the pages, it will now show a message
+									stating that it's sorting all the questions.
+								If there are more than 500 questions to sort, it will also display a message to let you
+									know that it may take awhile and that Chrome may say the page has become
+									unresponsive.
+								Unfortunately, I don't have a better way of searching this much data without freezing
+									the page, but I'll have to work on it.
+							</li>
+							<li>
+								A progress bar has been added that'll appear beneath the search box while a search is
+									running. It will disappear when the search has finished.
+							</li>
+							<li>
+								When a search is started, any pre-existing results will be faded out to show that they
+									may not be a real result. For instance, take the instance of having 1500 questions
+									to search through. You run search A and questions 1000 and 1200 are visible at the
+									end of it. You then run search B and questions 1000 and 1200 are still on the page
+									because the search algorithm hasn't checked them yet. In order to indicate that
+									they haven't been checked yet, they'll now be faded out and then they'll either be
+									removed or faded back in once the search algorithm reaches them.
+							</li>
+						</ul>
+					</div>
+					<div id="changelog_000300_content">
+						<h2>Version 0.3.3</h3>
+						<div class="date">5/26/2011</div>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>Should no longer crash on the match search page or any other page that has a lengthy
+								page navigation list on it.</li>
+						</ul>
+						<h2>Version 0.3.2</h2>
+						<div class="date">5/25/2011</div>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>When clicking on the detail pane for the random person on the home page, all clicks were
+								going to the last person instead of the visible person.
+								They should now go to the visible person.</li>
+						</ul>
+						<h2>Version 0.3.1</h2>
+						<div class="date">5/25/2011</div>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>The homepage now shows the first random person by default instead of the last.</li>
+							<li>The last random person on the homepage is no longer shifted 6 pixels to the right.</li>
+						</ul>
+						<h2>Version 0.3.0</h2>
+						<div class="date">5/24/2011</div>
+						<h3>Homepage</h3>
+						<ul>
+							<li>
+								The appearance of the random matches at the top has changed significantly.
+								The thumbnail images have been enlarged and move up into two rows, and only one
+									person's details is shown.
+								<p>
+									This area has always bugged me.. the point, I imagine, is to show a bunch of
+										pseudo-random people and perhaps one will catch your eye.. perhaps someone
+										that you don't technically match well with so you wouldn't otherwise
+										normally notice.
+									However, having to scroll the pane defeats the purpose because you only see a
+										handful of them and for the usually short amount of time you spend on the
+										homepage, you may not want to stop and scroll.
+								</p>
+							</li>
+						</ul>
+						
+						<h3>Questions</h3>
+						<ul>
+							<li>
+								The search box will start executing your search as you type.
+								No more need to hit enter or click that button.
+							</li>
+						</ul>
+						<h3>Bug Fixes</h3>
+						<ul>
+							<li>The bars in the profile's Personality tab should no longer move when the screen scrolls.</li>
+							<li>Hiding people with underscores in thier name on the home screen should now function properly.</li>
+							<li>The search feature on the Questions page should work even if there's only one page of questions.</li>
+							<li>Features that the user chose to disable in the original version will no longer be disabled. Since the option to enable/disable the features was removed, all features should be on.</li>
+						</ul>
+					</div>
+					<div id="changelog_000200_content">
+						<h2>Version 0.2.0</h2>
+						<div class="date">5/12/2011</div>
+						<h3>General</h3>
+						<p>
+							I've expanded the Options page to include a Changelog and About section.
+						</p>
+						<p>
+							A BetterCupid icon has been added.
+							For now, it simply opens up the OkCupid website in a new tab.
+						</p>
+						<p>
+							Most menus that appear on the right side of the screen will now scroll with the screen.
+							This is handy when answering questions on a person's profile, so that you can see how
+								your numbers are changing without scrolling all the way up and back down.
+						</p>
+						<h3>Questions</h3>
+						<p>
+							When answering questions under the "Improve Matches" section, I've noticed that sometimes
+								you can't skip them.
+							Well what's the point of that?
+							Some of those questions are horrible!
+							You can skip any question you want to now.
+						</p>
+						<p>
+							When you answer a question on someone's profile, your match, friend, and enemy percentages
+								as well as a few other things will update.
+						</p>
+						<p>
+							Question searches should run faster now.
+						</p>
+					</div>
+					<div id="changelog_000100_content">
+						<h2>Version 0.1.0</h2>
+						<div class="date">5/2/2011</div>
+						<h3>Initial Release</h3>
+						<p>
+							I created a basic options page that allows you to enable or disable the various features
+								that this initial release provides.
+							I felt that it was important because I didn't want people's first impressions to be ruined
+								by something being broken, but I'm not sure if I'm going to keep it around.
+							The point of having the extension is to enjoy the experience that it provides, and I can
+								release bug fixes pretty rapidly.
+						</p>
+						<h3>Homepage</h3>
+						<p>
+							Sometimes ugly guys show up on my homepage because they're marked as being female.
+							I'm not a big fan of ugly guys.
+							I need a button to hide them!
+						</p>
+						<h3>Favorites / Visitors</h3>
+						<p>
+							I was looking at my list of favorites and visitors and wondering how I could better
+								organize all this information.
+							What I ended up doing was making little tables atop each list that would summarize
+								people: how many women and men; how many are straight, gay, or bi; how many in
+								certain age ranges.
+							Not only does it provide this summary, but by clicking on one of the items, you filter
+								the list by it.
+							This way, you can quickly see how many single bisexual women aged 25-29 are in your list.
+						</p>
+						<h3>Match Search</h3>
+						<p>
+							With ads, the search fields, and everything else on the screen, I can only see the
+								picture of the first result in a search result.
+							What good is that?
+							I present to you.. the match minibar.
+							Now you can see the picture of each match.
+							Click a picture to scroll down to their details.
+						</p>
+						<p>
+							To go along with the minibar, I added a page list to the top of the search results.
+							Don't see anyone you like?
+							Click on to the next page without scrolling to the bottom.
+						</p>
+						<h3>Questions</h3>
+						<p>
+							One thing that's always frustrated me about the questions is the sort order.
+							When I see someone that I'm interested in, I like to compare our answers to the questions.
+							And when I'm on there answering new questions and flipping through the pages, I start
+								seeing repeats, going back, and seeing questions that weren't there before.
+							I've enhanced the question to load every page at once and show all questions in a
+								consistent order.
+						</p>
+						<p>
+							Furthermore, the search function will now instantly search by looking for questions that
+								contain the words you enter.
+							Unfortunately, there's no good way to differentiate between an answer choice to a question
+								and  so search terms like "important" and "mandatory" will
+								match on every question.
+						</p>
+					</div>
+				</div>
+			</div>
+			<div id="about_tab_content">
+				<p>
+					I've been a fan of OkCupid since its very early inception as TheSpark.
+					Back then, it was a bunch of random stuff along with fun quizzes to help you figure out
+						anything from your personality type to which Simpsons character you were most like.
+					SparkNotes and SparkMatch grew from the success, and SparkMatch went on to become OkCupid.
+					It took all the fun tests along with their new match-making stuff and created a revolutionary
+						service... compatability by math.
+					It's fun, functional, and free... it's OkCupid.
+				</p>
+				<p>
+					I've been creating small greasemonkey scripts for years.
+					Never anything major, small enhancements for my own use for some of my favorite sites.
+					Recently, I turned my attention to OkCupid.
+					I started finding little things that I wanted to enhance here and there, and as I poked around
+						in the markup, I found that it was organized extremely well.
+					It's a lot of fun to play with the DOM and manipulate things.
+					It's easy to find the data that you need
+				</p>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+</body>
+</html>
