@@ -221,7 +221,18 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 	}
 	
 	core.ProcessElement = function(ele, func) {
-		if ( ele && !ele.getAttribute("data-bc-processed") && ele.isMarkupLoaded() ) {
+		var vis;
+		if ( !ele ) {
+			return;
+		}
+		if ( !ele.getAttribute("data-bc-visibility") ) {
+			ele.setAttribute("data-bc-visibility", ele.style.visibility || "null");
+			ele.style.visibility = "hidden";
+		}
+		if ( !ele.getAttribute("data-bc-processed") && ele.isMarkupLoaded() ) {
+			core.info("Processing element {0}",ele.id || ele.className || "");
+			vis = ele.getAttribute("data-bc-visibility");
+			ele.style.visibility = vis === "null" ? null : vis;
 			func.call(ele)
 			ele.setAttribute("data-bc-processed", true)
 		}
