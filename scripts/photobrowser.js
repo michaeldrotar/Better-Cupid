@@ -78,14 +78,15 @@ core.RegisterLoadingProcess("photobrowser", function(){
 				})
 			})
 			
-			items.getElementsByClassName("item").forEach(function(item, i) {
+			items.getElementsByClassName("item").forEach(function(item, i, arr) {
+				
+				item.style.right = i === arr.length - 1 ? "6px" : "0px";
 				
 				core.ProcessElement(item, function() {
 					this.setStyle({
 						display: i == 0 ? "block" : "none",
 						height: "190px",
-						position: "absolute",
-						right: parseInt(this.style.marginRight) > 0 ? "0px" : "6px"
+						position: "absolute"
 					})
 					
 					var user = this.getAttribute("data-bc-user")
