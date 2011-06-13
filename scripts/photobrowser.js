@@ -2,6 +2,22 @@ core.RegisterLoadingProcess("photobrowser", function(){
 	
 	if ( !core.onPage("/home") ) return
 	
+	function hide_user(e) {
+		var user = this.getAttribute("data-bc-user"),
+			thumb = document.getElementById("bc_thumb_"+user);
+		if ( thumb ) {
+			$(thumb).clearQueue().stop().animate({ opacity: 0.3 }, 'slow');
+		}
+	}
+	
+	function unhide_user(e) {
+		var user = this.getAttribute("data-bc-user"),
+			thumb = document.getElementById("bc_thumb_"+user);
+		if ( thumb ) {
+			$(thumb).clearQueue().stop().animate({ opacity: 1 }, 'slow');
+		}
+	}
+	
 	document.getElementsByClassName("photobrowser").forEach(function(photobrowser) {
 	
 		photobrowser.getElementsByClassName("scrollbar").forEach(function(scrollbar) {
@@ -40,6 +56,7 @@ core.RegisterLoadingProcess("photobrowser", function(){
 					
 					var a = document.createElement("a")
 					a.href = url
+					a.id = "bc_thumb_"+user;
 					
 					var img = document.createElement("img")
 					img.src = src
@@ -107,6 +124,12 @@ core.RegisterLoadingProcess("photobrowser", function(){
 					var info = this.getElementsByClassName("info")[0]
 					info.appendChild(hide_button)
 					info.appendChild(unhide_button)
+					
+					hide_button.setAttribute("data-bc-user", user);
+					hide_button.addEventListener("click", hide_user, false);
+					
+					unhide_button.setAttribute("data-bc-user", user);
+					unhide_button.addEventListener("click", unhide_user, false);
 				})
 				
 			})
