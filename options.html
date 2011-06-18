@@ -262,12 +262,112 @@
 			group.find("li:first").click();
 		}
 		
+		var section_loaded = {};
+		function GenerateLoadSectionFunction(section, url, callback) {
+			var widget = $("#"+section),
+				func;
+			func = function(force) {
+				if ( force === true || !section_loaded[section] ) {
+					widget.html("<p>Loading...</p>");
+					core.SendRequest({
+						type: "fetch",
+						force: force === true ? true : false,
+						url: url
+					}, function(response) {
+						if ( response.error ) {
+							section_loaded[section] = false;
+							widget.html(
+								"<p class='error'>"+
+									"There was an error retrieving the information. The server may be down."+
+									" Click <a id='refresh_"+section+"' href=''>here</a> to try again."+
+								"</p>"
+							);
+							$("#refresh_"+section).click(function(e) {
+								e.stopPropagation();
+								e.preventDefault();
+								func(true);
+							});
+						} else {
+							section_loaded[section] = true;
+							if ( callback ) {
+								callback(response);
+							} else {
+								widget.html($(response.data).find("#template").html());
+							}
+						}
+					});
+				}
+			}
+			return func;
+		}
+		
+		var LoadChangelog = GenerateLoadSectionFunction(
+			"changelog_tab_content",
+			"https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog",
+			function(response) {
+				var html = $(response.data).find("#template").html(),
+					versions = [],
+					count = 0;
+				html = html.replace(/<h1>\s*Version ((\d+\.\d+)[\.\d]*)\s*<\/h1>/g,
+					function(text, fullVersion, shortVersion) {
+						var key = shortVersion.replace(/[^\d]/g, "_"),
+							keyExists = false;
+						for ( var i = 0, l = versions.length; i < l; i++ ) {
+							if ( versions[i].key === key ) {
+								keyExists = true;
+								break;
+							}
+						}
+						if ( !keyExists ) {
+							versions.push({key:key,text:shortVersion+".x"});
+							count += 1;
+							return ( count > 1 ? "</div>" : "" )+
+								"<div id='changelog_"+key+"_content'>"+text;
+						} else {
+							return text;
+						}
+					}
+				) + "</div>";
+				html = html.replace(/<p>(\s*\d+\/\d+\/\d+\s*)<\/p>/g, "<div class='date'>$1</div>");
+				html = "<div class='tab_content_nav'>" +
+						"<div class='title'>Versions</div>" +
+						"<ul class='switcher'></ul>" +
+						"</div>" +
+						"<div class='tab_content_left'>" +
+						html +
+						"</div>" +
+					"</div>";
+				
+				var changelog = $("#changelog_tab_content");
+				changelog.html(html);
+				changelog.find("h1").each(function(){
+					if ( $(this).text() === "Changelog" ) $(this).detach();
+				});
+				var switcher = changelog.find(".switcher");
+				for ( var i = 0, l = versions.length; i < l; i++ ) {
+					var v = versions[i];
+					switcher.append("<li id='changelog_"+v.key+"'>"+v.text+"</li>");
+				}
+				initSwitcher(switcher);
+			}
+		);
+		$("#changelog_tab").click(LoadChangelog);
+		
+		
+		var LoadAbout = GenerateLoadSectionFunction(
+			"about_tab_content",
+			"https://github.com/michaeldrotar/Better-Cupid/wiki/About"
+		);
+		$("#about_tab").click(LoadAbout);
+		
+		
+		/*
 		var changelog = $("#changelog_tab_content"),
 			changelog_tab = $("#changelog_tab"),
 			changelog_loaded = false;
 		
 		var LoadChangelog = function(force) {
-			if ( !changelog_loaded ) {
+			if ( !changelog_loaded || force === true ) {
 				changelog.html("<p>Loading Changelog...</p>");
 				core.SendRequest({
 					type: "fetch",
@@ -275,6 +375,7 @@
 					url: "https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog"
 				}, function(response) {
 					if ( response.error ) {
+						changelog_loaded = false;
 						changelog.html(
 							"<p class='error'>There was an error retrieving the changelog. The server may be down."+
 							" Click <a id='refresh_changelog' href=''>here</a> to try again."
@@ -285,6 +386,7 @@
 							LoadChangelog(true);
 						});
 					} else {
+						changelog_loaded = true;
 						var html = $(response.data).find("#template").html(),
 							versions = [],
 							count = 0;
@@ -333,6 +435,38 @@
 		};
 		
 		changelog_tab.click(LoadChangelog);
+		
+		var about = $("#about_tab_content"),
+			about_tab = $("#about_tab"),
+			about_loaded = false;
+		
+		var LoadAbout = function(force) {
+			if ( !about_loaded || force === true ) {
+				about.html("<p>Loading About Information...</p>");
+				core.SendRequest({
+					type: "fetch",
+					force: force === true ? true : false,
+					url: "https://github.com/michaeldrotar/Better-Cupid/wiki/About"
+				}, function(response) {
+					if ( response.error ) {
+						about.html(
+							"<p class='error'>There was an error retrieving the information. The server may be down."+
+							" Click <a id='refresh_about' href=''>here</a> to try again."
+						);
+						$("#refresh_about").click(function(e) {
+							e.stopPropagation();
+							e.preventDefault();
+							LoadAbout(true);
+						});
+					} else {
+						about.html($(response.data).find("#template").html());
+					}
+				});
+			}
+		};
+		
+		about_tab.click(LoadAbout);
+		*/
 		
 		$(".switcher").each(function(uli){
 			initSwitcher(this);
@@ -429,14 +563,16 @@
 		*/
 		
 		$("#reset_button").click(function(e){
-			if ( window.confirm("This will reset all of your BetterCupid settings.\nPlease be sure this is what you wish to do before proceeding.") ) {
-				//db.clear()
-				window.location.reload()
+			var msg = "This will reset all of your BetterCupid settings.\n"+
+					"Please be sure this is what you wish to do before proceeding.";
+			if ( window.confirm(msg) ) {
+				core.db.clear();
+				window.location.reload();
 			}
 		})
 		
 		//$(".tab_content > *:has(.tab_content_nav)").css("width", "480px")
-	})
+	});
 	</script>
 </head>
 <body>
@@ -475,24 +611,6 @@
 			<section id="changelog_tab_content">
 			</section>
 			<section id="about_tab_content">
-				<p>
-					I've been a fan of OkCupid since its very early inception as TheSpark.
-					Back then, it was a bunch of random stuff along with fun quizzes to help you figure out
-						anything from your personality type to which Simpsons character you were most like.
-					SparkNotes and SparkMatch grew from the success, and SparkMatch went on to become OkCupid.
-					It took all the fun tests along with their new match-making stuff and created a revolutionary
-						service... compatability by math.
-					It's fun, functional, and free... it's OkCupid.
-				</p>
-				<p>
-					I've been creating small greasemonkey scripts for years.
-					Never anything major, small enhancements for my own use for some of my favorite sites.
-					Recently, I turned my attention to OkCupid.
-					I started finding little things that I wanted to enhance here and there, and as I poked around
-						in the markup, I found that it was organized extremely well.
-					It's a lot of fun to play with the DOM and manipulate things.
-					It's easy to find the data that you need
-				</p>
 			</section>
 			<div class="clearfix"></div>
 		</div>
