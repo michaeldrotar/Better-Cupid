@@ -22,7 +22,7 @@
 			case "db.get.all":
 				var data = {};
 				for ( k in localStorage ) {
-					data[k] = core.db.get(k);
+					data[k] = localStorage[k];
 				}
 				response.data = data;
 				break;
