@@ -1,46 +1,46 @@
-(function(){
+(function() {
 
-var core = {}
+var core = {};
+core.noop = function(){};
 
 // -- debugging --------------------------------------------------------------------------------------------------------
 
 core.alert = function(obj) {
-	var t = typeof(obj)
-	if ( t == "object" ) {
-		var keys = []
+	var t = typeof obj;
+	if ( t === "object" ) {
+		var keys = [];
 		for ( k in obj ) {
-			keys.push(k)
+			keys.push(k);
 		}
-		keys.sort()
-		var msg = ""
+		if ( keys.length === 0 ) {
+			alert(obj);
+			return;
+		}
+		keys.sort();
+		var msg = "";
 		for ( var i = 0, l = keys.length; i < l; i++ ) {
-			var k = keys[i]
-			var v = obj[k]
+			var k = keys[i],
+				v = obj[k],
+				t = typeof v;
 			if ( v !== null && v.toString ) {
-				var ellipse = false
-				v = v.toString()
-				v = v.replace(/\r/g, "\n").replace(/^\s+/, "")
-				if ( v.indexOf("\n") > -1 ) {
-					v = v.substring(0, v.indexOf("\n"))
-					ellipse = true
+				var cutoff = 0;
+				v = v.toString().replace(/\r/g, "\n").replace(/^\s+/, "");
+				cutoff = v.length > 50 ? 45 : v.indexOf("\n");
+				if ( cutoff > 0 ) {
+					v = v.substring(0, cutoff) + " ...";
 				}
-				if ( v.length > 50 ) {
-					v = v.substring(0, 45)
-					ellipse = true
-				}
-				if ( ellipse ) v = v + " ..."
 			} else {
-				v = ""
+				v = "";
 			}
-			msg += k + " ["+typeof(v)+"]\n"+v+"\n\n"
-			if ( i % 10 == 9 ) {
-				alert(msg)
-				msg = ""
+			msg += k + " ["+t+"]\n"+v+"\n\n";
+			if ( i % 10 === 9 ) {
+				alert(msg);
+				msg = "";
 			}
 		}
-		if ( msg.length > 0 ) alert(msg)
+		if ( msg.length > 0 ) alert(msg);
 	} else {
-		alert("["+typeof(obj)+"]\n"+obj)
+		alert("["+typeof(obj)+"]\n"+obj);
 	}
 };
 
@@ -50,7 +50,7 @@ core.regex = {
 	
 };
 
-// -- messaging --------------------------------------------------------------------------------------------------------
+// -- console enhancements ---------------------------------------------------------------------------------------------
 
 ["debug", "error", "info", "warn"].forEach(function(k) {
 	core[k] = function(msg, args) {
@@ -58,7 +58,7 @@ core.regex = {
 			if ( typeof(msg) === "object" && msg.join ) {
 				msg = msg.join(" ");
 			}
-			console[k]("BetterCupid: "+msg.toString().format(args).replace(/\s+/g, " "))
+			console[k]("BetterCupid: "+msg.toString().format(args).replace(/\s+/g, " "));
 		}
 	}
 });
@@ -66,16 +66,15 @@ core.regex = {
 // -- location ---------------------------------------------------------------------------------------------------------
 
 (function() {
-	var l = document.location
-	var protocol = l.protocol.replace(":", "")
-	var domain = l.host
-	var port = l.port
-	var path = l.pathname.length == 0 ? null : l.pathname
-	var query = l.search.replace(/^\?/, "")
-	var hash = l.hash.replace(/^#/, "")
-
-	var baseurl = protocol+"://"+domain+(port.length > 0 ? ":"+port : "")+path
-	var url = baseurl+(query.length > 0 ? "?"+query : "")+(hash.length > 0 ? "#"+hash : "")
+	var l = document.location,
+		protocol = l.protocol.replace(":", ""),
+		domain = l.host,
+		port = l.port,
+		path = l.pathname.length == 0 ? null : l.pathname,
+		query = l.search.replace(/^\?/, ""),
+		hash = l.hash.replace(/^#/, ""),
+		baseurl = protocol+"://"+domain+(port.length > 0 ? ":"+port : "")+path,
+		url = baseurl+(query.length > 0 ? "?"+query : "")+(hash.length > 0 ? "#"+hash : "");
 
 	core.location = {
 		protocol: protocol,
@@ -89,68 +88,81 @@ core.regex = {
 	}
 	
 	core.onPage = function(search) {
-		var url = core.location.url
-		return typeof(search) == "string" ? url.indexOf(search) > -1 : search.test(url)
+		var url = core.location.url;
+		return typeof(search) === "string" ? url.indexOf(search) > -1 : search.test(url);
 	};
+	
+	core.onContentScript = core.location.protocol !== "chrome-extension";
 	
 })();
 
-// -- content script detection -----------------------------------------------------------------------------------------
-
-core.content_script = (core.location.protocol != "chrome-extension");
-
 // -- sorting ----------------------------------------------------------------------------------------------------------
 
-core.sorter = {}
+core.sorter = {};
 
 core.sorter.numeric = function(a,b) { return core.sorter.numeric.ascending(a,b) };
 core.sorter.numeric.ascending = function(a,b) { return a-b };
 core.sorter.numeric.descending = function(a,b) { return b-a };
 
+// -- comms ------------------------------------------------------------------------------------------------------------
+
+core.SendRequest = function(request, callback) {
+	chrome.extension.sendRequest(request, callback || core.noop);
+};
+
 // -- events -----------------------------------------------------------------------------------------------------------
 
-(function(){
+(function() {
 	
-	var hooks = {}
+	var hooks = {};
+	var firedEvents = {};
 	
-	core.HookEvent = function(event, func) {
-		event = event.toUpperCase()
+	core.HookEvent = function(event, func, nowIfFired) {
+		event = event.toUpperCase();
 		if ( !(event in hooks) ) {
-			hooks[event] = []
+			hooks[event] = [];
 		}
-		hooks[event].push(func)
-		core.debug("Hooked function '{0}' to {1}", [func.name, event])
+		hooks[event].push(func);
+		core.debug("Hooked function '{0}' to {1}", [func.name, event]);
+		if ( nowIfFired && firedEvents[event] ) {
+			func();
+		}
+		return core;
 	}
 	
 	core.UnhookEvent = function(event, func) {
-		event = event.toUpperCase()
-		if ( event in hooks ) {
-			var funcs = hooks[event]
+		event = event.toUpperCase();
+		if ( event in hooks ) {;
+			var funcs = hooks[event];
 			for ( var i = funcs.length-1; i >= 0; i-- ) {
-				if ( funcs[i] == func ) {
-					funcs.splice(i,1)
-					core.debug("Unhooked function '{0}' from {1}", [func.name, event])
+				if ( funcs[i] === func ) {
+					funcs.splice(i,1);
+					core.debug("Unhooked function '{0}' from {1}", [func.name, event]);
 				}
 			}
 		}
+		return core;
 	}
 	
 	core.FireEvent = function(event, obj) {
-		event = event.toUpperCase()
-		core.debug("Firing event {0} ...", event)
+		event = event.toUpperCase();console.debug("test");
+		core.debug("Firing event {0} ...", event);
+		firedEvents[event] = true;
 		if ( event in hooks ) {
-			var funcs = hooks[event]
+			var funcs = hooks[event];
 			for ( var i = 0, l = funcs.length; i < l; i++ ) {
-				core.debug(" - Calling function '{0}'", funcs[i].name)
+				core.debug(" - Calling function '{0}'", funcs[i].name);
 				try {
-					funcs[i](obj)
+					funcs[i](obj);
 				} catch(e) {
-					core.error("Function failed")
-					console.log(e)
-					console.trace()
+					//core.error("Function failed: "+e.toString());
+					//console.log(e);
+					//console.trace();
+					console.error("Uncaught "+e.toString());
 				}
 			}
 		}
+		return core;
 	}
 	
 })();
@@ -159,7 +171,7 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 
 (function(){
 	
-	core.handlers = {}
+	core.handlers = {};
 	
 })();
 
@@ -169,9 +181,9 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 	
 	// readyState: [ "loading", "interactive", "complete" ]
 	
-	var running = false
-	var loading = document.readyState == "loading"
-	var funcs = []
+	var running = false;
+	var loading = document.readyState === "loading";
+	var funcs = [];
 	
 	var process
 	process = function() {
@@ -244,64 +256,46 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 
 var db = {};
 (function(){
-	var defaults = {
-		fancy_questions: true,
-		show_hide_button: true,
-		show_match_minibar: true,
-		show_nav_above: true,
-		show_nav_below: true,
-		show_people_summaries: true
-	}
-	var types = {}
-	for ( i in defaults ) { types[i] = typeof(defaults[i]) }
 	
-	var get = function(k) {
-		var item = localStorage.getItem(k)
-		if ( item == null ) {
-			if ( k in defaults ) item = defaults[k]
-			return item
+	db.clear = function(k) {
+		if ( typeof k === "string" ) {
+			localStorage.removeItem(k);
+		} else {
+			localStorage.clear();
 		}
-		switch ( types[i] ) {
-			case "boolean":
-				return item == "true"
-				break
+		if ( core.onContentScript ) {
+			core.SendRequest({ type: "db.clear", key: k });
 		}
-		return null
+		return db;
 	}
 	
 	db.get = function(k) {
-		var val = get(k)
-		core.FireEvent("GET_VARIABLE", {key:k,value:val})
-		return val
-	}
-	db.set = function(k,v) {
-		var val = get(k)
-		localStorage.setItem(k,v)
-		core.FireEvent("SET_VARIABLE", {key:k,lastValue:val,value:get(k)})
-	}
-	db.del = function(k) {
-		var val = get(k)
-		localStorage.removeItem(k)
-		core.FireEvent("DELETE_VARIABLE", {key:k,lastValue:val})
-	}
-	db.clear = function() {
-		localStorage.clear()
-		core.FireEvent("CLEAR_VARIABLES")
+		return JSON.parse(localStorage.getItem(k));
 	}
 	
-	if ( core.location.protocol == "chrome-extension" ) {
-		core.FireEvent("VARIABLES_LOADED")
-	} else {
-		for ( k in defaults ) {
-			localStorage.removeItem(k)
+	db.set = function(k, v) {
+		localStorage.setItem(k, JSON.stringify(v));
+		if ( core.onContentScript ) {
+			core.SendRequest({ type: "db.set", key: k, value: v });
 		}
-		chrome.extension.sendRequest({type: "db.get.all"}, function(response) {
-			for ( k in response.data ) {
-				localStorage.setItem(k, response.data[k])
-			}
-			core.FireEvent("VARIABLES_LOADED")
-		})
+		return db;
 	}
+	
+	if ( core.onContentScript ) {
+		localStorage.clear();
+		core.debug("Getting local storage");
+		core.SendRequest({ type: "db.get.all" }, function(response) {
+			for ( k in response.data ) {
+				localStorage.setItem(k, response.data[k]);
+			}
+			core.FireEvent("VARIABLES_LOADED");
+		})
+	} else {
+		core.FireEvent("VARIABLES_LOADED");
+	}
+	
+	core.db = db;
+	
 })();
 
 // -- L ----------------------------------------------------------------------------------------------------------------
@@ -328,14 +322,16 @@ var L;
 
 // -- Upgrading --------------------------------------------------------------------------------------------------------
 
+/*
 var lastBuild = db.get('build')
 switch ( lastBuild ) {
 
 }
-if ( lastBuild != core.build ) {
+if ( lastBuild !== core.build ) {
 	db.set('lastBuild', lastBuild)
 }
 db.set('build', core.build)
+*/
 
 // -- Main -------------------------------------------------------------------------------------------------------------
 

@@ -1,29 +1,34 @@
+<script type="text/javascript" src="prototype.js"></script>
 <script type="text/javascript" src="core.js"></script>
 <script type="text/javascript">
 	chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-		switch ( request.type ) {
+		var response = { type: request.type };
 		
+		switch ( request.type ) {
+			
+			case "db.clear":
+				core.db.clear(request.key);
+				break;
+				
 			case "db.get":
-				sendResponse({
-					type: "db.set",
-					key: request.key,
-					value: localStorage.getItem(request.key)
-				})
-				return
+				response.key = request.key;
+				response.value = core.db.get(request.key);// JSON.parse(localStorage[request.key]);
+				break;
 				
 			case "db.get.all":
-				var data = {}
+				var data = {};
 				for ( k in localStorage ) {
-					data[k] = localStorage[k]
+					data[k] = core.db.get(k); //JSON.parse(localStorage[k]);
 				}
-				sendResponse({
-					type: "db.set.all",
-					data: data
-				})
-				return
+				response.data = data;
+				break;
 			
+			case "db.set":
+				core.db.set(request.key, request.value); //localStorage[request.key] = JSON.stringify(request.value);
+				break;
 		}
-		sendResponse({})
+		
+		sendResponse(response);
 	})
 	
 	chrome.browserAction.onClicked.addListener(function(tab) {
