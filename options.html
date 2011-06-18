@@ -353,125 +353,16 @@
 		);
 		$("#changelog_tab").click(LoadChangelog);
 		
-		
 		var LoadAbout = GenerateLoadSectionFunction(
 			"about_tab_content",
 			"https://github.com/michaeldrotar/Better-Cupid/wiki/About"
 		);
 		$("#about_tab").click(LoadAbout);
 		
-		
-		/*
-		var changelog = $("#changelog_tab_content"),
-			changelog_tab = $("#changelog_tab"),
-			changelog_loaded = false;
-		
-		var LoadChangelog = function(force) {
-			if ( !changelog_loaded || force === true ) {
-				changelog.html("<p>Loading Changelog...</p>");
-				core.SendRequest({
-					type: "fetch",
-					force: force === true ? true : false,
-					url: "https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog"
-				}, function(response) {
-					if ( response.error ) {
-						changelog_loaded = false;
-						changelog.html(
-							"<p class='error'>There was an error retrieving the changelog. The server may be down."+
-							" Click <a id='refresh_changelog' href=''>here</a> to try again."
-						);
-						$("#refresh_changelog").click(function(e) {
-							e.stopPropagation();
-							e.preventDefault();
-							LoadChangelog(true);
-						});
-					} else {
-						changelog_loaded = true;
-						var html = $(response.data).find("#template").html(),
-							versions = [],
-							count = 0;
-						html = html.replace(/<h1>\s*Version ((\d+\.\d+)[\.\d]*)\s*<\/h1>/g,
-							function(text, fullVersion, shortVersion) {
-								var key = shortVersion.replace(/[^\d]/g, "_"),
-									keyExists = false;
-								for ( var i = 0, l = versions.length; i < l; i++ ) {
-									if ( versions[i].key === key ) {
-										keyExists = true;
-										break;
-									}
-								}
-								if ( !keyExists ) {
-									versions.push({key:key,text:shortVersion+".x"});
-									count += 1;
-									return ( count > 1 ? "</div>" : "" )+
-										"<div id='changelog_"+key+"_content'>"+text;
-								} else {
-									return text;
-								}
-							}
-						) + "</div>";
-						html = html.replace(/<p>(\s*\d+\/\d+\/\d+\s*)<\/p>/g, "<div class='date'>$1</div>");
-						html = "<div class='tab_content_nav'>" +
-								"<div class='title'>Versions</div>" +
-								"<ul class='switcher'></ul>" +
-								"</div>" +
-								"<div class='tab_content_left'>" +
-								html +
-								"</div>" +
-							"</div>";
-						changelog.html(html);
-						changelog.find("h1").each(function(){
-							if ( $(this).text() === "Changelog" ) $(this).detach();
-						});
-						var switcher = changelog.find(".switcher");
-						for ( var i = 0, l = versions.length; i < l; i++ ) {
-							var v = versions[i];
-							switcher.append("<li id='changelog_"+v.key+"'>"+v.text+"</li>");
-						}
-						initSwitcher(switcher);
-					}
-				});
-			}
-		};
-		
-		changelog_tab.click(LoadChangelog);
-		
-		var about = $("#about_tab_content"),
-			about_tab = $("#about_tab"),
-			about_loaded = false;
-		
-		var LoadAbout = function(force) {
-			if ( !about_loaded || force === true ) {
-				about.html("<p>Loading About Information...</p>");
-				core.SendRequest({
-					type: "fetch",
-					force: force === true ? true : false,
-					url: "https://github.com/michaeldrotar/Better-Cupid/wiki/About"
-				}, function(response) {
-					if ( response.error ) {
-						about.html(
-							"<p class='error'>There was an error retrieving the information. The server may be down."+
-							" Click <a id='refresh_about' href=''>here</a> to try again."
-						);
-						$("#refresh_about").click(function(e) {
-							e.stopPropagation();
-							e.preventDefault();
-							LoadAbout(true);
-						});
-					} else {
-						about.html($(response.data).find("#template").html());
-					}
-				});
-			}
-		};
-		
-		about_tab.click(LoadAbout);
-		*/
-		
 		$(".switcher").each(function(uli){
 			initSwitcher(this);
 		})
-		$("#changelog_tab").click();
+		
 		/*
 		var options = [
 			{
@@ -569,9 +460,35 @@
 				core.db.clear();
 				window.location.reload();
 			}
-		})
+		});
 		
-		//$(".tab_content > *:has(.tab_content_nav)").css("width", "480px")
+		(function() {
+			var settings = core.db.get("settings") || {};
+			function setSetting(key, value) {
+				if ( typeof key === "object" ) key = key.getAttribute("data-setting");
+				if ( key && value !== undefined ) {
+					settings[key] = value;
+					core.db.set("settings", settings);
+				}
+			}
+			$("input").each(function() {
+				var key = this.getAttribute("data-setting");
+				if ( key ) {
+					switch ( this.type ) {
+						case "checkbox":
+							this.checked = settings[key];
+							$(this).click(function() {
+								setSetting(this, this.checked ? true : false);
+							});
+							break;
+						
+						case "text":
+						default:
+							break;
+					}
+				}
+			});
+		})();
 	});
 	</script>
 </head>
@@ -598,7 +515,7 @@
 		</nav>
 		<div class="tab_content">
 			<section id="general_tab_content">
-				General
+				<input type="checkbox" data-setting="hideYouMightLike" />Hide the "You Might Like" section on the homepage.
 			</section>
 			<!--
 			<div id="tab_modules_content">
