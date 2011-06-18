@@ -16,4 +16,4 @@ core.HookEvent("VARIABLES_LOADED", function() {
 		}
 		
 	});
-});
+}, true);
