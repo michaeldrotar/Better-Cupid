@@ -22,15 +22,13 @@ core.alert = function(obj) {
 			var k = keys[i],
 				v = obj[k],
 				t = typeof v;
-			if ( v !== null && v.toString ) {
+			if ( v !== undefined && v !== null && v.toString ) {
 				var cutoff = 0;
 				v = v.toString().replace(/\r/g, "\n").replace(/^\s+/, "");
 				cutoff = v.length > 50 ? 45 : v.indexOf("\n");
 				if ( cutoff > 0 ) {
 					v = v.substring(0, cutoff) + " ...";
 				}
-			} else {
-				v = "";
 			}
 			msg += k + " ["+t+"]\n"+v+"\n\n";
 			if ( i % 10 === 9 ) {
@@ -47,7 +45,6 @@ core.alert = function(obj) {
 // -- regex ------------------------------------------------------------------------------------------------------------
 
 core.regex = {
-	
 };
 
 // -- console enhancements ---------------------------------------------------------------------------------------------
@@ -66,6 +63,7 @@ core.regex = {
 // -- location ---------------------------------------------------------------------------------------------------------
 
 (function() {
+	
 	var l = document.location,
 		protocol = l.protocol.replace(":", ""),
 		domain = l.host,
@@ -145,7 +143,7 @@ core.SendRequest = function(request, callback) {
 	}
 	
 	core.FireEvent = function(event, obj) {
-		event = event.toUpperCase();console.debug("test");
+		event = event.toUpperCase();
 		core.debug("Firing event {0} ...", event);
 		firedEvents[event] = true;
 		if ( event in hooks ) {
@@ -155,9 +153,6 @@ core.SendRequest = function(request, callback) {
 				try {
 					funcs[i](obj);
 				} catch(e) {
-					//core.error("Function failed: "+e.toString());
-					//console.log(e);
-					//console.trace();
 					console.error("Uncaught "+e.toString());
 				}
 			}
