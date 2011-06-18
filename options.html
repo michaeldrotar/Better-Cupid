@@ -468,6 +468,7 @@
 				if ( typeof key === "object" ) key = key.getAttribute("data-setting");
 				if ( key && value !== undefined ) {
 					settings[key] = value;
+					core.debug("Setting {0} to {1}", [key, value]);
 					core.db.set("settings", settings);
 				}
 			}
@@ -479,6 +480,15 @@
 							this.checked = settings[key];
 							$(this).click(function() {
 								setSetting(this, this.checked ? true : false);
+							});
+							break;
+							
+						case "range":
+							this.value = settings[key] !== undefined ? settings[key] : this.value;
+							$("#"+key+"Display").html(this.value);
+							$(this).change(function() {
+								setSetting(this, parseInt(this.value));
+								$("#"+this.getAttribute("data-setting")+"Display").html(this.value);
 							});
 							break;
 						
@@ -515,7 +525,8 @@
 		</nav>
 		<div class="tab_content">
 			<section id="general_tab_content">
-				<input type="checkbox" data-setting="hideYouMightLike" />Hide the "You Might Like" section on the homepage.
+				<input type="checkbox" data-setting="hideYouMightLike" />Hide the "You Might Like" section on the homepage.<br />
+				<input type="range" min="0" max="10" value="10" data-setting="numRecentlyVisitedRows" />Set the maximum number of rows to show for Recently Visited: <span id="numRecentlyVisitedRowsDisplay"></span>
 			</section>
 			<!--
 			<div id="tab_modules_content">

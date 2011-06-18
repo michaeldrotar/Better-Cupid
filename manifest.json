@@ -25,6 +25,7 @@
 			"js": [
 				"prototype.js", "jquery.js", "core.js",
 				"scripts/match.js",
+				"scripts/misc.js",
 				"scripts/move_right_with_you.js",
 				"scripts/photobrowser.js"
 			],
@@ -35,7 +36,8 @@
 			"js": [
 				"scripts/questions.js",
 				"scripts/people_summary.js",
-				"scripts/skip_any_question.js"
+				"scripts/skip_any_question.js",
+				"scripts/user_tracker.js"
 			],
 			"run_at": "document_end"
 		}
