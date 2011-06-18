@@ -457,7 +457,7 @@
 			var msg = "This will reset all of your BetterCupid settings.\n"+
 					"Please be sure this is what you wish to do before proceeding.";
 			if ( window.confirm(msg) ) {
-				core.db.clear();
+				core.db.clear("settings");
 				window.location.reload();
 			}
 		});
