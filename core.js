@@ -293,6 +293,61 @@ var db = {};
 	
 })();
 
+// -- Settings ---------------------------------------------------------------------------------------------------------
+
+(function() {
+	
+	var defaults = {
+			hideYouMightLike: false,
+			numRecentlyVisitedRows: 10
+		},
+		settings = null;
+	
+	core.settings = {};
+	
+	core.settings.get = function(key) {
+		if ( settings.hasOwnProperty(key) ) {
+			var value = settings[key],
+				type;
+			if ( defaults.hasOwnProperty(key) ) {
+				type = typeof defaults[key];
+			}
+			if ( type ) {
+				if ( type === "number" ) value = Number(value);
+				else if ( type === "string" ) value = String(value);
+				else if ( type === "boolean" ) value = Boolean(value);
+			}
+			return value;
+		}
+		if ( defaults.hasOwnProperty(key) ) return defaults[key];
+		return null;
+	}
+	
+	core.settings.set = function(key, value) {
+		if ( typeof value === "undefined" ) return core.settings.clear(key);
+		settings[key] = value;
+		core.db.set("settings", settings);
+		return core.settings;
+	}
+	
+	core.settings.clear = function(key) {
+		if ( typeof(key) === "string" ) {
+			delete settings[key];
+		} else {
+			settings = {};
+		}
+		core.db.set("settings", settings);
+		return core.settings;
+	}
+	
+	function populateSettings() {
+		settings = core.db.get("settings");
+		if ( settings === null ) settings = {};
+	}
+	core.HookEvent("VARIABLES_LOADED", populateSettings, true);
+	
+})();
+
 // -- L ----------------------------------------------------------------------------------------------------------------
 
 var L;
