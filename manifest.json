@@ -27,7 +27,8 @@
 				"scripts/match.js",
 				"scripts/misc.js",
 				"scripts/move_right_with_you.js",
-				"scripts/photobrowser.js"
+				"scripts/photobrowser.js",
+				"scripts/recently_visited.js"
 			],
 			"run_at": "document_start"
 		},
