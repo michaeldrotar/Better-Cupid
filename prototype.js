@@ -69,6 +69,16 @@ function enhancePrototype(classNames, methods) {
 	}
 }
 
+// -- Array ------------------------------------------------------------------------------------------------------------
+
+enhancePrototype("Array", {
+	reverseForEach: function(func) {
+		for ( var i = this.length - 1; i >= 0; i-- ) {
+			func.call(arguments[1], this[i], i, this);
+		}
+	}
+});
+
 // -- Document ---------------------------------------------------------------------------------------------------------
 
 enhancePrototype("Document", {
@@ -98,7 +108,8 @@ enhancePrototype(["Document", "HTMLElement"], {
 // -- HTMLCollection ---------------------------------------------------------------------------------------------------
 
 enhancePrototype("HTMLCollection", {
-	forEach: Array.prototype.forEach
+	forEach: Array.prototype.forEach,
+	reverseForEach: Array.prototype.reverseForEach
 });
 
 // -- HTMLElement ------------------------------------------------------------------------------------------------------
@@ -338,7 +349,8 @@ enhancePrototype("Node", {
 // -- NodeList ---------------------------------------------------------------------------------------------------------
 
 enhancePrototype("NodeList", {
-	forEach: Array.prototype.forEach
+	forEach: Array.prototype.forEach,
+	reverseForEach: Array.prototype.reverseForEach
 })
 
 // -- RegExp -----------------------------------------------------------------------------------------------------------
