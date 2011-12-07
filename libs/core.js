@@ -1,46 +1,8 @@
+var core = {};
+
 (function() {
 
-var core = {};
-core.noop = function(){};
-
-// -- debugging --------------------------------------------------------------------------------------------------------
-
-core.alert = function(obj) {
-	var t = typeof obj;
-	if ( t === "object" ) {
-		var keys = [];
-		for ( k in obj ) {
-			keys.push(k);
-		}
-		if ( keys.length === 0 ) {
-			alert(obj);
-			return;
-		}
-		keys.sort();
-		var msg = "";
-		for ( var i = 0, l = keys.length; i < l; i++ ) {
-			var k = keys[i],
-				v = obj[k],
-				t = typeof v;
-			if ( v !== undefined && v !== null && v.toString ) {
-				var cutoff = 0;
-				v = v.toString().replace(/\r/g, "\n").replace(/^\s+/, "");
-				cutoff = v.length > 50 ? 45 : v.indexOf("\n");
-				if ( cutoff > 0 ) {
-					v = v.substring(0, cutoff) + " ...";
-				}
-			}
-			msg += k + " ["+t+"]\n"+v+"\n\n";
-			if ( i % 10 === 9 ) {
-				alert(msg);
-				msg = "";
-			}
-		}
-		if ( msg.length > 0 ) alert(msg);
-	} else {
-		alert("["+typeof(obj)+"]\n"+obj);
-	}
-};
+core.noop = function() {};
 
 // -- regex ------------------------------------------------------------------------------------------------------------
 
@@ -60,37 +22,34 @@ core.regex = {
 	}
 });
 
-// -- location ---------------------------------------------------------------------------------------------------------
+// -- location & pathing -----------------------------------------------------------------------------------------------
 
 (function() {
-	
 	var l = document.location,
-		protocol = l.protocol.replace(":", ""),
-		domain = l.host,
-		port = l.port,
-		path = l.pathname.length == 0 ? null : l.pathname,
-		query = l.search.replace(/^\?/, ""),
-		hash = l.hash.replace(/^#/, ""),
-		baseurl = protocol+"://"+domain+(port.length > 0 ? ":"+port : "")+path,
-		url = baseurl+(query.length > 0 ? "?"+query : "")+(hash.length > 0 ? "#"+hash : "");
-
-	core.location = {
-		protocol: protocol,
-		domain: domain,
-		port: port,
-		path: path,
-		query: query,
-		hash: hash,
-		baseurl: baseurl,
-		url: url
-	}
+		x = {
+			protocol: l.protocol.substring(0, l.protocol.length - 1),
+			domain  : l.host,
+			port    : l.port,
+			path    : l.pathname,
+			query   : l.search.substring(1),
+			hash    : l.hash.substring(1)
+		},
+		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");;
+	
+	x.baseurl = x.protocol + "://" + x.domain + ( x.port.length > 0 ? ":"+x.port : "" ) + x.path;
+	x.url     = x.baseurl + ( x.query.length > 0 ? "?"+x.query : "" ) + ( x.hash.length > 0 ? "#"+x.hash : "" );
+	
+	core.location = x;
 	
 	core.onPage = function(search) {
-		var url = core.location.url;
-		return typeof(search) === "string" ? url.indexOf(search) > -1 : search.test(url);
+		return typeof search === "string" ? x.url.indexOf(search) > -1 : search.test(x.url);
 	};
 	
-	core.onContentScript = core.location.protocol !== "chrome-extension";
+	core.onContentScript = ( x.protocol !== "chrome-extension" );
+	
+	core.rootPath = function(path) {
+		return root + (path || "");
+	};
 	
 })();
 
@@ -105,146 +64,31 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 // -- comms ------------------------------------------------------------------------------------------------------------
 
 core.SendRequest = function(request, callback) {
-	chrome.extension.sendRequest(request, callback || core.noop);
+	chrome.extension.sendRequest(request, typeof callback === "function" ? callback : core.noop);
 };
 
 // -- events -----------------------------------------------------------------------------------------------------------
 
 (function() {
 	
-	var hooks = {};
-	var firedEvents = {};
+	var ele = document.createElement("div");
 	
-	core.HookEvent = function(event, func, nowIfFired) {
-		event = event.toUpperCase();
-		if ( !(event in hooks) ) {
-			hooks[event] = [];
-		}
-		hooks[event].push(func);
-		core.debug("Hooked function '{0}' to {1}", [func.name, event]);
-		if ( nowIfFired && firedEvents[event] ) {
-			func();
-		}
-		return core;
-	}
+	["addEventListener", "removeEventListener"].forEach(function(method) {
+		core[method] = function() {
+			ele[method].apply(ele, arguments);
+		};
+	});
 	
-	core.UnhookEvent = function(event, func) {
-		event = event.toUpperCase();
-		if ( event in hooks ) {;
-			var funcs = hooks[event];
-			for ( var i = funcs.length-1; i >= 0; i-- ) {
-				if ( funcs[i] === func ) {
-					funcs.splice(i,1);
-					core.debug("Unhooked function '{0}' from {1}", [func.name, event]);
-				}
-			}
-		}
-		return core;
-	}
-	
-	core.FireEvent = function(event, obj) {
-		event = event.toUpperCase();
-		core.debug("Firing event {0} ...", event);
-		firedEvents[event] = true;
-		if ( event in hooks ) {
-			var funcs = hooks[event];
-			for ( var i = 0, l = funcs.length; i < l; i++ ) {
-				core.debug(" - Calling function '{0}'", funcs[i].name);
-				try {
-					funcs[i](obj);
-				} catch(e) {
-					console.error("Uncaught "+e.toString());
-				}
-			}
-		}
-		return core;
-	}
-	
-})();
-
-// -- generic event handlers -------------------------------------------------------------------------------------------
-
-(function(){
-	
-	core.handlers = {};
-	
-})();
-
-// -- loading process --------------------------------------------------------------------------------------------------
-
-(function(){
-	
-	// readyState: [ "loading", "interactive", "complete" ]
-	
-	var running = false;
-	var loading = document.readyState === "loading";
-	var funcs = [];
-	
-	var process
-	process = function() {
-		if ( running ) return
-		running = true
-		
-		for ( var i = 0, l = funcs.length; i < l; i++ ) {
-			funcs[i]()
+	core.dispatchEvent = function(details) {
+		var event;
+		if ( typeof details === "string" ) {
+			details = { type: details };
 		}
 		
-		if ( !loading ) {
-			window.removeEventListener("DOMSubtreeModified", process, false)
-		}
-		
-		running = false
-	}
-	
-	var process_interval = false
-	var queue_process = function() {
-		if ( !process_interval ) {
-			process_interval = setInterval(function() {
-				
-			}, 500)
-		}
-	}
-	
-	var onstatechange
-	onstatechange = function(e) {
-		if ( document.readyState != "loading" ) {
-			loading = false
-			document.removeEventListener("readystatechange", onstatechange, false)
-		}
-	}
-	
-	if ( loading ) {
-		document.addEventListener("readystatechange", onstatechange, false)
-		window.addEventListener("DOMSubtreeModified", process, false);
-	}
-	
-	core.RegisterLoadingProcess = function(id, callback) {
-		if ( loading ) {
-			funcs.push(callback)
-		} else {
-			callback()
-		}
-		core.debug("Registered loading process for {0}", id)
-	}
-	
-	core.ProcessElement = function(ele, func) {
-		var vis;
-		if ( !ele ) {
-			return;
-		}
-		if ( !ele.getAttribute("data-bc-visibility") ) {
-			ele.setAttribute("data-bc-visibility", ele.style.visibility || "null");
-			ele.style.visibility = "hidden";
-		}
-		if ( !ele.getAttribute("data-bc-processed") && ele.isMarkupLoaded() ) {
-			core.info("Processing element {0}",ele.id || ele.className || "");
-			vis = ele.getAttribute("data-bc-visibility");
-			ele.style.visibility = vis === "null" ? null : vis;
-			func.call(ele)
-			ele.setAttribute("data-bc-processed", true)
-		}
-	}
-	
+		event = document.createEvent("CustomEvent");
+		event.initCustomEvent(details.type, details.canBubble || false, details.cancelable || false, details);
+		ele.dispatchEvent(event);
+	};
 })();
 
 // -- db ---------------------------------------------------------------------------------------------------------------
@@ -277,74 +121,65 @@ var db = {};
 	}
 	
 	if ( core.onContentScript ) {
+		db.state = "loading";
+		core.dispatchEvent("dbstatechange");
 		localStorage.clear();
-		core.debug("Getting local storage");
 		core.SendRequest({ type: "db.get.all" }, function(response) {
 			for ( k in response.data ) {
 				localStorage.setItem(k, response.data[k]);
 			}
-			core.FireEvent("VARIABLES_LOADED");
+			db.state = "ready";
+			core.dispatchEvent("dbstatechange");
 		})
 	} else {
-		core.FireEvent("VARIABLES_LOADED");
+		db.state = "ready";
+		core.dispatchEvent("dbstatechange");
 	}
 	
 	core.db = db;
 	
 })();
 
-// -- Settings ---------------------------------------------------------------------------------------------------------
+// -- manifest ---------------------------------------------------------------------------------------------------------
 
 (function() {
+	var manifest,
+		callbacks = [];
 	
-	var defaults = {
-			hideYouMightLike: false,
-			numRecentlyVisitedRows: 10
-		},
-		settings = null;
-	
-	core.settings = {};
-	
-	core.settings.get = function(key) {
-		if ( settings.hasOwnProperty(key) ) {
-			var value = settings[key],
-				type;
-			if ( defaults.hasOwnProperty(key) ) {
-				type = typeof defaults[key];
-			}
-			if ( type ) {
-				if ( type === "number" ) value = Number(value);
-				else if ( type === "string" ) value = String(value);
-				else if ( type === "boolean" ) value = Boolean(value);
-			}
-			return value;
-		}
-		if ( defaults.hasOwnProperty(key) ) return defaults[key];
-		return null;
-	}
-	
-	core.settings.set = function(key, value) {
-		if ( typeof value === "undefined" ) return core.settings.clear(key);
-		settings[key] = value;
-		core.db.set("settings", settings);
-		return core.settings;
-	}
-	
-	core.settings.clear = function(key) {
-		if ( typeof(key) === "string" ) {
-			delete settings[key];
+	core.manifest = function(callback) {
+		var getManifest, reported;
+		
+		if ( manifest ) {
+			callback(manifest);
 		} else {
-			settings = {};
+			callbacks.push(callback);
+			if ( callbacks.length === 1 ) {
+				getManifest = function() {
+					$.ajax(core.rootPath("/manifest.json"), {
+						dataType: "json",
+						success: function(data) {
+							if ( reported ) {
+								core.info("Successfully retrieved manifest.json.");
+							}
+							manifest = data;
+							callbacks.forEach(function(callback) {
+								callback(manifest);
+							});
+							delete callbacks;
+						},
+						error: function(xhr, status, error) {
+							if ( !reported ) {
+								core.error("Failed to retrieve manifest.json. Will keep retrying...");
+								reported = true;
+							}
+							setTimeout(getManifest, 5000);
+						}
+					});
+				};
+				getManifest();
+			}
 		}
-		core.db.set("settings", settings);
-		return core.settings;
-	}
-	
-	function populateSettings() {
-		settings = core.db.get("settings");
-		if ( settings === null ) settings = {};
-	}
-	core.HookEvent("VARIABLES_LOADED", populateSettings, true);
+	};
 	
 })();
 
@@ -370,21 +205,4 @@ var L;
 	}
 })();
 
-// -- Upgrading --------------------------------------------------------------------------------------------------------
-
-/*
-var lastBuild = db.get('build')
-switch ( lastBuild ) {
-
-}
-if ( lastBuild !== core.build ) {
-	db.set('lastBuild', lastBuild)
-}
-db.set('build', core.build)
-*/
-
-// -- Main -------------------------------------------------------------------------------------------------------------
-
-window.core = core
-
-})()
+})();

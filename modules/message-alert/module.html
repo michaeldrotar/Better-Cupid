@@ -1,0 +1,26 @@
+<script>
+/*
+	Message Alert module
+*/
+</script>
+
+<style type="text/css">
+</style>
+
+<script>
+(function() {
+
+var alert = $(".alert.message"), count;
+if ( alert.length > 0 ) {
+	alert.css("display", "none");
+	count = $("#site_nav_menu_1 li .count .value").html();
+	if ( count && count.length > 0 ) {
+		if ( count.length > 3 ) {
+			count = "*";
+		}
+		$("#site_nav .item_1 a").html("Messages ("+count+")");
+	}
+}
+
+})();
+</script>
