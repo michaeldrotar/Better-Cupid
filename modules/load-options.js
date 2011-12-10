@@ -2,13 +2,10 @@
 	
 	function loadModules() {
 		core.manifest(function(manifest) {
-			var modules = manifest.modules
-				count = 0;
+			var modules = manifest.modules;
 			
-			function moduleAdded() {
-				if ( ++count === modules.length ) {
-					document.body.style.visibility = "visible";
-				}
+			if ( !modules || modules.length === 0 ) {
+				return;
 			}
 			
 			modules.forEach(function(module) {
@@ -36,15 +33,11 @@
 							},
 							error: function(xhr, status, error) {
 								core.error("Failed to load " + module.id + " module.");
-							},
-							complete: function(xhr, status) {
-								moduleAdded();
 							}
 						});
 					},
 					error: function(xhr, status, error) {
 						core.error("Failed to load defaults for " + module.id + " module.");
-						moduleAdded();
 					}
 				});
 			});

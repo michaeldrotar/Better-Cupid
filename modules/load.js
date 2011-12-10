@@ -2,8 +2,13 @@
 	
 	function loadModules() {
 		core.manifest(function(manifest) {
-			var modules = manifest.modules
+			var modules = manifest.modules,
 				count = 0;
+			
+			if ( !modules || modules.length === 0 ) {
+				document.body.style.visibility = "visible";
+				return;
+			}
 			
 			function moduleAdded() {
 				if ( ++count === modules.length ) {
