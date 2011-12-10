@@ -150,9 +150,11 @@ $(".switcher").switcher();
 	var init = {
 		checkbox: function(setting, module) {
 			this.checked = module.db.get(setting);
+			$(this).change();
 		},
 		text: function(setting, module) {
 			this.value = module.db.get(setting);
+			$(this).change();
 		}
 	};
 	
