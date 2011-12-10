@@ -2,13 +2,7 @@
 (function(module) {
 	
 	if ( module.db.get("hide") ) {
-		$(".section.matches").each(function() {
-			this.getElementsByTagName("h5").forEach(function(el) {
-				if ( el.innerHTML.toLowerCase().indexOf("you might like") >= 0 ) {
-					el.parentNode.style.display = 'none';
-				}
-			});
-		});
+		$("#section_matches").hide();
 	}
 	
 })(module);

@@ -1,7 +1,13 @@
+<style type="text/css">
+#section_recent ul li {
+	margin-right: 6px;
+}
+</style>
+
 <script>
 (function(module) {
 	
-	var recentlyVisited = document.getElementById("side_recently_viewed"),
+	var recentlyVisited = document.getElementById("section_recent"),
 		maxItemCount = module.db.get("maxRowCount") * 4,
 		visRowCount = module.db.get("visibleRowCount"),
 		visitLog = module.db.get("recentlyVisited") || [],
@@ -73,13 +79,15 @@
 		holder.addEventListener("mousewheel", function(e) {
 			var dir = e.wheelDelta > 0 ? 1 : -1,
 				change = dir * Math.ceil(holder.getHeight() * 2/3),
-				height = list.getHeight(),
+				height = list.getHeight("outer"),
 				area = height - holder.getHeight(),
 				top = list.getTop(holder),
-				newTop = top + change;
+				newTop = top + change,
+				marginTop = parseInt(list.getCssStyle("margin-top")),
+				marginBottom = parseInt(list.getCssStyle("margin-bottom"));
 			
-			if ( dir > 0 && top === 0 ) return;
-			if ( dir < 0 && top === -area ) return;
+			if ( dir > 0 && top === marginTop ) return;
+			if ( dir < 0 && top - marginTop - marginBottom === -area ) return;
 			if ( newTop > 0 ) {
 				newTop = 0;
 			} else if ( newTop < -area ) {
