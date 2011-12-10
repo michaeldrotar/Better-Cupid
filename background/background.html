@@ -5,63 +5,33 @@
 <script type="text/javascript">
 (function(){
 
-/*
-$(function() {
-
-var version = 0;
-var tabs = {};
-var getVersion, checkVersion;
+var version = 0,
+	tabs = {},
+	regex = {
+		targetSite: /^https?:\/\/(?:[^\.]+\.)?okcupid\.com/i
+	};
 
 chrome.tabs.onUpdated.addListener(function(_, info, tab) {
-	//alert(tab.url);
-	if ( tab.url.indexOf("okcupid.com") >= 0 ) {
+	if ( regex.targetSite.test(tab.url) ) {
 		tabs[tab.id] = tab;
 	} else {
 		delete tabs[tab.id];
 	}
 });
 
-getVersion = function() {
-	
-	$.ajax(root+"/manifest.json", {
-		cache: false,
-		dataType: "json",
-		error: getVersion,
-		success: function(data) {
-			version = data.version;
-		
-			checkVersion = function() {
-				$.ajax(root+"/manifest.json", {
-					cache: false,
-					dataType: "json",
-					error: function() {
-						setTimeout(checkVersion, 30000);
-					},
-					success: function(data) {
-						if ( data.version !== version ) {
-							//alert(version);
-							//chrome.extension.sendRequest({ command: "update", old_version: version, new_version: data.version });
-							for ( k in tabs ) {
-								chrome.tabs.sendRequest(tabs[k].id, { command: "update", old_version: version, new_version: data.version });
-							}
-							version = data.version;
-						}
-						setTimeout(checkVersion, 500);
-					},
-					timeout: 10000
-				});
-			};
-
-			checkVersion();
-		},
-		timeout: 5000
-	});
-};
-
-getVersion();
-
+chrome.tabs.onRemoved.addListener(function(tabid, info) {
+	delete tabs[tabid];
 });
-*/
+
+chrome.windows.getAll({ populate: true }, function(windowArray) {
+	$.each(windowArray, function(_, window) {
+		$.each(window.tabs, function(_, tab) {
+			if ( regex.targetSite.test(tab.url) ) {
+				tabs[tab.id] = tab;
+			}
+		});
+	});
+});
 
 	var fetch_cache = {};
 	

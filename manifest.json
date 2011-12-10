@@ -47,6 +47,7 @@
 	],
 	
 	"permissions": [
+		"tabs",
 		"https://github.com/michaeldrotar/Better-Cupid"
 	]
 }
