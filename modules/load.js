@@ -78,7 +78,7 @@
 	}
 	
 	function waitForLoaded() {
-		if ( document.readystate !== "loading" ) {
+		if ( document.readyState !== "loading" ) {
 			document.removeEventListener("readystatechange", waitForLoaded, false);
 			checkDB();
 		}
