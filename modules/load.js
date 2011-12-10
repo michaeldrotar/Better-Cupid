@@ -34,9 +34,13 @@
 									container.id = module.id+"-module";
 									container.innerHTML = markup;
 									
-									window.module = mod;
-									$(document.body).append(container);
-									delete window.module;
+									try {
+										window.module = mod;
+										$(document.body).append(container);
+										delete window.module;
+									} catch ( error ) {
+										console.error("An error occured injecting the "+mod.name()+" module", error);
+									}
 								},
 								error: function(xhr, status, error) {
 									core.error("Failed to load " + module.id + " module.");
