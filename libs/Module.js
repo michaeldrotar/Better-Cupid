@@ -1,5 +1,7 @@
 var Module = (function() {
-	var _shared = {},
+	var _shared = {
+			modules: {}
+		},
 		self;
 	
 	self = function(data) {
@@ -7,6 +9,10 @@ var Module = (function() {
 				dbkey: "module-db--" + data.id
 			},
 			mod = this;
+		
+		if ( data.id && !_shared.modules[data.id] ) {
+			_shared.modules[data.id] = mod;
+		}
 		
 		mod.id = function() {
 			return data.id;
@@ -100,6 +106,10 @@ var Module = (function() {
 			
 		};
 	};
+	
+	self.get = function(id) {
+		return _shared.modules[id];
+	}
 	
 	return self;
 })();
