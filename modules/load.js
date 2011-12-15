@@ -2,63 +2,93 @@
 	
 	function loadModules() {
 		core.manifest(function(manifest) {
-			var modules = manifest.modules,
+			var modules = [],
+				moduleCount,
+				iterateModules,
 				count = 0;
 			
-			if ( !modules || modules.length === 0 ) {
+			$.each(manifest.modules, function(_, data) {
+				var module = new Module(data);
+				if ( module.enabled() ) {
+					modules.push(module);
+				}
+			});
+			
+			if ( modules.length === 0 ) {
 				document.body.style.visibility = "visible";
 				return;
+			} else {
+				moduleCount = modules.length;
 			}
 			
 			function moduleAdded() {
-				if ( ++count === modules.length ) {
+				if ( ++count === moduleCount ) {
 					document.body.style.visibility = "visible";
 				}
 			}
 			
-			modules.forEach(function(module) {
-				var mod = new Module(module);
-				
-				if ( mod.db.get("enabled") ) {
-					$.ajax(mod.path("/defaults.json"), {
-						dataType: "json",
-						timeout: 2000,
-						success: function(defaults, status, xhr) {
-							mod.db.defaults(defaults);
-							
-							$.ajax(mod.path("/"+module.id+".html"), {
-								dataType: "html",
-								timeout: 5000,
-								success: function(markup, status, xhr) {
-									var container = document.createElement("div");
-									container.id = module.id+"-module";
-									container.innerHTML = markup;
-									
-									try {
-										window.module = mod;
-										$(document.body).append(container);
-										delete window.module;
-									} catch ( error ) {
-										console.error("An error occured injecting the "+mod.name()+" module", error);
-									}
-								},
-								error: function(xhr, status, error) {
-									core.error("Failed to load " + module.id + " module.");
-								},
-								complete: function(xhr, status) {
-									moduleAdded();
+			function loadModule(module) {
+				$.ajax(module.path("/defaults.json"), {
+					dataType: "json",
+					timeout: 2000,
+					success: function(defaults, status, xhr) {
+						module.db.defaults(defaults);
+					},
+					error: function() {
+						module.db.defaults({});
+					},
+					complete: function() {
+						$.ajax(module.path("/"+module.id()+".html"), {
+							dataType: "html",
+							timeout: 5000,
+							success: function(markup, status, xhr) {
+								var container = $("<div>");
+								container.attr("id", module.id()+"-module");
+								container[0].innerHTML = markup;
+								
+								try {
+									window.module = module;
+									$("body").append(container);
+									delete window.module;
+									module.state("loaded");
+								} catch ( error ) {
+									console.error("An error occured injecting the "+module.name()+" module:", error);
+									module.state("failed");
 								}
-							});
-						},
-						error: function(xhr, status, error) {
-							core.error("Failed to load defaults for " + module.id + " module.");
+							},
+							error: function(xhr, status, error) {
+								console.error("Failed to load the "+module.name()+" module:", error);
+								module.state("failed");
+							},
+							complete: function(xhr, status) {
+								moduleAdded();
+							}
+						});
+					}
+				});
+			}
+			
+			iterateModules = function() {
+				$.each(modules, function(i, module) {
+					switch ( module.state() ) {
+						case "ready":
+							loadModule(module);
+							modules.splice(i, 1);
+							return false;
+						
+						case "failed":
+							modules.splice(i, 1);
 							moduleAdded();
-						}
-					});
-				} else {
-					moduleAdded();
+							return false;
+					}
+				});
+				
+				if ( modules.length > 0 ) {
+					setTimeout(iterateModules, 1);
 				}
-			});
+			};
+			iterateModules();
+			
 		});
 	}
 	

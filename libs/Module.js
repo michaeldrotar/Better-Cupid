@@ -6,7 +6,14 @@ var Module = (function() {
 	
 	self = function(data) {
 		var _private = {
-				dbkey: "module-db--" + data.id
+				dbkey: "module-db--" + data.id,
+				
+				id: data.id,
+				name: data.name,
+				description: data.description,
+				depends: data.depends || [],
+				
+				state: null
 			},
 			mod = this;
 		
@@ -15,24 +22,68 @@ var Module = (function() {
 		}
 		
 		mod.id = function() {
-			return data.id;
+			return _private.id;
 		};
 		
 		mod.name = function() {
-			return data.name;
+			return _private.name;
 		};
 		
 		mod.description = function() {
-			return data.description;
+			return _private.description;
 		};
 		
 		mod.path = (function() {
 			var root = null;
 			return function(path) {
-				root = root || core.rootPath("/modules/" + data.id);
+				root = root || core.rootPath("/modules/" + _private.id);
 				return root + (path || "");
 			};
 		})();
+		
+		mod.enabled = function(val) {
+			if ( typeof val !== "boolean" ) {
+				return mod.db.get("enabled");
+			} else {
+				mod.db.set("enabled", val);
+				return mod;
+			}
+		};
+		
+		mod.state = function(state) {
+			if ( typeof state === "string" ) {
+				_private.state = state;
+				return mod;
+			} else if ( _private.state ) {
+				return _private.state;
+			} else {
+				/*
+				ready
+				waiting
+				failed
+				loaded
+				*/
+				var depsFailed = false,
+					depsLoaded = true;
+				$.each(_private.depends, function(_, depID) {
+					var dep = Module.get(depID),
+						depState = dep.state();
+					if ( !dep.enabled() || depState === "failed" ) {
+						depsFailed = true;
+						return true;
+					} else if ( depState !== "loaded" ) {
+						depsLoaded = false;
+					}
+				});
+				if ( depsFailed ) {
+					return "failed";
+				}
+				if ( !depsLoaded ) {
+					return "waiting";
+				}
+				return "ready";
+			}
+		};
 		
 		_private.getdb = function() {
 			return core.db.get(_private.dbkey) || {};
@@ -109,7 +160,7 @@ var Module = (function() {
 	
 	self.get = function(id) {
 		return _shared.modules[id];
-	}
+	};
 	
 	return self;
 })();
