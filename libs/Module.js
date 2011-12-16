@@ -67,12 +67,18 @@ var Module = (function() {
 					depsLoaded = true;
 				$.each(_private.depends, function(_, depID) {
 					var dep = Module.get(depID),
-						depState = dep.state();
-					if ( !dep.enabled() || depState === "failed" ) {
+						depState;
+					if ( !dep ) {
 						depsFailed = true;
 						return true;
-					} else if ( depState !== "loaded" ) {
-						depsLoaded = false;
+					} else {
+						depState = dep.state();
+						if ( !dep.enabled() || depState === "failed" ) {
+							depsFailed = true;
+							return true;
+						} else if ( depState !== "loaded" ) {
+							depsLoaded = false;
+						}
 					}
 				});
 				if ( depsFailed ) {
