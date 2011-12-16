@@ -12,6 +12,7 @@ var Module = (function() {
 				name: data.name,
 				description: data.description,
 				depends: data.depends || [],
+				required: data.required === true ? true : false,
 				
 				state: null
 			},
@@ -43,11 +44,15 @@ var Module = (function() {
 		
 		mod.enabled = function(val) {
 			if ( typeof val !== "boolean" ) {
-				return mod.db.get("enabled");
+				return _private.required || mod.db.get("enabled");
 			} else {
 				mod.db.set("enabled", val);
 				return mod;
 			}
+		};
+		
+		mod.required = function() {
+			return _private.required;
 		};
 		
 		mod.state = function(state) {
