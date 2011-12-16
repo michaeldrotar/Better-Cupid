@@ -97,9 +97,6 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 	
 	chrome.extension.onRequest.addListener(requestHandler);
 	
-	chrome.browserAction.onClicked.addListener(function(tab) {
-		window.open("http://www.okcupid.com");
-	});
 	/*
 	chrome.browserAction.setPopup({popup:"popup.html"})
 	setTimeout(function() {

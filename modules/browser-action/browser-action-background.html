@@ -1,0 +1,9 @@
+<script>
+(function(module) {
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+	window.open(module.db.get("openUrl"));
+});
+
+})(module);
+</script>
