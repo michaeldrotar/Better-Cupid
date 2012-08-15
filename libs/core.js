@@ -34,7 +34,7 @@ core.regex = {
 			query   : l.search.substring(1),
 			hash    : l.hash.substring(1)
 		},
-		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");;
+		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");
 	
 	x.baseurl = x.protocol + "://" + x.domain + ( x.port.length > 0 ? ":"+x.port : "" ) + x.path;
 	x.url     = x.baseurl + ( x.query.length > 0 ? "?"+x.query : "" ) + ( x.hash.length > 0 ? "#"+x.hash : "" );
@@ -64,7 +64,7 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 // -- comms ------------------------------------------------------------------------------------------------------------
 
 core.SendRequest = function(request, callback) {
-	chrome.extension.sendRequest(request, typeof callback === "function" ? callback : core.noop);
+	chrome.extension.sendMessage(request, typeof callback === "function" ? callback : core.noop);
 };
 
 // -- events -----------------------------------------------------------------------------------------------------------
@@ -147,34 +147,44 @@ var db = {};
 		callbacks = [];
 	
 	core.manifest = function(callback) {
-		var getManifest, reported;
+		var request, getManifest, reported;
 		
 		if ( manifest ) {
 			callback(manifest);
 		} else {
 			callbacks.push(callback);
 			if ( callbacks.length === 1 ) {
-				getManifest = function() {
-					$.ajax(core.rootPath("/manifest.json"), {
-						dataType: "json",
-						success: function(data) {
+				request = {
+					"url": core.rootPath("/manifest.json"),
+					"dataType": "json",
+					"success": function(temp_manifest, status, xhr) {
+						if ( reported ) {
+							core.info("Successfully retreived manifest json.");
+						}
+						request.url = core.rootPath("/modules.json");
+						request.success = function(response, status, xhr) {
 							if ( reported ) {
-								core.info("Successfully retrieved manifest.json.");
+								core.info("Successfully retrieved manifest json.");
 							}
-							manifest = data;
+							temp_manifest.modules = response;
+							manifest = temp_manifest;
 							callbacks.forEach(function(callback) {
 								callback(manifest);
 							});
 							delete callbacks;
-						},
-						error: function(xhr, status, error) {
-							if ( !reported ) {
-								core.error("Failed to retrieve manifest.json. Will keep retrying...");
-								reported = true;
-							}
-							setTimeout(getManifest, 5000);
+						};
+						getManifest();
+					},
+					"error": function(xhr, status, message) {
+						if ( !reported ) {
+							core.error("Failed to retrieve the manifest. Will keep retrying...");
+							reported = true;
 						}
-					});
+						setTimeout(getManifest, 5000);
+					}
+				};
+				getManifest = function() {
+					$.ajax(request);
 				};
 				getManifest();
 			}

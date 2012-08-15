@@ -1,4 +1,6 @@
 {
+	"manifest_version": 2,
+	
 	"name": "BetterCupid",
 	"version": "0.7.3",
 	"description": "Enhances the functionality of the OkCupid website. This extension was written by a bored fan and is not endorsed by OkCupid.",
@@ -12,7 +14,9 @@
 	"minimum_chrome_version": "5.0.316.0",
 	"incognito": "spanning",
 	
-	"background_page": "background/background.html",
+	"background": {
+		"page": "background/background.html"
+	},
 	"options_page": "options/options.html",
 	
 	"browser_action": {
@@ -33,22 +37,15 @@
 		}
 	],
 	
-	"modules": [
-		{
-			"id": "people-summary",
-			"name": "People Summary",
-			"description": "Provides a summary of information about the people that have visited you and those that you favorited"
-		},
-		{
-			"id": "recently-visited",
-			"name": "Recently Visited",
-			"description": "Provides enhanced functionality for the list of Recently Visited members, including the ability to store and maintain more than just the past 8 visitors."
-		},
-		{
-			"id": "you-might-like",
-			"name": "You Might Like",
-			"description": "Provides additional settings for the You Might Like panel on the home screen."
-		}
+	"web_accessible_resources": [
+		"manifest.json",
+		"modules.json",
+		"modules/people-summary/defaults.json",
+		"modules/people-summary/people-summary.html",
+		"modules/recently-visited/defaults.json",
+		"modules/recently-visited/recently-visited.html",
+		"modules/you-might-like/defaults.json",
+		"modules/you-might-like/you-might-like.html"
 	],
 	
 	"permissions": [
