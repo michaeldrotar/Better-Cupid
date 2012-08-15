@@ -1,5 +1,11 @@
 (function(window, document, $) {
 	
+	var moduleObjects = {};
+	
+	core.getModuleObject = function(id) {
+		return moduleObjects[id];
+	}
+	
 	function loadModules() {
 		core.manifest(function(manifest) {
 			var modules = manifest.modules;
@@ -10,6 +16,7 @@
 			
 			modules.forEach(function(module) {
 				var mod = new Module(module);
+				moduleObjects[mod.id()] = mod;
 				
 				$.ajax(mod.path("/defaults.json"), {
 					dataType: "json",
