@@ -34,7 +34,7 @@ core.regex = {
 			query   : l.search.substring(1),
 			hash    : l.hash.substring(1)
 		},
-		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");;
+		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");
 	
 	x.baseurl = x.protocol + "://" + x.domain + ( x.port.length > 0 ? ":"+x.port : "" ) + x.path;
 	x.url     = x.baseurl + ( x.query.length > 0 ? "?"+x.query : "" ) + ( x.hash.length > 0 ? "#"+x.hash : "" );
@@ -46,6 +46,7 @@ core.regex = {
 	};
 	
 	core.onContentScript = ( x.protocol !== "chrome-extension" );
+	core.onBackgroundPage = ( x.protocol === "chrome-extension" && x.path.indexOf("background/background.html") > 0 );
 	
 	core.rootPath = function(path) {
 		return root + (path || "");
@@ -66,6 +67,7 @@ core.sorter.numeric.descending = function(a,b) { return b-a };
 core.SendRequest = function(request, callback) {
 	chrome.extension.sendRequest(request, typeof callback === "function" ? callback : core.noop);
 };
+core.sendRequest = core.SendRequest;
 
 // -- events -----------------------------------------------------------------------------------------------------------
 
@@ -102,9 +104,10 @@ var db = {};
 		} else {
 			localStorage.clear();
 		}
-		if ( core.onContentScript ) {
+		if ( !core.onBackgroundPage ) {
 			core.SendRequest({ type: "db.clear", key: k });
 		}
+		core.dispatchEvent({ type: "dbchange", key: k });
 		return db;
 	}
 	
@@ -114,9 +117,10 @@ var db = {};
 	
 	db.set = function(k, v) {
 		localStorage.setItem(k, JSON.stringify(v));
-		if ( core.onContentScript ) {
+		if ( !core.onBackgroundPage ) {
 			core.SendRequest({ type: "db.set", key: k, value: v });
 		}
+		core.dispatchEvent({ type: "dbchange", key: k });
 		return db;
 	}
 	
@@ -204,5 +208,12 @@ var L;
 		return getMessage(arguments[0], arguments[1])
 	}
 })();
+
+if ( core.onContentScript ) {
+	chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+		console.log(request.type,request);
+	});
+	chrome.extension.sendRequest({type:"script"});
+}
 
 })();

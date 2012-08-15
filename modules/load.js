@@ -52,7 +52,7 @@
 									delete window.module;
 									module.state("loaded");
 								} catch ( error ) {
-									console.error("An error occured injecting the "+module.name()+" module:", error);
+									console.error("An error occured injecting the "+module.name()+" module:", error.stack || error);
 									module.state("failed");
 								}
 							},

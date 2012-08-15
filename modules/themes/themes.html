@@ -1,0 +1,59 @@
+<style type="text/css">
+#theme-box {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	height: 100px;
+	width: 100px;
+	z-index: 5000;
+}
+#theme-box.over {
+	width: 400px;
+	height: 300px;
+}
+</style>
+
+<textarea id="theme-box"></textarea>
+<script>
+(function(module) {
+
+var themes = module.db.get("themes");
+
+var themeCss = $("#theme-css"),
+	themeBox = $("#theme-box");
+
+	themeBox.val(module.db.get("theme") || "");
+	
+var timeout;
+function update() {
+	var css = themeBox.val();
+	$("#theme-css").detach();
+	$("body").append("<style type='text/css' id='theme-css'>"+css+"</style>");
+	module.db.set("theme", css);
+}
+update();
+$("#theme-box").keyup(function(e) {
+	if ( timeout ) {
+		clearTimeout(timeout);
+	}
+	timeout = setTimeout(function() {
+		update();
+	}, 1000);
+}).keydown(function(e) {
+	if ( e.keyCode === 9 ) {
+		var start = this.selectionStart;
+		var end = this.selectionEnd;
+		this.value = this.value.substring(0, start) + "\t" + this.value.substring(end,this.value.length);
+		this.focus();
+		this.selectionStart = start + 1;
+		this.selectionEnd = this.selectionStart;
+		e.preventDefault();
+	}
+}).hover(function(e) {
+	$(this).addClass("over");
+}, function(e) {
+	$(this).removeClass("over");
+});
+
+})(module);
+</script>

@@ -9,5 +9,14 @@
 	<div class="container scrollable">
 		test
 	</div>
+	<script>
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+	console.log(request.type,request);
+});
+
+setInterval(function() {
+	chrome.extension.sendRequest({type:"popup"});
+}, 2000);
+	</script>
 </body>
 </html>

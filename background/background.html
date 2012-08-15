@@ -163,6 +163,14 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 	});
 
 })();
-	
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+	console.log(request.type,request, sender);
+});
+
+setInterval(function() {
+	chrome.extension.sendRequest({type:"background"});
+}, 2000);
+
 })();
 </script>

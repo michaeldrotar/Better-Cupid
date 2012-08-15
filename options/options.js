@@ -152,6 +152,10 @@ $(".switcher").switcher();
 			this.checked = module.db.get(setting);
 			$(this).change();
 		},
+		"select-one": function(setting, module) {
+			console.log(setting);
+			$(this).val(module.db.get(setting)).change();
+		},
 		text: function(setting, module) {
 			this.value = module.db.get(setting);
 			$(this).change();
@@ -161,6 +165,9 @@ $(".switcher").switcher();
 	var onchange = {
 		checkbox: function(e, setting, module) {
 			module.db.set(setting, this.checked);
+		},
+		"select-one": function(e, setting, module) {
+			module.db.set(setting, $(this).val());
 		},
 		text: function(e, setting, module) {
 			var val = this.value;
@@ -184,6 +191,7 @@ $(".switcher").switcher();
 		module_hash[module.id()] = module;
 		
 		page.find("[data-setting]").attr("data-module", module.id()).each(function() {
+			console.log("type:",this.type);
 			var f = init[this.type],
 				f2 = onchange[this.type],
 				setting = this.getAttribute("data-setting");
@@ -312,5 +320,11 @@ $(".switcher").switcher();
 	})();
 	
 })();
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+	console.log(request.type,request);
+});
+
+chrome.extension.sendRequest({type:"options"});
 
 })();

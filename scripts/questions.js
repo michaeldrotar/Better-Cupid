@@ -1,6 +1,27 @@
 if ( core.onPage("/questions") ) {
 core.RegisterLoadingProcess("questions", function() {
     
+    core.ProcessElement(document.getElementByClassName("questions"), function() {
+        this.setStyle("display", "none");
+        
+        var div = document.createElement("div");
+        div.id = "bc_question_progress";
+        div.innerHTML = "Loading page 1...";
+        div.insertAbove(this);
+    }, true);
+    
+    // -- pages --------------------------------------------------------------------------------------------------------
+    (function() {
+        
+    })();
+    
+});
+}
+
+if ( core.onPage("/questions") ) {
+} else if ( false ) {
+core.RegisterLoadingProcess("questions", function() {
+    
     if ( document.readyState === "loading" ) return;
     
     // -- base ---------------------------------------------------------------------------------------------------------

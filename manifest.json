@@ -25,6 +25,8 @@
 			"js": [
 				"libs/prototype.js",
 				"libs/jquery.js",
+				"libs/jquery-plus.js",
+				"libs/DB.js",
 				"libs/core.js",
 				"libs/Module.js",
 				"modules/load.js"
