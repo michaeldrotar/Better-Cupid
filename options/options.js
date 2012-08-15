@@ -48,7 +48,7 @@ $(".switcher").switcher();
 								onerror();
 							}
 						} else {
-							widget.html($(response.data).find("#template").html());
+							widget.html($(response.data).find(".markdown-body").html());
 						}
 					}
 				});
@@ -61,7 +61,7 @@ $(".switcher").switcher();
 		"#changelog_tab_content",
 		"https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog",
 		function(response) {
-			var html = $(response.data).find("#template").html(),
+			var html = $(response.data).find(".markdown-body").html(),
 				versions = [],
 				count = 0;
 			
