@@ -77,7 +77,7 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 						sendResponse(response);
 					}
 					$.ajax(request);
-					return;
+					return true;
 				} else {
 					response.cached = true;
 					response.data = entry.data;
