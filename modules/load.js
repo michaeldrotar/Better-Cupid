@@ -1,6 +1,10 @@
 (function(window, document, $) {
 	
 	function loadModules() {
+		Module.inject("scripts", function() {
+			document.body.style.visibility = "visible";
+		});
+	/*
 		core.manifest(function(manifest) {
 			var modules = manifest.modules,
 				count = 0;
@@ -19,47 +23,44 @@
 			modules.forEach(function(module) {
 				var mod = new Module(module);
 				
-				if ( mod.db.get("enabled") ) {
-					$.ajax(mod.path("/defaults.json"), {
-						dataType: "json",
-						timeout: 2000,
-						success: function(defaults, status, xhr) {
-							mod.db.defaults(defaults);
-							
-							$.ajax(mod.path("/"+module.id+".html"), {
-								dataType: "html",
-								timeout: 5000,
-								success: function(markup, status, xhr) {
-									var container = document.createElement("div");
-									container.id = module.id+"-module";
-									container.innerHTML = markup;
-									
-									try {
-										window.module = mod;
-										$(document.body).append(container);
-										delete window.module;
-									} catch ( error ) {
-										console.error("An error occured injecting the "+mod.name()+" module", error);
-									}
-								},
-								error: function(xhr, status, error) {
-									core.error("Failed to load " + module.id + " module.");
-								},
-								complete: function(xhr, status) {
-									moduleAdded();
+				$.ajax(mod.path("defaults.json"), {
+					dataType: "json",
+					timeout: 2000,
+					success: function(defaults, status, xhr) {
+						mod.db.defaults(defaults);
+						
+						$.ajax(mod.path(module.id+".html"), {
+							dataType: "html",
+							timeout: 5000,
+							success: function(markup, status, xhr) {
+								var container = document.createElement("div");
+								container.id = module.id+"-module";
+								container.innerHTML = markup;
+								
+								try {
+									window.module = mod;
+									$(document.body).append(container);
+									delete window.module;
+								} catch ( error ) {
+									console.error("An error occured injecting the "+mod.name()+" module", error);
 								}
-							});
-						},
-						error: function(xhr, status, error) {
-							core.error("Failed to load defaults for " + module.id + " module.");
-							moduleAdded();
-						}
-					});
-				} else {
-					moduleAdded();
-				}
+							},
+							error: function(xhr, status, error) {
+								core.error("Failed to load " + module.id + " module.");
+							},
+							complete: function(xhr, status) {
+								moduleAdded();
+							}
+						});
+					},
+					error: function(xhr, status, error) {
+						core.error("Failed to load defaults for " + module.id + " module.");
+						moduleAdded();
+					}
+				});
 			});
 		});
+	*/
 	}
 	
 	function waitForDB() {

@@ -2,16 +2,49 @@
 	{
 		"id": "people-summary",
 		"name": "People Summary",
-		"description": "Provides a summary of information about the people that have visited you and those that you favorited"
+		"description": "Provides a summary of information about the people that have visited you and those that you favorited",
+		"defaults": {
+		},
+		"scripts": [
+			"people-summary.html"
+		],
+		"options": [
+		],
+		"background": [
+		]
 	},
 	{
 		"id": "recently-visited",
 		"name": "Recently Visited",
-		"description": "Provides enhanced functionality for the list of Recently Visited members, including the ability to store and maintain more than just the past 8 visitors."
+		"description": "Provides enhanced functionality for the list of Recently Visited members, including the ability to store and maintain more than just the past 8 visitors.",
+		"defaults": {
+			"maxRowCount": 25,
+			"visibleRowCount": 5
+		},
+		"scripts": [
+			"recently-visited.html"
+		],
+		"options": [
+			"recently-visited-options.html",
+			"recently-visited-options.js"
+		],
+		"background": [
+		]
 	},
 	{
 		"id": "you-might-like",
 		"name": "You Might Like",
-		"description": "Provides additional settings for the You Might Like panel on the home screen."
+		"description": "Provides additional settings for the You Might Like panel on the home screen.",
+		"defaults": {
+			"hide": false
+		},
+		"scripts": [
+			"you-might-like.html"
+		],
+		"options": [
+			"you-might-like-options.html"
+		],
+		"background": [
+		]
 	}
 ]

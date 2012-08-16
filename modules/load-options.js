@@ -1,12 +1,24 @@
 (function(window, document, $) {
-	
+	/*
 	var moduleObjects = {};
 	
 	core.getModuleObject = function(id) {
 		return moduleObjects[id];
 	}
-	
+	*/
 	function loadModules() {
+		Module.inject("options", function(modules) {
+			modules.forEach(function(module) {
+				var id = module.id(),
+					container = $("#"+id+"-module");
+				if ( container.length ) {
+					container.prepend("<p>"+module.description()+"</p>");
+					container.prepend("<h1>"+module.name()+"</h1>");
+					options.ProcessOptionsPage(container, module);
+				}
+			});
+		});
+		/*
 		core.manifest(function(manifest) {
 			var modules = manifest.modules;
 			
@@ -18,13 +30,13 @@
 				var mod = new Module(module);
 				moduleObjects[mod.id()] = mod;
 				
-				$.ajax(mod.path("/defaults.json"), {
+				$.ajax(mod.path("defaults.json"), {
 					dataType: "json",
 					timeout: 2000,
 					success: function(defaults, status, xhr) {
 						mod.db.defaults(defaults);
 						
-						$.ajax(mod.path("/"+module.id+"-options.html"), {
+						$.ajax(mod.path(module.id+"-options.html"), {
 							dataType: "html",
 							timeout: 5000,
 							success: function(markup, status, xhr) {
@@ -49,6 +61,7 @@
 				});
 			});
 		});
+		*/
 	}
 	
 	function waitForDB() {

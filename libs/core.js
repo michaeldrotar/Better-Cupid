@@ -11,7 +11,7 @@ core.regex = {
 
 // -- console enhancements ---------------------------------------------------------------------------------------------
 
-["debug", "error", "info", "warn"].forEach(function(k) {
+["assert", "debug", "error", "info", "warn"].forEach(function(k) {
 	core[k] = function(msg, args) {
 		if ( console ) {
 			if ( typeof(msg) === "object" && msg.join ) {
@@ -36,6 +36,10 @@ core.regex = {
 		},
 		root = "chrome-extension://"+chrome.i18n.getMessage("@@extension_id");
 	
+	if ( document.location.href.indexOf(root) === 0 ) {
+		root = "";
+	}
+	
 	x.baseurl = x.protocol + "://" + x.domain + ( x.port.length > 0 ? ":"+x.port : "" ) + x.path;
 	x.url     = x.baseurl + ( x.query.length > 0 ? "?"+x.query : "" ) + ( x.hash.length > 0 ? "#"+x.hash : "" );
 	
@@ -48,6 +52,9 @@ core.regex = {
 	core.onContentScript = ( x.protocol !== "chrome-extension" );
 	
 	core.rootPath = function(path) {
+		if ( path.substring(0, 1) !== "/" ) {
+			path = "/"+path;
+		}
 		return root + (path || "");
 	};
 	

@@ -1,5 +1,4 @@
 (function(module) {
-
 	var visRow = $("#recently-visited_visibleRowCount"),
 		maxRow = $("#recently-visited_maxRowCount"),
 		rowSlider = $("#row-count-slider"),
@@ -65,4 +64,4 @@
 		}
 	});
 	
-})(core.getModuleObject("recently-visited"));
+})(Module.get("recently-visited"));
