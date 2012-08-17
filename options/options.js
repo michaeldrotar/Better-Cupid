@@ -200,26 +200,29 @@ $(".switcher").switcher();
 		$("#settings_tab_content .tab_content_left").append(page);
 		var li = $("<li id='"+module.id()+"-tab' data-content-selector='#"+page.attr("id")+"'>"+module.name()+"</li>");
 		$("#settings_tab_content .switcher").append(li).switcher();
-		var en = $("<span class='switch'></span>");
-		en.click(function(e) {
-			toggleEnabled(module);
-			if ( module.db.get("enabled") ) {
-				this.addClass("enabled");
-				this.innerHTML = "Enabled";
+		
+		if ( !module.required() ) {
+			var en = $("<span class='switch'></span>");
+			en.click(function(e) {
+				toggleEnabled(module);
+				if ( module.enabled() ) {
+					this.addClass("enabled");
+					this.innerHTML = "Enabled";
+				} else {
+					this.removeClass("enabled");
+					this.innerHTML = "Disabled";
+				}
+				e.stopPropagation();
+				e.preventDefault();
+			});
+			if ( module.enabled() ) {
+				en.addClass("enabled");
+				en.html("Enabled");
 			} else {
-				this.removeClass("enabled");
-				this.innerHTML = "Disabled";
+				en.html("Disabled");
 			}
-			e.stopPropagation();
-			e.preventDefault();
-		});
-		if ( module.db.get("enabled") ) {
-			en.addClass("enabled");
-			en.html("Enabled");
-		} else {
-			en.html("Disabled");
+			li.append(en);
 		}
-		li.append(en);
 	};
 	
 	$("#reset-confirmation-dialog").dialog({

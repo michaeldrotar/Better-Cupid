@@ -5,31 +5,34 @@ var Module = (function() {
 		self;
 	
 	self = function(data) {
-		if ( _shared.cache[data.id] ) {
-			return _shared.cache[data.id];
-		}
-		
-		var _private = {
-				"dbkey": "module-db--"+data.id,
-				"defaults": $.extend(
-					{
+		var _private = $.extend(true,
+				{
+					"dbkey": "module-db--" + data.id,
+					"defaults": {
 						"enabled": true
 					},
-					data.defaults
-				)
-			},
+					"state": null,
+					"depends": [],
+					"required": false
+				},
+				data
+			),
 			mod = this;
 		
+		if ( data.id && !_shared.cache[data.id] ) {
+			_shared.cache[data.id] = mod;
+		}
+		
 		mod.id = function() {
-			return data.id;
+			return _private.id;
 		};
 		
 		mod.name = function() {
-			return data.name;
+			return _private.name;
 		};
 		
 		mod.description = function() {
-			return data.description;
+			return _private.description;
 		};
 		
 		mod.path = (function() {
@@ -42,6 +45,60 @@ var Module = (function() {
 				return root+"/"+path;
 			};
 		})();
+		
+		mod.enabled = function(val) {
+			if ( typeof val !== "boolean" ) {
+				return _private.required || mod.db.get("enabled");
+			} else {
+				mod.db.set("enabled", val);
+				return mod;
+			}
+		};
+		
+		mod.required = function() {
+			return _private.required;
+		};
+		
+		mod.state = function(state) {
+			if ( typeof state === "string" ) {
+				_private.state = state;
+				return mod;
+			} else if ( _private.state ) {
+				return _private.state;
+			} else {
+				/*
+				ready
+				waiting
+				failed
+				loaded
+				*/
+				var depsFailed = false,
+					depsLoaded = true;
+				$.each(_private.depends, function(_, depID) {
+					var dep = Module.get(depID),
+						depState;
+					if ( !dep ) {
+						depsFailed = true;
+						return true;
+					} else {
+						depState = dep.state();
+						if ( !dep.enabled() || depState === "failed" ) {
+							depsFailed = true;
+							return true;
+						} else if ( depState !== "loaded" ) {
+							depsLoaded = false;
+						}
+					}
+				});
+				if ( depsFailed ) {
+					return "failed";
+				}
+				if ( !depsLoaded ) {
+					return "waiting";
+				}
+				return "ready";
+			}
+		};
 		
 		_private.getdb = function() {
 			return core.db.get(_private.dbkey) || {};
@@ -95,7 +152,6 @@ var Module = (function() {
 			
 		};
 		
-		_shared.cache[data.id] = mod;
 		return mod;
 	};
 	
