@@ -7,15 +7,23 @@ var Module = (function() {
 	self = function(data) {
 		var _private = $.extend(true,
 				{
-					"dbkey": "module-db--" + data.id,
+					"id": "",
+					"name": "",
+					"description": "",
+					"depends": [],
+					"required": false,
 					"defaults": {
 						"enabled": true
 					},
-					"state": null,
-					"depends": [],
-					"required": false
+					"scripts": [],
+					"options": [],
+					"background": []
 				},
-				data
+				data,
+				{
+					"dbkey": "module-db--"+data.id,
+					"state": null
+				}
 			),
 			mod = this;
 		
@@ -35,8 +43,12 @@ var Module = (function() {
 			return _private.description;
 		};
 		
+		mod.required = function() {
+			return !!_private.required;
+		};
+		
 		mod.path = (function() {
-			var root = core.rootPath("/modules/"+data.id);
+			var root = core.rootPath("/modules/"+_private.id);
 			return function(path) {
 				path = path || "";
 				if ( path.substring(0, 1) === "/" ) {
@@ -55,10 +67,6 @@ var Module = (function() {
 			}
 		};
 		
-		mod.required = function() {
-			return _private.required;
-		};
-		
 		mod.state = function(state) {
 			if ( typeof state === "string" ) {
 				_private.state = state;
@@ -67,34 +75,24 @@ var Module = (function() {
 				return _private.state;
 			} else {
 				/*
-				ready
-				waiting
-				failed
-				loaded
+				waiting - waiting for a dependency to load
+				ready   - ready to be loaded, all dependencies are loaded
+				failed  - failed to load, a dependency failed to load or doesn't exist
+				loaded  - loaded successfully
 				*/
-				var depsFailed = false,
-					depsLoaded = true;
-				$.each(_private.depends, function(_, depID) {
-					var dep = Module.get(depID),
-						depState;
-					if ( !dep ) {
-						depsFailed = true;
-						return true;
+				var i, dep, depID, depState;
+				for ( i = _private.depends.length - 1; depID = _private.depends[i]; i-- ) {
+					dep = Module.get(depID);
+					if ( !dep || !dep.enabled() ) {
+						return "failed";
 					} else {
 						depState = dep.state();
-						if ( !dep.enabled() || depState === "failed" ) {
-							depsFailed = true;
-							return true;
+						if ( depState === "failed" ) {
+							return "failed";
 						} else if ( depState !== "loaded" ) {
-							depsLoaded = false;
+							return "waiting";
 						}
 					}
-				});
-				if ( depsFailed ) {
-					return "failed";
-				}
-				if ( !depsLoaded ) {
-					return "waiting";
 				}
 				return "ready";
 			}
@@ -156,7 +154,6 @@ var Module = (function() {
 	};
 	
 	self.get = function(id) {
-		core.assert(_shared.cache[id], "Unable to retrieve module. No module has been created with the ID '"+id+"'");
 		return _shared.cache[id];
 	};
 	
@@ -171,28 +168,33 @@ var Module = (function() {
 		function doInjection(key, callback) {
 			var loadedModules = [];
 			core.manifest(function(manifest) {
-				var modules = manifest.modules,
+				var modules = [],
+					moduleCount,
 					count = 0;
 				
-				if ( !modules || modules.length === 0 ) {
+				$.each(manifest.modules, function(_, data) {
+					var module = new Module(data);
+					if ( key !== "scripts" || module.enabled() ) {
+						modules.push(data);
+					}
+				});
+				
+				if ( modules.length === 0 ) {
 					callback(loadedModules);
 					return;
+				} else {
+					moduleCount = modules.length;
 				}
 				
 				function moduleAdded() {
-					if ( ++count === modules.length ) {
+					if ( ++count === moduleCount ) {
 						callback(loadedModules);
 					}
 				}
 				
-				modules.forEach(function(module) {
-					var mod = new Module(module),
+				function loadModule(module) {
+					var mod = Module.get(module.id),
 						resources = module[key];
-					
-					if ( key === "scripts" && !mod.db.get("enabled") ) {
-						moduleAdded();
-						return;
-					}
 					
 					if ( !resources || resources.length === 0 ) {
 						moduleAdded();
@@ -201,29 +203,6 @@ var Module = (function() {
 					
 					loadedModules.push(mod);
 					
-					/*
-					if ( key === "options" ) {
-					$.ajax(mod.path(module.id+"-options.html"), {
-							dataType: "html",
-							timeout: 5000,
-							success: function(markup, status, xhr) {
-								var container = document.createElement("div");
-								container.id = module.id+"-module";
-								container.innerHTML = "<h1>"+mod.name()+"</h1>"+markup;
-								
-								window.module = mod;
-								$(document.body).append(container);
-								delete window.module;
-								
-								options.ProcessOptionsPage("#"+module.id+"-module", mod);
-							},
-							error: function(xhr, status, error) {
-								core.error("Failed to load " + module.id + " module.");
-							}
-						});
-						return;
-					}
-					*/
 					(function() {
 						var resourceCount = 0,
 							nodes = [];
@@ -242,6 +221,7 @@ var Module = (function() {
 									}
 								});
 								
+								mod.state("loaded");
 								moduleAdded();
 							}
 						}
@@ -291,7 +271,40 @@ var Module = (function() {
 							}
 						});
 					})();
-				});
+				}
+				
+				function iterateModules() {
+					var i, data, module;
+					for ( i = modules.length - 1; data = modules[i]; i-- ) {
+						if ( key === "scripts" ) {
+							module = Module.get(data.id);
+							
+							switch ( module.state() ) {
+								
+								case "ready":
+									loadModule(data);
+									modules.splice(i, 1);
+									break;
+									
+								case "failed":
+									modules.splice(i, 1);
+									moduleAdded();
+									break;
+							
+							}
+						} else {
+							loadModule(data);
+							modules.splice(i, 1);
+						}
+					}
+					
+					if ( modules.length > 0 ) {
+						setTimeout(iterateModules, 50);
+					}
+				}
+				
+				iterateModules();
+				
 			});
 		}
 		
