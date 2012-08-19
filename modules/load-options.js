@@ -8,6 +8,10 @@
 	*/
 	function loadModules() {
 		Module.inject("options", function(modules) {
+			modules.sort(function(a,b) {
+				// Assumes each module has a unique name
+				return ( a.required() ? "!" : "" ) + a.name() > ( b.required() ? "!" : "" ) + b.name() ? 1 : -1;
+			});
 			modules.forEach(function(module) {
 				var id = module.id(),
 					container = $("#"+id+"-module");

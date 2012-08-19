@@ -3,6 +3,8 @@
 		"id": "people-summary",
 		"name": "People Summary",
 		"description": "Provides a summary of information about the people that have visited you and those that you favorited",
+		"depends": [],
+		"required": false,
 		"defaults": {
 		},
 		"scripts": [
@@ -17,6 +19,8 @@
 		"id": "recently-visited",
 		"name": "Recently Visited",
 		"description": "Provides enhanced functionality for the list of Recently Visited members, including the ability to store and maintain more than just the past 8 visitors.",
+		"depends": [],
+		"required": false,
 		"defaults": {
 			"maxRowCount": 25,
 			"visibleRowCount": 5
@@ -35,6 +39,8 @@
 		"id": "you-might-like",
 		"name": "You Might Like",
 		"description": "Provides additional settings for the You Might Like panel on the home screen.",
+		"depends": [],
+		"required": false,
 		"defaults": {
 			"hide": false
 		},

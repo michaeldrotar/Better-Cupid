@@ -194,35 +194,39 @@ var Module = (function() {
 				
 				function loadModule(module) {
 					var mod = Module.get(module.id),
-						resources = module[key];
+						resources = module[key],
+						resourceCount = 0,
+						nodes = [];
 					
-					if ( !resources || resources.length === 0 ) {
+					function resourcesLoaded() {
+						var container = document.createElement("div");
+						container.id = module.id+"-module";
+						$("body").append(container);
+						
+						nodes.forEach(function(node) {
+							if ( typeof node === "string" ) {
+								$(container).append(node);
+							} else {
+								document.body.appendChild(node);
+							}
+						});
+						
+						mod.state("loaded");
 						moduleAdded();
-						return;
 					}
 					
 					loadedModules.push(mod);
 					
+					if ( !resources || resources.length === 0 ) {
+						resourcesLoaded();
+						return;
+					}
+					
 					(function() {
-						var resourceCount = 0,
-							nodes = [];
 						
 						function resourceAdded() {
 							if ( ++resourceCount === resources.length ) {
-								var container = document.createElement("div");
-								container.id = module.id+"-module";
-								$("body").append(container);
-								
-								nodes.forEach(function(node) {
-									if ( typeof node === "string" ) {
-										$(container).append(node);
-									} else {
-										document.body.appendChild(node);
-									}
-								});
-								
-								mod.state("loaded");
-								moduleAdded();
+								resourcesLoaded();
 							}
 						}
 							
