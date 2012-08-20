@@ -39,6 +39,10 @@ var Module = (function() {
 			return _private.name;
 		};
 		
+		mod.depends = function() {
+			return _private.depends;
+		};
+		
 		mod.description = function() {
 			return _private.description;
 		};

@@ -14,9 +14,20 @@
 			});
 			modules.forEach(function(module) {
 				var id = module.id(),
-					container = $("#"+id+"-module");
+					container = $("#"+id+"-module"),
+					depends = module.depends() || [];
 				if ( container.length ) {
 					container.prepend("<p>"+module.description()+"</p>");
+					if ( depends.length ) {
+						container.prepend(
+							"<div>Depends On:<ul><li>"+
+							depends.map(function(id) {
+								var mod = Module.get(id);
+								return mod && mod.name() || id;
+							}).join("</li><li>")+
+							"</li></ul></div>"
+						);
+					}
 					container.prepend("<h1>"+module.name()+"</h1>");
 					options.ProcessOptionsPage(container, module);
 				}
