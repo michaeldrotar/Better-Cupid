@@ -79,16 +79,5 @@
 		*/
 	}
 	
-	function waitForDB() {
-		if ( core.db.state === "ready" ) {
-			core.removeEventListener("dbstatechange", waitForDB, false);
-			loadModules();
-		}
-	}
-	
-	if ( core.db.state === "ready" ) {
-		loadModules();
-	} else {
-		core.addEventListener("dbstatechange", waitForDB, false);
-	}
+	loadModules();
 })(window, document, jQuery);

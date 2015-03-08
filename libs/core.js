@@ -101,45 +101,21 @@ core.SendRequest = function(request, callback) {
 
 var db = {};
 (function(){
+	var storage = chrome.storage.sync;
 	
-	db.clear = function(k) {
-		if ( typeof k === "string" ) {
-			localStorage.removeItem(k);
-		} else {
-			localStorage.clear();
-		}
-		if ( core.onContentScript ) {
-			core.SendRequest({ type: "db.clear", key: k });
-		}
+	db.remove = function() {
+		storage.remove.apply(storage, arguments);
 		return db;
 	}
 	
-	db.get = function(k) {
-		return JSON.parse(localStorage.getItem(k));
-	}
-	
-	db.set = function(k, v) {
-		localStorage.setItem(k, JSON.stringify(v));
-		if ( core.onContentScript ) {
-			core.SendRequest({ type: "db.set", key: k, value: v });
-		}
+	db.get = function() {
+		storage.get.apply(storage, arguments);
 		return db;
 	}
 	
-	if ( core.onContentScript ) {
-		db.state = "loading";
-		core.dispatchEvent("dbstatechange");
-		localStorage.clear();
-		core.SendRequest({ type: "db.get.all" }, function(response) {
-			for ( k in response.data ) {
-				localStorage.setItem(k, response.data[k]);
-			}
-			db.state = "ready";
-			core.dispatchEvent("dbstatechange");
-		})
-	} else {
-		db.state = "ready";
-		core.dispatchEvent("dbstatechange");
+	db.set = function() {
+		storage.set.apply(storage, arguments);
+		return db;
 	}
 	
 	core.db = db;

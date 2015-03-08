@@ -102,54 +102,77 @@ var Module = (function() {
 			}
 		};
 		
-		_private.getdb = function() {
-			return core.db.get(_private.dbkey) || {};
+		_private.getdb = function(callback) {
+			core.db.get(_private.dbkey, function(db) {
+				if ( callback ) {
+					callback(db || {})
+				}
+			});
 		};
 		
-		_private.setdb = function(v) {
-			core.db.set(_private.dbkey, v);
+		_private.setdb = function(v, callback) {
+			var db = {};
+			db[_private.dbkey] = v;
+			core.db.set(db, function() {
+				if ( callback ) {
+					callback();
+				}
+			});
 		};
 		
 		mod.db = {
 			
-			clear: function(k) {
-				var item;
-				if ( typeof k === "string" ) {
-					item = _private.getdb();
-					delete item[k];
-					_private.setdb(item);
-				} else {
-					core.db.clear(_private.dbkey);
-				}
+			clear: function(callback) {
+				core.db.remove(_private.dbkey, callback);
+				return mod.db;
+			},
+			
+			remove: function(k, callback) {
+				_private.getdb(function(db) {
+					delete db[k];
+					_private.setdb(db, callback);
+				});
+				return mod.db;
 			},
 		
-			get: function(k) {
-				var item = _private.getdb(),
-					dkey;
-				if ( typeof k === "string" ) {
-					return item.hasOwnProperty(k) ? item[k] : _private.defaults[k];
-				} else {
-					for ( dkey in _private.defaults ) {
-						if ( _private.defaults.hasOwnProperty(dkey) ) {
-							if ( !item.hasOwnProperty(dkey) ) {
-								item[dkey] = _private.defaults[dkey];
+			get: function(k, callback) {
+				var defaults = _private.defaults,
+						dkey;
+				if ( typeof k === 'function' ) {
+					callback = k;
+					k = undefined;
+				}
+				_private.getdb(function(db) {
+					if ( typeof k === 'string' ) {
+						callback(db.hasOwnProperty(k) ? db[k] : defaults[k]);
+					} else {
+						for ( dkey in defaults ) {
+							if ( defaults.hasOwnProperty(dkey) ) {
+								if ( !db.hasOwnProperty(dkey) ) {
+									db[dkey] = defaults[dkey];
+								}
 							}
 						}
+						callback(db);
 					}
-					return item;
-				}
+				});
+				return mod.db;
 			},
 		
-			set: function(k, v) {
-				var item;
-				if ( typeof k === "string" ) {
-					item = _private.getdb();
-					item[k] = v;
-					_private.setdb(item);
-				} else {
-					// Assume it's the entire database object
-					_private.setdb(k);
+			set: function(k, v, callback) {
+				if ( typeof k === 'object' ) {
+					callback = v;
+					v = undefined;
 				}
+				_private.getdb(function(db) {
+					if ( typeof k === 'string' ) {
+						db[k] = v;
+					} else {
+						$.extend(db, k);
+					}
+					_private.setdb(db, callback);
+				});
+				return mod.db;
 			}
 			
 		};
@@ -317,24 +340,12 @@ var Module = (function() {
 		}
 		
 		return function(key, callback) {
-			var waitForDB;
-			
 			core.assert(valid_keys[key], "Key passed to Modules.inject is not valid");
 			if ( typeof callback !== "function" ) {
 				callback = function(){};
 			}
 			
-			if ( core.db.state === "ready" ) {
-				doInjection(key, callback);
-			} else {
-				waitForDB = function() {
-					if ( core.db.state === "ready" ) {
-						core.removeEventListener("dbstatechange", waitForDB, false);
-						doInjection(key, callback);
-					}
-				};
-				core.addEventListener("dbstatechange", waitForDB, false);
-			}
+			doInjection(key, callback);
 		};
 	})();
 	

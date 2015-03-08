@@ -33,28 +33,6 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 	var requestHandler = function(request, sender, sendResponse) {
 		var response = { type: request.type };
 		switch ( request.type ) {
-			
-			case "db.clear":
-				core.db.clear(request.key);
-				break;
-				
-			case "db.get":
-				response.key = request.key;
-				response.value = core.db.get(request.key);
-				break;
-				
-			case "db.get.all":
-				var data = {};
-				for ( k in localStorage ) {
-					data[k] = localStorage[k];
-				}
-				response.data = data;
-				break;
-			
-			case "db.set":
-				core.db.set(request.key, request.value);
-				break;
-			
 			case "fetch":
 				var url = request.url,
 					key = url.toLowerCase(),
@@ -162,7 +140,7 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 					if ( old.count === 0 ) {
 						localStorage.removeItem("settings");
 					} else {
-						localStorage.setItem("settings", JSON.stringify(old.settings));
+						localStorage.setItem("settings", JSON.stringifyold.settings);
 					}
 					
 				})();
@@ -172,13 +150,13 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 					(function() {
 						localStorage.removeItem('--version');
 						
-						var db = { modules: {} },
+						var db = {},
 								modules = [ 'people-summary', 'recently-visited', 'you-might-like' ];
 						
 						modules.forEach(function(id) {
 							var data = JSON.parse(localStorage.getItem('module-db--'+id));
 							if ( data ) {
-								db.modules[id] = data;
+								db['module-db--'+id] = data;
 							}
 						});
 						

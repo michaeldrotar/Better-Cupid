@@ -99,31 +99,5 @@
 			e.preventDefault();
 		});
 	}
-	
-	/*
-		core.ProcessElement(document.getElementById("side_recently_viewed"), function() {
-			var recentlyVisited = this,
-				numRows = settings.get("numRecentlyVisitedRows"),
-				visitLog = core.db.get("recentlyVisited") || [],
-				visitItems = recentlyVisited.getElementsByTagName("li"),
-				clearButton = $(recentlyVisited).find("a.flat_button")[0];
-			
-				
-				clearButton.addEventListener("click", function() {
-					core.db.clear("recentlyVisited");
-				});
-				
-				if ( list.getHeight() > 135 ) {
-					holder.addEventListener("mousewheel", function(e) {
-						list.setStyle("top", newTop + "px");
-						e.stopPropagation();
-						e.preventDefault();
-					});
-				}
-			}
-		});
-	});
-}, true);
-	*/
 })(Module.get("recently-visited"));
 </script>

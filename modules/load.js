@@ -99,25 +99,10 @@
 	*/
 	}
 	
-	function waitForDB() {
-		if ( core.db.state === "ready" ) {
-			core.removeEventListener("dbstatechange", waitForDB, false);
-			loadModules();
-		}
-	}
-	
-	function checkDB() {
-		if ( core.db.state === "ready" ) {
-			loadModules();
-		} else {
-			core.addEventListener("dbstatechange", waitForDB, false);
-		}
-	}
-	
 	function waitForLoaded() {
 		if ( document.readyState !== "loading" ) {
 			document.removeEventListener("readystatechange", waitForLoaded, false);
-			checkDB();
+			loadModules();
 		}
 	}
 	
@@ -125,7 +110,7 @@
 		document.body.style.visibility = "hidden";
 		
 		if ( document.readyState !== "loading" ) {
-			checkDB();
+			loadModules();
 		} else {
 			document.addEventListener("readystatechange", waitForLoaded, false);
 		}
