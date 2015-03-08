@@ -105,58 +105,92 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 // -- Upgrading --------------------------------------------------------------------------------------------------------
 
 (function() {
-	
-	var lastVersion = core.db.get("--version") || "0.0.0";
-	core.manifest(function(manifest) {
-		if ( lastVersion !== manifest.version ) {
-			(function() {
-				var old = {},
-					modules = {};
-				
-				lastVersion = parseFloat(lastVersion);
-				
-				if ( lastVersion < 0.7 ) {
-					
-					modules.youMightLike = new Module({ id: "you-might-like" });
-					modules.recentlyVisited = new Module({ id: "recently-visited" });
-					
-					old.settings = core.db.get("settings");
-					if ( old.settings ) {
-						if ( old.settings.hideYouMightLike !== undefined ) {
-							modules.youMightLike.db.set("hide", old.settings.hideYouMightLike);
-							delete old.settings.hideYouMightLike;
-						}
-						if ( old.settings.numRecentlyVisitedRows !== undefined ) {
-							modules.recentlyVisited.db.set("maxRowCount", old.settings.numRecentlyVisitedRows);
-							delete old.settings.numRecentlyVisitedRows;
-						}
-					}
-					
-					old.recentlyVisited = core.db.get("recentlyVisited");
-					if ( old.recentlyVisited ) {
-						modules.recentlyVisited.db.set("recentlyVisited", old.recentlyVisited);
-						core.db.clear("recentlyVisited");
-					}
-					
-					core.db.clear("visits");
-				}
-				
-				old.count = 0;
-				for ( old.key in old.settings ) {
-					old.count++;
-				}
-				if ( old.count === 0 ) {
-					core.db.clear("settings");
-				} else {
-					core.db.set("settings", old.settings);
-				}
-				
-			})();
-			
-			core.db.set("--version", manifest.version);
+	chrome.storage.sync.get('version', function(db) {
+		console.log('v',db);
+		if ( !db.version ) {
+			db.version = JSON.parse(localStorage.getItem("--version")) || "0.0.0";
 		}
+		
+		core.manifest(function(manifest) {
+			if ( db.version !== manifest.version ) {
+				(function() {
+					// These probably should be under 0.7, but too late to move them
+					var old = {},
+							modules = {},
+							lastVersion;
+					
+					// Get the last minor version -- should not be any setting changes
+					// on a revision
+					lastVersion = parseFloat(db.version);
+					
+					if ( lastVersion < 0.7 ) {
+						modules.youMightLike = {
+							db: JSON.parse(localStorage.getItem('module-db--you-might-like')) || {}
+						};
+						modules.recentlyVisited = {
+							db: JSON.parse(localStorage.getItem('module-db--recently-visited')) || {}
+						};
+						
+						old.settings = JSON.parse(localStorage.getItem("settings"));
+						if ( old.settings ) {
+							if ( old.settings.hideYouMightLike !== undefined ) {
+								modules.youMightLike.db.hide = old.settings.hideYouMightLike;
+								delete old.settings.hideYouMightLike;
+							}
+							if ( old.settings.numRecentlyVisitedRows !== undefined ) {
+								modules.recentlyVisited.db.maxRowCount = old.settings.numRecentlyVisitedRows;
+								delete old.settings.numRecentlyVisitedRows;
+							}
+						}
+						
+						old.recentlyVisited = JSON.parse(localStorage.getItem("recentlyVisited"));
+						if ( old.recentlyVisited ) {
+							modules.recentlyVisited.db.recentlyVisited = old.recentlyVisited;
+							localStorage.removeItem("recentlyVisited");
+						}
+						
+						localStorage.removeItem("visits");
+						
+						localStorage.setItem('module-db--you-might-like', JSON.stringify(modules.youMightLike.db));
+						localStorage.setItem('module-db--recently-visited', JSON.stringify(modules.recentlyVisited.db));
+					}
+					
+					old.count = 0;
+					for ( old.key in old.settings ) {
+						old.count++;
+					}
+					if ( old.count === 0 ) {
+						localStorage.removeItem("settings");
+					} else {
+						localStorage.setItem("settings", JSON.stringify(old.settings));
+					}
+					
+				})();
+				
+				if ( lastVersion < 0.8 ) {
+					// Move all settings into chrome's sync storage
+					(function() {
+						localStorage.removeItem('--version');
+						
+						var db = { modules: {} },
+								modules = [ 'people-summary', 'recently-visited', 'you-might-like' ];
+						
+						modules.forEach(function(id) {
+							var data = JSON.parse(localStorage.getItem('module-db--'+id));
+							if ( data ) {
+								db.modules[id] = data;
+							}
+						});
+						
+						chrome.storage.sync.set(db);
+						
+					})();
+				}
+				
+				chrome.storage.sync.set({version: manifest.version});
+			}
+		});
 	});
-
 })();
 	
 })();
