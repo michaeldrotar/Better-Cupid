@@ -1,9 +1,9 @@
 <script>
 (function(module) {
-  
-  if ( module.db.get("hide") ) {
-    $("#section_matches").hide();
-  }
-  
+  module.db.get(function(db) {
+    if ( db.hide ) {
+      $("#section_matches").hide();
+    }
+  });
 })(Module.get("you-might-like"));
 </script>
