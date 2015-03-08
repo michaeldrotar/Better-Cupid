@@ -21,7 +21,7 @@ header h1
 	padding: 40px 0px 40px 75px;
 }
 
-section h1
+section h2
 {
 	clear: left;
 	color: #555555;
@@ -32,7 +32,7 @@ section h1
 	padding: 30px 0px 5px 0px;
 }
 
-section h2
+section h3
 {
 	font-size: 15px;
 }
