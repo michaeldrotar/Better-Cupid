@@ -1,74 +1,541 @@
 <html>
 <head>
-	<title>BetterCupid Options</title>
-	<link rel="stylesheet" type="text/css" href="/libs/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="options.css" />
+  <title>BetterCupid Options</title>
+  <script type="text/javascript" src="../libs/prototype.js"></script>
+  <script type="text/javascript" src="../libs/jquery.js"></script>
+  <script type="text/javascript" src="../libs/core.js"></script>
+  <style type="text/css">
+  body
+  {
+    background-color: #2963a4;
+    color: #777777;
+    font: normal 12px Verdana, 'Bitsream Vera Sans', sans-serif;
+    margin: 0px;
+    padding: 0px;
+  }
+
+  header h1
+  {
+    background-image: url(res/icon48.png);
+    background-position: 25 center;
+    background-repeat: no-repeat;
+    color: #F83265;
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 24px;
+    margin: 0px;
+    padding: 40px 0px 40px 75px;
+  }
+
+  section h1
+  {
+    clear: left;
+    color: #555555;
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 19px;
+    margin: 0px;
+    padding: 30px 0px 5px 0px;
+  }
+  
+  section h2
+  {
+    font-size: 15px;
+  }
+
+  .btn
+  {
+    background-color: white;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#efefef));
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    color: #555555;
+    cursor: pointer;
+    display: block;
+    font-size: 10px;
+    font-weight: bold;
+    height: 23px;
+    float: right;
+    line-height: 23px;
+    margin-right: 5px;
+    text-align: center;
+    width: 120px;
+  }
+
+  .btn:hover
+  {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#e7e7e7));
+  }
+
+  .btn:active
+  {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#efefef), to(white));
+  }
+
+  .clearfix
+  {
+    clear: both;
+  }
+
+  .page
+  {
+    background-color: #eaeaea;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    margin: auto;
+    padding: 0px 0px 40px 0px;
+    position: relative;
+    width: 780px;
+  }
+
+  .options
+  {
+    background-color: #f6f6f6;
+    margin-bottom: 10px;
+    opacity: 1;
+    padding: 0px 15px 20px 15px;
+  }
+
+  .options input
+  {
+    clear: left;
+    float: left;
+  }
+
+  .options label
+  {
+    color: #333333;
+    cursor: pointer;
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin: 0 0 8px 15px;
+    width: 700px;
+  }
+  
+  .tab_content
+  {
+    background-color: #F6F6F6;
+    clear: both;
+    margin-bottom: 10px;
+    padding: 20px 15px;
+  }
+  
+  .tab_content_left
+  {
+    width: 485px;
+  }
+  
+  .tab_content_nav
+  {
+    float: right;
+    margin: 0px -15px 0px 0px;
+    width: 250px;
+  }
+  
+  .tab_content_nav ul
+  {
+    background-color: #EEE;
+    list-style: none;
+    margin: 0px 0px 15px 0px;
+    padding: 0px 0px 50px 0px;
+  }
+  
+  .tab_content_nav li
+  {
+    border-bottom: 1px solid #F6F6F6;
+    color: #2963A4;
+    cursor: pointer;
+    font-size: 11px;
+    height: 27px;
+    line-height: 28px;
+    margin: 0px;
+    padding: 0px 12px;
+  }
+  
+  .tab_content_nav li:hover
+  {
+    background-color: #E0EAF2;
+  }
+  
+  .tab_content_nav li.active
+  {
+    background-color: #E8F2E0;
+    background-image: url(res/green_arrow.png);
+    background-repeat: no-repeat;
+    color: #569424;
+    font-weight: bold;
+    margin-left: -13px;
+    padding-left: 25px;
+  }
+  
+  .tab_content_nav li.active:hover
+  {
+  
+  }
+  
+  .tab_content_nav .title
+  {
+    background-color: #EEE;
+    color: #777;
+    font-size: 16px;
+    margin: 0px 0px 1px 0px;
+    padding: 18px 12px 5px 12px;
+  }
+  
+  .tabgroup
+  {
+    display: block;
+    height: 28px;
+    list-style: none;
+    margin: 0px;
+    padding: 0px 25px;
+  }
+  
+  .tabgroup li
+  {
+    border-style: none;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: #777777;
+    cursor: pointer;
+    float: left;
+    font-size: 11px;
+    font-weight: bold;
+    height: 28px;
+    line-height: 28px;
+    padding: 0px 20px;
+    text-shadow: 0px 1px 0px white;
+  }
+  
+  .tabgroup li:hover
+  {
+    color: #3D85CE;
+  }
+  
+  .tabgroup li.active
+  {
+    background-color: #F6F6F6;
+    border-left: 1px soid #D6D6D6;
+    border-right: 1px solid #D6D6D6;
+    border-top: 1px solid white;
+    line-height: 26px;
+    margin-bottom: 0px;
+    padding: 1px 20px 0px 20px;
+  }
+  
+  .tabgroup li.active:hover
+  {
+    color: inherit;
+  }
+  
+  .tabgroup li.right
+  {
+    float: right;
+  }
+  
+  #reset_button
+  {
+    float: none;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+  
+  </style>
+  <script type="text/javascript">
+  $(function(){
+    
+    var show_content = function(){ $("#"+this.id+"_content").show() }
+    var hide_content = function(){ $("#"+this.id+"_content").hide() }
+    var tab_onclick = function(e) {
+      $(this).parent().children().removeClass("active").each(hide_content)
+      $(this).addClass("active").each(show_content)
+    }
+    function initSwitcher(switcher) {
+      var group = $(switcher);
+      group.find("li").each(function(lii) {
+        var tab = $(this);
+        tab.click(tab_onclick);
+      });
+      group.find("li:first").click();
+    }
+    
+    var section_loaded = {};
+    function GenerateLoadSectionFunction(section, url, callback) {
+      var widget = $("#"+section),
+        func;
+      func = function(force) {
+        if ( force === true || !section_loaded[section] ) {
+          widget.html("<p>Loading...</p>");
+          core.SendRequest({
+            type: "fetch",
+            force: force === true ? true : false,
+            url: url
+          }, function(response) {
+            if ( response.error ) {
+              section_loaded[section] = false;
+              widget.html(
+                "<p class='error'>"+
+                  "There was an error retrieving the information. The server may be down."+
+                  " Click <a id='refresh_"+section+"' href=''>here</a> to try again."+
+                "</p>"
+              );
+              $("#refresh_"+section).click(function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                func(true);
+              });
+            } else {
+              section_loaded[section] = true;
+              if ( callback ) {
+                callback(response);
+              } else {
+                widget.html($(response.data).find("#template").html());
+              }
+            }
+          });
+        }
+      }
+      return func;
+    }
+    
+    var LoadChangelog = GenerateLoadSectionFunction(
+      "changelog_tab_content",
+      "https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog",
+      function(response) {
+        var html = $(response.data).find("#template").html(),
+          versions = [],
+          count = 0;
+        html = html.replace(/<h1>\s*Version ((\d+\.\d+)[\.\d]*)\s*<\/h1>/g,
+          function(text, fullVersion, shortVersion) {
+            var key = shortVersion.replace(/[^\d]/g, "_"),
+              keyExists = false;
+            for ( var i = 0, l = versions.length; i < l; i++ ) {
+              if ( versions[i].key === key ) {
+                keyExists = true;
+                break;
+              }
+            }
+            if ( !keyExists ) {
+              versions.push({key:key,text:shortVersion+".x"});
+              count += 1;
+              return ( count > 1 ? "</div>" : "" )+
+                "<div id='changelog_"+key+"_content'>"+text;
+            } else {
+              return text;
+            }
+          }
+        ) + "</div>";
+        html = html.replace(/<p>(\s*\d+\/\d+\/\d+\s*)<\/p>/g, "<div class='date'>$1</div>");
+        html = "<div class='tab_content_nav'>" +
+            "<div class='title'>Versions</div>" +
+            "<ul class='switcher'></ul>" +
+            "</div>" +
+            "<div class='tab_content_left'>" +
+            html +
+            "</div>" +
+          "</div>";
+        
+        var changelog = $("#changelog_tab_content");
+        changelog.html(html);
+        changelog.find("h1").each(function(){
+          if ( $(this).text() === "Changelog" ) $(this).detach();
+        });
+        var switcher = changelog.find(".switcher");
+        for ( var i = 0, l = versions.length; i < l; i++ ) {
+          var v = versions[i];
+          switcher.append("<li id='changelog_"+v.key+"'>"+v.text+"</li>");
+        }
+        initSwitcher(switcher);
+      }
+    );
+    $("#changelog_tab").click(LoadChangelog);
+    
+    var LoadAbout = GenerateLoadSectionFunction(
+      "about_tab_content",
+      "https://github.com/michaeldrotar/Better-Cupid/wiki/About"
+    );
+    $("#about_tab").click(LoadAbout);
+    
+    $(".switcher").each(function(uli){
+      initSwitcher(this);
+    })
+    
+    /*
+    var options = [
+      {
+        heading: L("optionHeadingGeneral"),
+        options: [
+          {
+            key: "show_hide_button",
+            type: "boolean",
+            text: L("optionShowHideButton")
+          },
+          {
+            key: "show_count",
+            type: "boolean",
+            text: "Show count"
+          },
+          {
+            key: "show_nav_above",
+            type: "boolean",
+            text: L("optionShowPageNavAbove")
+          },
+          {
+            key: "show_nav_below",
+            type: "boolean",
+            text: L("optionShowPageNavBelow")
+          },
+          {
+            key: "show_people_summaries",
+            type: "boolean",
+            text: L("optionShowPeopleSummaries")
+          }
+        ]
+      },
+      {
+        heading: L("optionHeadingMatchSearch"),
+        options: [
+          {
+            key: "show_match_minibar",
+            type: "boolean",
+            text: L("optionShowMinibar")
+          }
+        ]
+      },
+      {
+        heading: L("optionHeadingProfiles"),
+        options: [
+          {
+            key: "fancy_questions",
+            type: "boolean",
+            text: L("optionFancyQuestions")
+          }
+        ]
+      }
+    ]
+    
+    var title = L("optionPageTitle")
+    document.title = title
+    $("h1").text(title)
+    
+    function handle_checkbox() {
+      db.set(this.id, this.checked)
+    }
+    
+    function setup_checkbox() {
+      $(this).click(handle_checkbox)
+      this.checked = db.get(this.id)
+    }
+    
+    function processOptions(data) {
+      var ret = ""
+      for ( var i = 0, l = data.length; i < l; i++ ) {
+        var d = data[i]
+        
+        if ( d.heading ) {
+          ret += "<h2>"+d.heading+"</h2>" + processOptions(d.options)
+          
+        } else {
+          switch ( d.type ) {
+            case "boolean":
+              ret += "<input type='checkbox' id='"+d.key+"' /><label for='"+d.key+"'>"+d.text+"</label>"
+              break
+          }
+        }
+      }
+      return ret
+    }
+    
+    $(".options").prepend(processOptions(options))
+    $("input[type=checkbox]").each(setup_checkbox)
+    */
+    
+    $("#reset_button").click(function(e){
+      var msg = "This will reset all of your BetterCupid settings.\n"+
+          "Please be sure this is what you wish to do before proceeding.";
+      if ( window.confirm(msg) ) {
+        core.settings.clear();
+        window.location.reload();
+      }
+    });
+    
+    (function() {
+      var settings = core.settings;
+      $("input").each(function() {
+        var key = this.getAttribute("data-setting");
+        if ( key ) {
+          switch ( this.type ) {
+            case "checkbox":
+              this.checked = settings.get(key);
+              $(this).click(function() {
+                settings.set(this.getAttribute("data-setting"), this.checked ? true : false);
+              });
+              break;
+              
+            case "range":
+              this.value = settings.get(key);
+              $("#"+key+"Display").html(this.value);
+              $(this).change(function() {
+                var key = this.getAttribute("data-setting");
+                settings.set(key, this.value);
+                $("#"+key+"Display").html(this.value);
+              });
+              break;
+            
+            case "text":
+            default:
+              break;
+          }
+        }
+      });
+    })();
+  });
+  </script>
 </head>
 <body>
-	<div id="reset-confirmation-dialog" class="dialog" title="Are you sure?">
-		<div class="instructions">
-			<div class="page-text">
-				You can choose to reset all of your settings or just the settings on the current page.
-				Please choose carefully. This action cannot be undone.
-			</div>
-			<div class="all-text">
-				This action will reset all of your settings. If you'd like to reset just a particular page
-				of settings, please navigate to that page and push the "Reset Settings" button again.
-				Please choose carefully. This action cannot be undone.
-			</div>
-		</div>
-		<div class="buttons">
-			<button id="reset-page-button" class="btn">Reset Page</button>
-			<button id="reset-all-button" class="btn">Reset All</button>
-		</div>
-		<div class="clearfix"></div>
-	</div>
-	<div class="page">
-		<header>
-			<h1>BetterCupid Options</h1>
-		</header>
-		<div id="reset_button" class="btn">
-			Reset Settings
-		</div>
-		<nav>
-			<ul class="tabgroup switcher">
-				<li id="settings_tab" data-content-selector="#settings_tab_content">
-					Settings
-				</li>
-				<li id="about_tab" data-content-selector="#about_tab_content" class="right">
-					About
-				</li>
-				<li id="changelog_tab" data-content-selector="#changelog_tab_content" class="right">
-					Changelog
-				</li>
-			</ul>
-		</nav>
-		<div class="tab_content">
-			<section id="settings_tab_content">
-				<div class="tab_content_nav">
-					<div class="title">Modules</div>
-					<ul class="switcher">
-					</ul>
-				</div>
-				<div class="tab_content_left">
-				</div>
-			</section>
-			<section id="changelog_tab_content">
-			</section>
-			<section id="about_tab_content">
-			</section>
-			<div class="clearfix"></div>
-		</div>
-		<div class="clearfix"></div>
-	</div>
-	
-	<script type="text/javascript" src="/libs/prototype.js"></script>
-	<script type="text/javascript" src="/libs/jquery.js"></script>
-	<script type="text/javascript" src="/libs/jquery.fn.switcher.js"></script>
-	<script type="text/javascript" src="/libs/jquery-ui.js"></script>
-	<script type="text/javascript" src="/libs/core.js"></script>
-	<script type="text/javascript" src="/libs/Module.js"></script>
-	<script type="text/javascript" src="options.js"></script>
-	<script type="text/javascript" src="/modules/load-options.js"></script>
+  <div class="page">
+    <header>
+      <h1>BetterCupid Options</h1>
+      <div id="reset_button" class="btn">
+        Reset Settings
+      </div>
+    </header>
+    <nav>
+      <ul class="tabgroup switcher">
+        <li id="general_tab">
+          General
+        </li>
+        <li id="about_tab" class="right">
+          About
+        </li>
+        <li id="changelog_tab" class="right">
+          Changelog
+        </li>
+      </ul>
+    </nav>
+    <div class="tab_content">
+      <section id="general_tab_content">
+        <input type="checkbox" data-setting="hideYouMightLike" />Hide the "You Might Like" section on the homepage.<br />
+        <input type="range" min="0" max="10" data-setting="numRecentlyVisitedRows" />Set the maximum number of rows to show for Recently Visited: <span id="numRecentlyVisitedRowsDisplay"></span>
+      </section>
+      <!--
+      <div id="tab_modules_content">
+        <div class="description">
+          Enable/Disable any of the various modules used by BetterCupid.
+          There are 
+        </div>
+      </div>
+      -->
+      <section id="changelog_tab_content">
+      </section>
+      <section id="about_tab_content">
+      </section>
+      <div class="clearfix"></div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
 </body>
 </html>

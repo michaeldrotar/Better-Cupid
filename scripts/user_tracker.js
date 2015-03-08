@@ -1,18 +1,18 @@
 core.HookEvent("VARIABLES_LOADED", function() {
-	
-	var visits = core.db.get("visits") || [];
-	
-	var user = /profile\/(\w+)/.match(core.location.path, 1);
-	if ( user ) {
-		for ( var i = visits.length-1; i >= 0; i-- ) {
-			if ( visits[i].user.toLowerCase() === user.toLowerCase() ) {
-				visits.splice(i, 1);
-			}
-		}
-		visits.splice(0, 0, { user: user, url: core.location.url, image: $("#thumb0 img").attr("src") });
-		core.db.set("visits", visits);
-	}
-	
+  
+  var visits = core.db.get("visits") || [];
+  
+  var user = /profile\/(\w+)/.match(core.location.path, 1);
+  if ( user ) {
+    for ( var i = visits.length-1; i >= 0; i-- ) {
+      if ( visits[i].user.toLowerCase() === user.toLowerCase() ) {
+        visits.splice(i, 1);
+      }
+    }
+    visits.splice(0, 0, { user: user, url: core.location.url, image: $("#thumb0 img").attr("src") });
+    core.db.set("visits", visits);
+  }
+  
 }, true);
 
 (function() {
@@ -68,11 +68,11 @@ console.assert(b===c, "test");
 console.log("%s is %d years old.", "Bob", 42);
 
 core.HookOrRun("VARIABLES_LOADED", function() {
-	//a += 1;
-	core.HookEvent("TestEvent", function() {
-		a += 1;
-	});
-	core.FireEvent("TestEvent");
+  //a += 1;
+  core.HookEvent("TestEvent", function() {
+    a += 1;
+  });
+  core.FireEvent("TestEvent");
 });
 
 a += 1;
