@@ -1,6 +1,6 @@
-<script>
+
 (function(module) {
-  console.log('you-might-like');
+  console.log('you-might-like2');
   module.db.get(function(db) {
     console.log(db);
     if ( db.hide ) {
@@ -8,4 +8,3 @@
     }
   });
 })(Module.get("you-might-like"));
-</script>

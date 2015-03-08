@@ -64,7 +64,7 @@ var Module = (function() {
     
     mod.enabled = function(val) {
       if ( typeof val !== "boolean" ) {
-        return _private.required || mod.db.get("enabled");
+        return _private.required || true; //mod.db.get("enabled");
       } else {
         mod.db.set("enabled", val);
         return mod;
