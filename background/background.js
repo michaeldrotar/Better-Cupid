@@ -84,8 +84,6 @@ chrome.windows.getAll({ populate: true }, function(windowArray) {
 
 (function() {
   chrome.storage.sync.get('version', function(db) {
-    debugger;
-    console.log('v',db);
     if ( !db.version ) {
       db.version = JSON.parse(localStorage.getItem("--version")) || "0.0.0";
     }
