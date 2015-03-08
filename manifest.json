@@ -15,9 +15,9 @@
   "incognito": "spanning",
   
   "background": {
-    "page": "background/background.html"
+    "page": "app/background.html"
   },
-  "options_page": "options/options.html",
+  "options_page": "app/options.html",
   
   "browser_action": {
     "default_icon": "res/icon19.png"
