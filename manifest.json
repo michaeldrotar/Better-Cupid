@@ -27,10 +27,10 @@
     {
       "matches": ["http://*.okcupid.com/*", "https://*.okcupid.com/*"],
       "js": [
-        "libs/prototype.js",
-        "libs/jquery.js",
-        "libs/core.js",
-        "libs/Module.js",
+        "app/prototype.js",
+        "lib/jquery/jquery-2.1.3.min.js",
+        "app/core.js",
+        "app/Module.js",
         "modules/load.js"
       ],
       "run_at": "document_start"
