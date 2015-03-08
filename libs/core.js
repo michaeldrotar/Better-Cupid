@@ -13,11 +13,10 @@ core.regex = {
 
 ["assert", "debug", "error", "info", "warn"].forEach(function(k) {
 	core[k] = function(msg, args) {
-		if ( console ) {
-			if ( typeof(msg) === "object" && msg.join ) {
-				msg = msg.join(" ");
-			}
-			console[k]("BetterCupid: "+msg.toString().format(args).replace(/\s+/g, " "));
+		if ( window.console && window.console[k] ) {
+			var args = Array.prototype.slice.call(arguments, 0);
+			args.unshift('BetterCupid:');
+			window.console[k].apply(window.console, args);
 		}
 	}
 });
