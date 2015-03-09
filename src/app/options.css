@@ -270,3 +270,13 @@ section h3
   right: 20px;
   top: 20px;
 }
+
+.setting {
+  display: block;
+  margin-top: 8px;
+}
+
+.label {
+  display: inline-block;
+  width: 150px;
+}
