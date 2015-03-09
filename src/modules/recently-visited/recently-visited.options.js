@@ -1,4 +1,4 @@
-(function(module) {
+Module.get('recently-visited').then(function(module) {
   module.db.get(function(db) {
     var visRow = $("#recently-visited_visibleRowCount"),
       maxRow = $("#recently-visited_maxRowCount"),
@@ -65,4 +65,4 @@
       }
     });
   });
-})(Module.get("recently-visited"));
+});

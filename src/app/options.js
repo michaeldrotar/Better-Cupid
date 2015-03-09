@@ -145,12 +145,16 @@ $(".switcher").switcher();
   
   var init = {
     checkbox: function(setting, module) {
-      this.checked = module.db.get(setting);
-      $(this).change();
+      module.db.get(setting, function(db) {
+        this.checked = db[setting];
+        $(this).change();
+      });
     },
     text: function(setting, module) {
-      this.value = module.db.get(setting);
-      $(this).change();
+      module.db.get(setting, function(db) {
+        this.value = db[setting];
+        $(this).change();
+      });
     }
   };
   
@@ -175,7 +179,6 @@ $(".switcher").switcher();
   }
   
   core.manifest(function(manifest) {
-    console.log(manifest);
     var modules = manifest.modules.map(function(module) {
           return new Module(module);
         });

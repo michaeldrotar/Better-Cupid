@@ -181,7 +181,24 @@ var Module = (function() {
   };
   
   self.get = function(id) {
-    return _shared.cache[id];
+    if ( _shared.cache[id] ) {
+      return Promise.resolve(_shared.cache[id]);
+    } else {
+      return new Promise(function(resolve, reject) {
+        core.manifest(function(manifest) {
+          if ( !_shared.cache[id] ) {
+            var modules = manifest.modules;
+            modules.forEach(function(module) {
+              if ( module.id === id ) {
+                _shared.cache[id] = new Module(module);
+              }
+            });
+          }
+          
+          resolve(_shared.cache[id]);
+        });
+      });
+    }
   };
   
   self.inject = (function() {

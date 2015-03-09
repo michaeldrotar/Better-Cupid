@@ -9,7 +9,7 @@ body
 
 header h1
 {
-  background-image: url(/res/icon48.png);
+  background-image: url(icon48.png);
   background-position: 25 center;
   background-repeat: no-repeat;
   color: #F83265;
