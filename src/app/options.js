@@ -174,6 +174,82 @@ $(".switcher").switcher();
     module.db.set("enabled", !module.db.get("enabled"));
   }
   
+  core.manifest(function(manifest) {
+    console.log(manifest);
+    var modules = manifest.modules.map(function(module) {
+          return new Module(module);
+        });
+    
+    modules.forEach(function(module) {
+      module_hash[module.id()] = module;
+      
+      var page = $('[id="'+module.id()+'-module"]');
+      if ( !page.length ) {
+        page = $(
+          '<div id="'+module.id()+'-module">' +
+            '<h2>'+module.name()+'</h2>' +
+            '<p>'+module.description()+'</p>' +
+            ( module.depends().length ?
+              '<div>Depends On:<ul><li>' +
+              module.depends().map(function(id) {
+                var dep;
+                modules.forEach(function(module) {
+                  if ( module.id() === id ) {
+                    dep = module;
+                  }
+                });
+                return dep && dep.name || id;
+              }).join('</li><li>') +
+              '</li></ul></div>' :
+              ''
+            ) +
+          '</div>'
+        );
+        $("#settings_tab_content .tab_content_left").append(page);
+      } else {
+        page.find('[data-setting]').attr('data-module', module.id()).each(function() {
+          var f = init[this.type],
+              f2 = onchange[this.type],
+              setting = this.getAttribute('data-setting');
+          if ( f ) {
+            f.call(this, setting, module);
+          }
+          if ( f2 ) {
+            $(this).change(function(e) {
+              f2.call(this, e, setting, module);
+            });
+          }
+        });
+      }
+      
+      var li = $("<li id='"+module.id()+"-tab' data-content-selector='#"+page.attr("id")+"'>"+module.name()+"</li>");
+      $("#settings_tab_content .switcher").append(li).switcher();
+      
+      if ( !module.required() ) {
+        var en = $("<span class='switch'></span>");
+        en.click(function(e) {
+          toggleEnabled(module);
+          if ( module.enabled() ) {
+            this.addClass("enabled");
+            this.innerHTML = "Enabled";
+          } else {
+            this.removeClass("enabled");
+            this.innerHTML = "Disabled";
+          }
+          e.stopPropagation();
+          e.preventDefault();
+        });
+        if ( module.enabled() ) {
+          en.addClass("enabled");
+          en.html("Enabled");
+        } else {
+          en.html("Disabled");
+        }
+        li.append(en);
+      }
+    });
+  });
+  
   options.ProcessOptionsPage = function(selector, module) {
     var page = $(selector);
     

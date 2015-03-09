@@ -160,7 +160,7 @@ section h3
 .tab_content_nav li.active
 {
   background-color: #E8F2E0;
-  background-image: url(/res/green_arrow.png);
+  background-image: url(green_arrow.png);
   background-repeat: no-repeat;
   color: #569424;
   font-weight: bold;

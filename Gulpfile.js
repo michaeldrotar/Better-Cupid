@@ -7,6 +7,7 @@ var gulp       = require('gulp'),
     cssmin     = require('gulp-cssmin'),
     del        = require('del'),
     htmlmin    = require('gulp-htmlmin'),
+    inject     = require('gulp-inject'),
     livereload = require('gulp-livereload'),
     newer      = require('gulp-newer'),
     //sass       = require('gulp-sass'),
@@ -58,7 +59,7 @@ gulp.task('build-js-background', function() {
 });
 
 gulp.task('build-js-options', function() {
-  return gulp.src('src/app/options.js')
+  return gulp.src(['src/app/options.js', 'src/modules/**/*.options.js'])
     .pipe(sourcemaps.init())
       .pipe(concat('options.js'))
       .pipe(uglify({preserveComments: 'some'}))
@@ -84,8 +85,47 @@ gulp.task('build-html-background', function() {
 });
 
 gulp.task('build-html-options', function() {
+  var modules = require('./src/modules.json');
   return gulp.src('src/app/options.html')
-    .pipe(htmlmin())
+    .pipe(inject(gulp.src(['src/modules/**/*.options.html']), {
+      starttag: '<!-- inject:modules -->',
+      transform: function(path, file) {
+        var id = path.substring(path.lastIndexOf('/')+1).replace('.options.html', ''),
+            markup = '',
+            config;
+        modules.forEach(function(module) {
+          if ( module.id === id ) {
+            config = module;
+          }
+        });
+        
+        if ( config ) {
+          markup =
+            '<div id="'+id+'-module">' +
+              '<h2>'+config.name+'</h2>' +
+              '<p>'+config.description+'</p>' +
+              ( config.depends.length ?
+                '<div>Depends On:<ul><li>' +
+                config.depends.map(function(id) {
+                  var dep;
+                  modules.forEach(function(module) {
+                    if ( module.id === id ) {
+                      dep = module;
+                    }
+                  });
+                  return dep && dep.name || id;
+                }).join('</li><li>') +
+                '</li></ul></div>' :
+                ''
+              ) +
+              file.contents.toString('utf-8') +
+            '</div>';
+        }
+        
+        return markup;
+      }
+    }))
+    //.pipe(htmlmin())
     .pipe(gulp.dest('dist'));
 });
 
