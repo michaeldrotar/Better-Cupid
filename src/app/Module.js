@@ -1,35 +1,34 @@
-var Module = (function() {
+;(function() {
   var _shared = {
-      cache: {}
-    },
-    self;
+        allPromise: null,
+        cache: {}
+      },
+      lib = {};
   
-  self = function(data) {
+  function Module(data, callback) {
     var _private = $.extend(true,
-        {
-          "id": "",
-          "name": "",
-          "description": "",
-          "depends": [],
-          "required": false,
-          "defaults": {
-            "enabled": true
+          {
+            id: '',
+            name: '',
+            description: '',
+            depends: [],
+            required: false,
+            defaults: {
+              enabled: true
+            }
           },
-          "scripts": [],
-          "options": [],
-          "background": []
-        },
-        data,
-        {
-          "dbkey": "module-db--"+data.id,
-          "state": null
-        }
-      ),
-      mod = this;
+          data,
+          {
+            db: {},
+            dbkey: 'module-db--'+data.id,
+            state: null
+          }
+        ),
+        mod = this,
+        db = mod.db = {},
+        defaults = _private.defaults;
     
-    if ( data.id && !_shared.cache[data.id] ) {
-      _shared.cache[data.id] = mod;
-    }
+    data = _private.db;
     
     mod.id = function() {
       return _private.id;
@@ -64,7 +63,7 @@ var Module = (function() {
     
     mod.enabled = function(val) {
       if ( typeof val !== "boolean" ) {
-        return _private.required || true; //mod.db.get("enabled");
+        return _private.required || mod.db.get('enabled');
       } else {
         mod.db.set("enabled", val);
         return mod;
@@ -102,14 +101,6 @@ var Module = (function() {
       }
     };
     
-    _private.getdb = function(callback) {
-      core.db.get(_private.dbkey, function(db) {
-        if ( callback ) {
-          callback(db || {})
-        }
-      });
-    };
-    
     _private.setdb = function(v, callback) {
       var db = {};
       db[_private.dbkey] = v;
@@ -120,88 +111,87 @@ var Module = (function() {
       });
     };
     
-    mod.db = {
-      
-      clear: function(callback) {
-        core.db.remove(_private.dbkey, callback);
-        return mod.db;
-      },
-      
-      remove: function(k, callback) {
-        _private.getdb(function(db) {
-          delete db[k];
-          _private.setdb(db, callback);
-        });
-        return mod.db;
-      },
-    
-      get: function(k, callback) {
-        var defaults = _private.defaults,
-            dkey;
-        if ( typeof k === 'function' ) {
-          callback = k;
-          k = undefined;
-        }
-        _private.getdb(function(db) {
-          if ( typeof k === 'string' ) {
-            callback(db.hasOwnProperty(k) ? db[k] : defaults[k]);
-          } else {
-            for ( dkey in defaults ) {
-              if ( defaults.hasOwnProperty(dkey) ) {
-                if ( !db.hasOwnProperty(dkey) ) {
-                  db[dkey] = defaults[dkey];
-                }
-              }
-            }
-            callback(db);
-          }
-        });
-        return mod.db;
-      },
-    
-      set: function(k, v, callback) {
-        if ( typeof k === 'object' ) {
-          callback = v;
-          v = undefined;
-        }
-        _private.getdb(function(db) {
-          if ( typeof k === 'string' ) {
-            db[k] = v;
-          } else {
-            $.extend(db, k);
-          }
-          _private.setdb(db, callback);
-        });
-        return mod.db;
+    db.clear = function(callback) {
+      var k;
+      for ( k in data ) {
+        delete data[k];
       }
-      
+      core.db.remove(_private.dbkey, callback);
+      return db;
     };
+      
+    db.remove = function(k, callback) {
+      delete data[k];
+      _private.setdb(data, callback);
+      return db;
+    };
+  
+    db.get = function(k) {
+      if ( typeof k === 'string' ) {
+        return data.hasOwnProperty(k) ? data[k] : defaults[k];
+      } else {
+        return $.extend(true, {}, defaults, data);
+      }
+    };
+  
+    db.set = function(k, v, callback) {
+      if ( typeof k === 'object' ) {
+        callback = v;
+        v = undefined;
+      }
+      if ( typeof k === 'string' ) {
+        data[k] = v;
+      } else {
+        $.extend(true, data, k);
+      }
+      _private.setdb(data, callback);
+      return db;
+    };
+    
+    core.db.get(_private.dbkey, function(db) {
+      $.extend(true, data, db[_private.dbkey] || {});
+      callback();
+    });
     
     return mod;
   };
   
-  self.get = function(id) {
-    if ( _shared.cache[id] ) {
-      return Promise.resolve(_shared.cache[id]);
-    } else {
-      return new Promise(function(resolve, reject) {
+  lib.all = function() {
+    if ( !_shared.allPromise ) {
+      _shared.allPromise = new Promise(function(resolve, reject) {
         core.manifest(function(manifest) {
-          if ( !_shared.cache[id] ) {
-            var modules = manifest.modules;
-            modules.forEach(function(module) {
-              if ( module.id === id ) {
-                _shared.cache[id] = new Module(module);
+          var modules = manifest.modules,
+              modulesCount = modules.length;
+          modules = modules.map(function(module) {
+            return _shared.cache[module.id] = new Module(module, function() {
+              modulesCount--;
+              if ( modulesCount === 0 ) {
+                resolve(modules);
               }
             });
-          }
-          
-          resolve(_shared.cache[id]);
+          });
         });
       });
     }
+    return _shared.allPromise;
   };
   
-  self.inject = (function() {
+  lib.get = function(id) {
+    return new Promise(function(resolve, reject) {
+      lib.all().then(function(modules) {
+        var i = modules.length - 1;
+        for ( ; i >= 0; i-- ) {
+          if ( modules[i].id() === id ) {
+            resolve(modules[i]);
+            return;
+          }
+        }
+        reject('Module '+id+' does not exist');
+      });
+    });
+  };
+  
+  lib.inject = (function() {
   
     var valid_keys = {
       "scripts": true,
@@ -366,5 +356,5 @@ var Module = (function() {
     };
   })();
   
-  return self;
+  window.Module = lib;
 })();

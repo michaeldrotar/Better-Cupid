@@ -15,7 +15,7 @@
   "incognito": "spanning",
   
   "background": {
-    "page": "background.html"
+    "scripts": [ "app.js", "background.js" ]
   },
   "options_page": "options.html",
   
@@ -27,8 +27,8 @@
     {
       "matches": ["http://*.okcupid.com/*", "https://*.okcupid.com/*"],
       "js": [
-        "shared.js",
-        "modules.js"
+        "app.js",
+        "scripts.js"
       ],
       "run_at": "document_start"
     }

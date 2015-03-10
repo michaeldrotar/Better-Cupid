@@ -145,22 +145,21 @@ $(".switcher").switcher();
   
   var init = {
     checkbox: function(setting, module) {
-      module.db.get(setting, function(db) {
-        this.checked = db[setting];
-        $(this).change();
-      });
+      this.checked = module.db.get(setting);
+      $(this).change();
+      console.log('init checkbox', setting, module, this.checked);
     },
     text: function(setting, module) {
-      module.db.get(setting, function(db) {
-        this.value = db[setting];
-        $(this).change();
-      });
+      this.value = module.db.get(setting);
+      console.log('init text', setting, module);
+      $(this).change();
     }
   };
   
   var onchange = {
     checkbox: function(e, setting, module) {
       module.db.set(setting, this.checked);
+      console.log('update checkbox', setting, module, this.checked);
     },
     text: function(e, setting, module) {
       var val = this.value;
@@ -178,11 +177,8 @@ $(".switcher").switcher();
     module.db.set("enabled", !module.db.get("enabled"));
   }
   
-  core.manifest(function(manifest) {
-    var modules = manifest.modules.map(function(module) {
-          return new Module(module);
-        });
-    
+  Module.all().then(function(modules) {
+    if ( true ) return;
     modules.forEach(function(module) {
       module_hash[module.id()] = module;
       
@@ -211,8 +207,8 @@ $(".switcher").switcher();
         $("#settings_tab_content .tab_content_left").append(page);
       } else {
         page.find('[data-setting]').attr('data-module', module.id()).each(function() {
-          var f = init[this.type],
-              f2 = onchange[this.type],
+          var f = init[this.type] || init.text,
+              f2 = onchange[this.type] || onchange.text,
               setting = this.getAttribute('data-setting');
           if ( f ) {
             f.call(this, setting, module);
@@ -325,7 +321,7 @@ $(".switcher").switcher();
         setting = this.getAttribute("data-setting"),
         module = module_hash[modName],
         f = init[this.type];
-      module.db.clear(setting);
+      module.db.remove(setting);
       if ( f ) {
         f.call(this, setting, module);
       }
@@ -343,7 +339,8 @@ $(".switcher").switcher();
         $("[data-module="+modName+"]").each(function() {
           var setting = this.getAttribute("data-setting"),
             f = init[this.type];
-          module.db.clear(setting);
+          console.log('remove',setting);
+          module.db.remove(setting);
           if ( f ) {
             f.call(this, setting, module);
           }
@@ -352,6 +349,21 @@ $(".switcher").switcher();
     });
     $("#reset-confirmation-dialog").dialog("close");
   });
+  
+  $(document)
+    .on('click', '#settings_tab_content .switch', function(e) {
+      e.stopPropagation(); // don't select the module settings as well
+      var btn = $(this),
+          id = btn.attr('data-module');
+      Module.get(id).then(function(module) {
+        toggleEnabled(module);
+        if ( module.enabled ) {
+          btn.addClass('enabled').text('Enabled');
+        } else {
+          btn.removeClass('enabled').text('Disabled');
+        }
+      });
+    });
   
   if ( 1 ) return;
   

@@ -280,3 +280,44 @@ section h3
   display: inline-block;
   width: 150px;
 }
+
+.modal {
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+}
+
+.modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  background-color: rgba(0,0,0,0.3);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.modal-dialog {
+  background-color: white;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 6px;
+  box-shadow: 0 0 16px rgba(0,0,0,0.5);
+  display: block;
+  margin: 30px auto;
+  padding: 30px;
+  position: relative;
+  transform: translate(0,0);
+  transition: transform 0.3s;
+  width: 500px;
+}

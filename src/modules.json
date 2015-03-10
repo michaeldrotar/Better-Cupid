@@ -6,14 +6,7 @@
     "depends": [],
     "required": false,
     "defaults": {
-    },
-    "scripts": [
-      "people-summary.html"
-    ],
-    "options": [
-    ],
-    "background": [
-    ]
+    }
   },
   {
     "id": "recently-visited",
@@ -24,16 +17,7 @@
     "defaults": {
       "maxRowCount": 25,
       "visibleRowCount": 5
-    },
-    "scripts": [
-      "recently-visited.html"
-    ],
-    "options": [
-      "recently-visited-options.html",
-      "recently-visited-options.js"
-    ],
-    "background": [
-    ]
+    }
   },
   {
     "id": "you-might-like",
@@ -43,14 +27,6 @@
     "required": false,
     "defaults": {
       "hide": false
-    },
-    "scripts": [
-      "you-might-like.js"
-    ],
-    "options": [
-      "you-might-like-options.html"
-    ],
-    "background": [
-    ]
+    }
   }
 ]

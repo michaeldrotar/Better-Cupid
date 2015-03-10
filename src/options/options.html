@@ -1,0 +1,99 @@
+<html>
+<head>
+  <title>BetterCupid Options</title>
+  <link rel="stylesheet" type="text/css" href="app.css" />
+  <link rel="stylesheet" type="text/css" href="options.css" />
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>BetterCupid Options</h1>
+    </header>
+    <div class="btn" data-open-drawer="reset-confirmation">
+      Reset Settings
+    </div>
+    <nav>
+      <ul class="tabgroup switcher">
+        <li id="settings_tab" data-content-selector="#settings_tab_content">
+          Settings
+        </li>
+        <li id="about_tab" data-content-selector="#about_tab_content" class="right">
+          About
+        </li>
+        <li id="changelog_tab" data-content-selector="#changelog_tab_content" class="right">
+          Changelog
+        </li>
+      </ul>
+    </nav>
+    <div class="tab_content">
+      <section id="settings_tab_content">
+        <div class="tab_content_nav">
+          <div class="title">Modules</div>
+          <ul class="switcher">
+            {% for module in manifest.modules %}
+              <li id="{{module.id}}-tab" data-content-selector="#{{module.id}}-module">
+                {{module.name}}
+                {% if not module.required %}
+                  <span class="switch {% if module.enabled %}enabled{% endif %}" data-module="{{module.id}}">
+                    {% if module.enabled %}
+                      Enabled
+                    {% else %}
+                      Disabled
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="tab_content_left">
+          {% for module in manifest.modules %}
+            <div id="{{module.id}}-module">
+              <h2>{{module.name}}</h2>
+              <p>{{module.description}}</p>
+              {% if module.depends.length %}
+                <div>Depends On:</div>
+                <ul>
+                  {% for dep in module.depends %}
+                    <li>{{dep.name}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {{ module.contents.options }}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section id="changelog_tab_content">
+      </section>
+      <section id="about_tab_content">
+      </section>
+      <div class="clearfix"></div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+  <div data-drawer="reset-confirmation" class="modal">
+    <div class="modal-backdrop" data-close-drawer></div>
+    <div class="modal-dialog">
+      <div class="instructions">
+        <div class="page-text">
+          You can choose to reset all of your settings or just the settings on the current page.
+          Please choose carefully. This action cannot be undone.
+        </div>
+        <div class="all-text">
+          This action will reset all of your settings. If you'd like to reset just a particular page
+          of settings, please navigate to that page and push the "Reset Settings" button again.
+          Please choose carefully. This action cannot be undone.
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="reset-page-button" class="btn">Reset Page</button>
+        <button id="reset-all-button" class="btn">Reset All</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
