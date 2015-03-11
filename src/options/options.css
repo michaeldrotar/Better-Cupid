@@ -38,6 +38,14 @@
   background-color: #EFEFEF;
 }
 
+.changelog-section {
+  display: none;
+}
+
+.changelog-section.is-open {
+  display: block;
+}
+
 .options {
   background-color: #f6f6f6;
   margin-bottom: 10px;
