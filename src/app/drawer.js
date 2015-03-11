@@ -33,7 +33,7 @@ function openDrawer(drawer) {
   
   var drawerKey = drawer.attr('data-drawer-key');
   if ( drawerKey ) {
-    $('[data-drawer][data-drawer-key="'+drawerKey+'"]')
+    $('[data-drawer][data-drawer-key="'+drawerKey+'"].is-open')
       .not(drawer)
       .each(function(i, drawer) {
         closeDrawer($(drawer));
