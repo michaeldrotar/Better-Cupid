@@ -55,7 +55,7 @@
         </div>
         <div class="section-nav-content">
           {% for module in manifest.modules %}
-            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings">
+            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings" data-module="{{module.id}}">
               <h2>{{module.name}}</h2>
               <p>{{module.description}}</p>
               {% if module.depends.length %}
