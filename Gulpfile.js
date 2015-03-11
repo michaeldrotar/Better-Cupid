@@ -7,6 +7,8 @@ var gulp       = require('gulp'),
     del        = require('del'),
     fs         = require('fs'),
     htmlmin    = require('gulp-htmlmin'),
+    http       = require('http'),
+    https      = require('https'),
     livereload = require('gulp-livereload'),
     newer      = require('gulp-newer'),
     nunjucks   = require('gulp-nunjucks-html'),
@@ -49,21 +51,20 @@ var gulp       = require('gulp'),
           'src/modules/**/*.scripts.js'
         ]
       }
-    },
-    res = {};
+    };
 
-function buildResource(path, res) {
-  var k;
-  for ( k in path ) {
-    if ( typeof path[k] === 'string' || Array.isArray(path[k]) ) {
-      res[k] = gulp.src(path[k]);
-    } else {
-      res[k] = {};
-      buildResource(path[k], res[k]);
-    }
-  }
+function downloadFile(url, path, done) {
+  var file = fs.createWriteStream(path),
+      module = url.indexOf('https') > -1 ? https : http;
+  module.get(url, function(res) {
+    res.on('data', function(chunk) {
+      file.write(chunk);
+    }).on('end', function() {
+      file.end();
+      done();
+    });
+  });
 }
-buildResource(path, res);
 
 function getManifest() {
   if ( getManifest.manifest ) {
@@ -79,8 +80,12 @@ function getManifest() {
   }
   
   var manifest = require('./src/manifest.json'),
-      modules = require('./src/modules.json');
+      modules = require('./src/modules.json'),
+      changelog = require('./src/changelog.json');
+  
   manifest.modules = modules;
+  manifest.changelog = changelog;
+  
   modules.forEach(function(module) {
     module.depends.map(function(dep) {
       var i = modules.length - 1;
@@ -112,13 +117,22 @@ function getPipes(key, file) {
         gulp.dest('dist')
       ];
     } else if ( key === 'html' ) {
-      //nunjucks.nunjucks.configure(['./src']);
       return [
         nunjucks({
           locals: {
             manifest: getManifest()
           },
-          searchPaths: ['src']
+          searchPaths: ['src'],
+          setUp: function(env) {
+            env.addFilter('version', function(version) {
+              var res = /^\d+\.\d+/.exec(version);
+              if ( res && res.length ) {
+                return res[0];
+              }
+              return version;
+            });
+            return env;
+          }
         }),
         htmlmin({
           removeComments: true,
@@ -136,28 +150,6 @@ function getPipes(key, file) {
     }
   }
   return key;
-}
-
-function build(file, pipes) {
-  var ret = res,
-      keys = file.split(/\./g),
-      key = keys.pop();
-  keys.forEach(function(key) {
-    if ( ret[key] ) {
-      ret = ret[key];
-    }
-  });
-  getPipes(pipes || key, file).forEach(function(pipe) {
-    if ( pipe ) {
-      ret[key] = ret[key].pipe(pipe).on('error', function(error) {
-        console.log('oops!');
-      });
-    }
-  });
-  ret[key] = ret[key].on('error', function(error) {
-    console.log('oops!');
-  });
-  return ret[key];
 }
 
 function build(file, pipes) {
@@ -214,7 +206,7 @@ gulp.task('build', ['clean'], function() {
   ]);
 });
 
-gulp.task('build-prod', function() {
+gulp.task('build-prod', ['update-resources'], function() {
   prod = true;
   return gulp.start('build');
 });
@@ -223,9 +215,32 @@ gulp.task('clean', function(done) {
   del(['dist/**/*'], done);
 });
 
+gulp.task('update-resources', function(done) {
+  var count = 0,
+      changelog,
+      about;
+  function checkDone() {
+    count++;
+    if ( count == 2 ) {
+      done();
+    }
+  }
+  
+  downloadFile(
+    'https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog',
+    'src/options/changelog.html',
+    checkDone
+  );
+  
+  downloadFile(
+    'https://github.com/michaeldrotar/Better-Cupid/wiki/About',
+    'src/options/about.html',
+    checkDone
+  );
+});
+
 gulp.task('watch', ['build'], function() {
   livereload.listen();
-  /*
   gulp.watch(path.app.css,       ['build-app']);
   gulp.watch(path.app.js,        ['build-app']);
   gulp.watch(path.assets,        ['build-assets']);
@@ -235,10 +250,6 @@ gulp.task('watch', ['build'], function() {
   gulp.watch(path.options.html,  ['build-options']);
   gulp.watch(path.scripts.css,   ['build-scripts']);
   gulp.watch(path.scripts.js,    ['build-scripts']);
-  */
-  gulp.watch('src/**', ['build']).on('error', function(error) {
-    console.log(error);
-  });
   gulp.watch('dist/**').on('change', livereload.changed);
 });
 
