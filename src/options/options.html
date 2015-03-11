@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>BetterCupid Options</title>
@@ -5,36 +6,42 @@
   <link rel="stylesheet" type="text/css" href="options.css" />
 </head>
 <body>
-  <div class="page">
+  <div class="page" style="display: none">
     <header>
       <h1>BetterCupid Options</h1>
     </header>
-    <div class="btn" data-open-drawer="reset-confirmation">
+    <button type="button" class="btn reset-btn" data-open-drawer="reset-confirmation">
       Reset Settings
-    </div>
+    </button>
     <nav>
-      <ul class="tabgroup switcher">
-        <li id="settings_tab" data-content-selector="#settings_tab_content">
-          Settings
+      <ul class="tabgroup">
+        <li>
+          <button type="button" class="tabgroup__tab" data-open-drawer="settings">
+            Settings
+          </button>
         </li>
-        <li id="about_tab" data-content-selector="#about_tab_content" class="right">
-          About
+        <li class="float-right">
+          <button type="button" class="tabgroup__tab" data-open-drawer="about">
+            About
+          </button>
         </li>
-        <li id="changelog_tab" data-content-selector="#changelog_tab_content" class="right">
-          Changelog
+        <li class="float-right">
+          <button type="button" class="tabgroup__tab" data-open-drawer="changelog">
+            Changelog
+          </button>
         </li>
       </ul>
     </nav>
-    <div class="tab_content">
-      <section id="settings_tab_content">
-        <div class="tab_content_nav">
-          <div class="title">Modules</div>
-          <ul class="switcher">
+    <div class="tabgroup__content">
+      <section class="tabgroup__section" data-drawer="settings" data-drawer-key="page-section">
+        <div class="section-nav">
+          <div class="section-nav__title">Modules</div>
+          <ul class="section-nav__menu">
             {% for module in manifest.modules %}
-              <li id="{{module.id}}-tab" data-content-selector="#{{module.id}}-module">
+              <li class="section-nav__tab" data-open-drawer="module-{{module.id}}">
                 {{module.name}}
                 {% if not module.required %}
-                  <span class="switch {% if module.enabled %}enabled{% endif %}" data-module="{{module.id}}">
+                  <span class="module-enabled-switch {% if module.enabled %}is-enabled{% endif %}" data-module="{{module.id}}">
                     {% if module.enabled %}
                       Enabled
                     {% else %}
@@ -46,9 +53,9 @@
             {% endfor %}
           </ul>
         </div>
-        <div class="tab_content_left">
+        <div class="section-nav-content">
           {% for module in manifest.modules %}
-            <div id="{{module.id}}-module">
+            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings">
               <h2>{{module.name}}</h2>
               <p>{{module.description}}</p>
               {% if module.depends.length %}
@@ -64,14 +71,11 @@
           {% endfor %}
         </div>
       </section>
-      <section id="changelog_tab_content">
-      </section>
-      <section id="about_tab_content">
-      </section>
-      <div class="clearfix"></div>
+      <section data-drawer="about" data-drawer-key="page-section"></section>
+      <section data-drawer="changelog" data-drawer-key="page-section"></section>
     </div>
-    <div class="clearfix"></div>
   </div>
+  
   <div data-drawer="reset-confirmation" class="modal">
     <div class="modal-backdrop" data-close-drawer></div>
     <div class="modal-dialog">

@@ -1,180 +1,18 @@
-body
-{
-  background-color: #2963a4;
-  color: #777777;
-  font: normal 12px Verdana, 'Bitsream Vera Sans', sans-serif;
-  margin: 0px;
-  padding: 0px;
-}
-
-header h1
-{
-  background-image: url(icon48.png);
-  background-position: 25 center;
-  background-repeat: no-repeat;
-  color: #F83265;
-  font-size: 24px;
-  font-weight: normal;
-  letter-spacing: -1px;
-  line-height: 24px;
-  margin: 0px;
-  padding: 40px 0px 40px 75px;
-}
-
-section h2
-{
-  clear: left;
-  color: #555555;
-  font-size: 18px;
-  font-weight: normal;
-  line-height: 19px;
-  margin: 0px;
-  padding: 30px 0px 5px 0px;
-}
-
-section h3
-{
-  font-size: 15px;
-}
-
-.btn
-{
-  background-color: white;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#efefef));
-  border: 1px solid #dddddd;
-  border-radius: 3px;
-  color: #555555;
-  cursor: pointer;
-  display: block;
-  font-size: 10px;
-  font-weight: bold;
-  height: 23px;
+.reset-btn {
   float: right;
-  line-height: 23px;
   margin-right: 5px;
-  text-align: center;
   width: 120px;
 }
 
-.btn:hover
-{
-  background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#e7e7e7));
-}
-
-.btn:active
-{
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#efefef), to(white));
-}
-
-.clearfix
-{
-  clear: both;
-}
-
-.dialog {
+.module-settings-section {
   display: none;
 }
 
-.page
-{
-  background-color: #eaeaea;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
-  margin: auto;
-  padding: 0px 0px 40px 0px;
-  position: relative;
-  width: 780px;
-}
-
-.options
-{
-  background-color: #f6f6f6;
-  margin-bottom: 10px;
-  opacity: 1;
-  padding: 0px 15px 20px 15px;
-}
-
-.options input
-{
-  clear: left;
-  float: left;
-}
-
-.options label
-{
-  color: #333333;
-  cursor: pointer;
+.module-settings-section.is-open {
   display: block;
-  float: left;
-  font-size: 11px;
-  margin: 0 0 8px 15px;
-  width: 700px;
 }
 
-.tab_content
-{
-  background-color: #F6F6F6;
-  clear: both;
-  margin-bottom: 10px;
-  padding: 20px 15px;
-}
-
-.tab_content_left
-{
-  width: 485px;
-}
-
-.tab_content_nav
-{
-  float: right;
-  margin: 0px -15px 0px 0px;
-  width: 250px;
-}
-
-.tab_content_nav ul
-{
-  background-color: #EEE;
-  list-style: none;
-  margin: 0px 0px 15px 0px;
-  padding: 0px 0px 50px 0px;
-}
-
-.tab_content_nav li
-{
-  border-bottom: 1px solid #F6F6F6;
-  color: #2963A4;
-  cursor: pointer;
-  font-size: 11px;
-  height: 27px;
-  line-height: 28px;
-  margin: 0px;
-  padding: 0px 12px;
-  position: relative;
-}
-
-.tab_content_nav li:hover
-{
-  background-color: #E0EAF2;
-}
-
-.tab_content_nav li.active
-{
-  background-color: #E8F2E0;
-  background-image: url(green_arrow.png);
-  background-repeat: no-repeat;
-  color: #569424;
-  font-weight: bold;
-  margin-left: -13px;
-  padding-left: 25px;
-}
-
-.tab_content_nav li.active:hover
-{
-
-}
-
-.tab_content_nav li .switch
-{
+.module-enabled-switch {
   background-color: #DEDEDE;
   border-radius: 5px;
   color: #777777;
@@ -188,83 +26,41 @@ section h3
   top: 5px;
 }
 
-.tab_content_nav li .switch:hover
-{
-  background-color: #CDCDCD !important;
+.module-enabled-switch:hover {
+  background-color: #CDCDCD;
 }
 
-.tab_content_nav li .switch.enabled
-{
-  color: #F83265;
+.module-enabled-switch.is-enabled {
+  color: #F83265
 }
 
-.tab_content_nav li .switch.enabled:hover
-{
-  background-color: #EFEFEF !important;
+.module-enabled-switch.is-enabled:hover {
+  background-color: #EFEFEF;
 }
 
-.tab_content_nav .title
-{
-  background-color: #EEE;
-  color: #777;
-  font-size: 16px;
-  margin: 0px 0px 1px 0px;
-  padding: 18px 12px 5px 12px;
+.options {
+  background-color: #f6f6f6;
+  margin-bottom: 10px;
+  opacity: 1;
+  padding: 0 15px 20px 15px;
 }
 
-.tabgroup
-{
-  display: block;
-  height: 28px;
-  list-style: none;
-  margin: 0px;
-  padding: 0px 25px;
+.options input {
+  clear: left;
+  float: left;
 }
 
-.tabgroup li
-{
-  border-style: none;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  color: #777777;
+.options label {
+  color: #333333;
   cursor: pointer;
+  display: block;
   float: left;
   font-size: 11px;
-  font-weight: bold;
-  height: 28px;
-  line-height: 28px;
-  padding: 0px 20px;
-  text-shadow: 0px 1px 0px white;
+  margin: 0 0 8px 15px;
+  width: 700px;
 }
 
-.tabgroup li:hover
-{
-  color: #3D85CE;
-}
-
-.tabgroup li.active
-{
-  background-color: #F6F6F6;
-  border-left: 1px soid #D6D6D6;
-  border-right: 1px solid #D6D6D6;
-  border-top: 1px solid white;
-  line-height: 26px;
-  margin-bottom: 0px;
-  padding: 1px 20px 0px 20px;
-}
-
-.tabgroup li.active:hover
-{
-  color: inherit;
-}
-
-.tabgroup li.right
-{
-  float: right;
-}
-
-#reset_button
-{
+#reset_button {
   float: none;
   position: absolute;
   right: 20px;

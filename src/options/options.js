@@ -173,10 +173,6 @@ $(".switcher").switcher();
     }
   };
   
-  function toggleEnabled(module) {
-    module.db.set("enabled", !module.db.get("enabled"));
-  }
-  
   Module.all().then(function(modules) {
     if ( true ) return;
     modules.forEach(function(module) {
@@ -227,7 +223,7 @@ $(".switcher").switcher();
       if ( !module.required() ) {
         var en = $("<span class='switch'></span>");
         en.click(function(e) {
-          toggleEnabled(module);
+          module.enabled(!module.enabled());
           if ( module.enabled() ) {
             this.addClass("enabled");
             this.innerHTML = "Enabled";
@@ -275,7 +271,7 @@ $(".switcher").switcher();
     if ( !module.required() ) {
       var en = $("<span class='switch'></span>");
       en.click(function(e) {
-        toggleEnabled(module);
+        module.enabled(!module.enabled());
         if ( module.enabled() ) {
           this.addClass("enabled");
           this.innerHTML = "Enabled";
@@ -351,19 +347,29 @@ $(".switcher").switcher();
   });
   
   $(document)
-    .on('click', '#settings_tab_content .switch', function(e) {
+    .on('click', '.module-enabled-switch', function(e) {
       e.stopPropagation(); // don't select the module settings as well
       var btn = $(this),
           id = btn.attr('data-module');
       Module.get(id).then(function(module) {
-        toggleEnabled(module);
-        if ( module.enabled ) {
-          btn.addClass('enabled').text('Enabled');
+        module.enabled(!module.enabled());
+        if ( module.enabled() ) {
+          btn.addClass('is-enabled').text('Enabled');
         } else {
-          btn.removeClass('enabled').text('Disabled');
+          btn.removeClass('is-enabled').text('Disabled');
         }
       });
     });
+  
+  Module.all().then(function(modules) {
+    modules.forEach(function(module) {
+      var btn = $('.module-enabled-switch[data-module="'+module.id()+'"]');
+      if ( module.enabled() ) {
+        btn.addClass('is-enabled').text('Enabled');
+      }
+    });
+    $('.page').show();
+  });
   
   if ( 1 ) return;
   
