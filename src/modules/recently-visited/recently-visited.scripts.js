@@ -1,6 +1,5 @@
-Module.get('recently-visited').then(function(module) {
-  var db = module.db.get(),
-      recentlyVisited = document.getElementById("section_recent"),
+Module.run('recently-visited', function(module, db) {
+  var recentlyVisited = document.getElementById("section_recent"),
       maxItemCount = db.maxRowCount * 4,
       visRowCount = db.visibleRowCount,
       visitLog = db.recentlyVisited || [],

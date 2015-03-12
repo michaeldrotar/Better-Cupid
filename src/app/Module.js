@@ -191,170 +191,77 @@
     });
   };
   
-  lib.inject = (function() {
-  
-    var valid_keys = {
-      "scripts": true,
-      "options": true,
-      "background": true
-    };
-    
-    function doInjection(key, callback) {
-      var loadedModules = [];
-      core.manifest(function(manifest) {
-        var modules = [],
-          moduleCount,
-          count = 0;
-        
-        $.each(manifest.modules, function(_, data) {
-          var module = new Module(data);
-          if ( key !== "scripts" || module.enabled() ) {
-            modules.push(data);
-          }
-        });
-        
-        if ( modules.length === 0 ) {
-          callback(loadedModules);
-          return;
-        } else {
-          moduleCount = modules.length;
+  if ( core.onContentScript ) {
+    (function() {
+      var runScripts = {},
+          modulesHash,
+          ready = false;
+      
+      function runModule(module, callback) {
+        if ( module.enabled() ) {
+          callback(module, module.db.get());
         }
-        
-        function moduleAdded() {
-          if ( ++count === moduleCount ) {
-            callback(loadedModules);
-          }
-        }
-        
-        function loadModule(module) {
-          var mod = Module.get(module.id),
-            resources = module[key],
-            resourceCount = 0,
-            nodes = [];
-          
-          function resourcesLoaded() {
-            var container = document.createElement("div");
-            container.id = module.id+"-module";
-            $("body").append(container);
-            
-            nodes.forEach(function(node) {
-              if ( typeof node === "string" ) {
-                $(container).append(node);
-              } else {
-                document.body.appendChild(node);
-              }
-            });
-            
-            mod.state("loaded");
-            moduleAdded();
-          }
-          
-          loadedModules.push(mod);
-          
-          if ( !resources || resources.length === 0 ) {
-            resourcesLoaded();
-            return;
-          }
-          
-          (function() {
-            
-            function resourceAdded() {
-              if ( ++resourceCount === resources.length ) {
-                resourcesLoaded();
-              }
-            }
-              
-            resources.forEach(function(resource, index) {
-              var path = mod.path(resource),
-                ext = path.substring(path.lastIndexOf(".")+1),
-                node;
-              
-              switch ( ext ) {
-                
-                case "css":
-                  node = document.createElement("link");
-                  node.type = "text/css";
-                  node.rel = "stylesheet";
-                  node.href = path;
-                  nodes[index] = node;
-                  
-                  resourceAdded();
-                  break;
-                
-                case "js":
-                  node = document.createElement("script");
-                  node.type = "text/javascript";
-                  node.src = path;
-                  nodes[index] = node;
-                  resourceAdded();
-                  break;
-                
-                case "html":
-                  $.ajax({
-                    "url": path,
-                    "dataType": "text",
-                    "timeout": 5000,
-                    "success": function(response, status, xhr) {
-                      nodes[index] = response;
-                    },
-                    "error": function(xhr, status, message) {
-                      core.error("Failed to load "+resource+" for "+module.name);
-                    },
-                    "complete": function(xhr, status) {
-                      resourceAdded();
-                    }
-                  });
-                  break;
-                
-              }
-            });
-          })();
-        }
-        
-        function iterateModules() {
-          var i, data, module;
-          for ( i = modules.length - 1; data = modules[i]; i-- ) {
-            if ( key === "scripts" ) {
-              module = Module.get(data.id);
-              
-              switch ( module.state() ) {
-                
-                case "ready":
-                  loadModule(data);
-                  modules.splice(i, 1);
-                  break;
-                  
-                case "failed":
-                  modules.splice(i, 1);
-                  moduleAdded();
-                  break;
-              
-              }
-            } else {
-              loadModule(data);
-              modules.splice(i, 1);
-            }
-          }
-          
-          if ( modules.length > 0 ) {
-            setTimeout(iterateModules, 50);
-          }
-        }
-        
-        iterateModules();
-        
-      });
-    }
-    
-    return function(key, callback) {
-      core.assert(valid_keys[key], "Key passed to Modules.inject is not valid");
-      if ( typeof callback !== "function" ) {
-        callback = function(){};
       }
       
-      doInjection(key, callback);
-    };
-  })();
+      function checkAllReady() {
+        var k, module;
+        if ( modulesHash && ready ) {
+          for ( k in runScripts ) {
+            module = modulesHash[k];
+            runModule(module, runScripts[k]);
+          }
+          runScripts = {};
+          document.body.style.visibility = 'visible';
+        }
+      }
+      
+      lib.all().then(function(modules) {
+        modulesHash = {};
+        modules.forEach(function(module) {
+          modulesHash[module.id()] = module;
+        });
+        checkAllReady();
+      });
+      
+      lib.run = function(id, callback) {
+        runScripts[id] = callback;
+        checkAllReady();
+      };
+      
+      function domReady() {
+        ready = true;
+        checkAllReady();
+      }
+      
+      function waitForLoaded() {
+        if ( document.readyState !== 'loading' ) {
+          document.removeEventListener('readystatechange', waitForLoaded, false);
+          domReady();
+        }
+      }
+      
+      if ( document.readyState !== 'loading' ) {
+        domReady();
+      } else {
+        document.addEventListener('readystatechange', waitForLoaded, false);
+      }
+      
+      
+      // For some reason, body stays visible unless we get really aggressive
+      // like this and continually keep it hidden
+      var hideBody;
+      hideBody = function() {
+        if ( !ready ) {
+          if ( window.document && window.document.body ) {
+            document.body.style.visibility = 'hidden';
+          }
+          setTimeout(hideBody, 1);
+        }
+      }
+      
+      hideBody();
+    })();
+  }
   
   window.Module = lib;
 })();
