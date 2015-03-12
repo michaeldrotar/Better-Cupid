@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.8.0",
+    "date": "03/11/2015",
+    "sections": [
+      {
+        "heading": "General",
+        "paragraphs": [
+          "The past two and a half years have sure gone by quickly. I'm sorry to say there's nothing revolutionary in this version. I've disabled a couple things that weren't worth fixing just yet (reset settings button).. I've fixed everything else. I've completely revamped the project over the past 4 days. Same direction.. better process.",
+          "So what's new? Well, everything. When I left the project, I was in the middle of redoing the module system. That's done now. BetterCupid no longer uses weird hacks to get at the modules, it just requests them and waits til they're ready. There are no longer any weird script injections to load the modules. In fact, BetterCupid now has a whole build process that takes all the module files and puts them together into a manageable number of resources. Now that I know what resources I have, I just load them the way that Chrome intends for its extensions to load files. I must have deleted hundreds of lines of code that was doing all this for me before.",
+          "No more github permission too. The changelog is now stored in a json file in the source, and the options file uses nunjuck templating to grab the data from various json files. The downside? I have to manually maintain the changelog within the source and then periodically update the github wiki. The upside? There's no fear of the changelog breaking anymore. There's no ajax request that takes a second to grab it and could potentially fail. And, yes, there's no more need to request permission to access github. That was a weird one.",
+          "Here's a big one someone might appreciate.. BetterCupid now uses Chrome's sync storage. That means all your data will be available in any Chrome browser that's logged into your account (if you enable the syncing in Chrome). Your extended list of recently viewed users will be maintained.. all your settings.. and all future data as well. Also, with any luck, I have the data format good enough now that I won't need to keep changing it every other version.",
+          "JQuery UI is also gone. All that really means to you is that the package should be a good bit lighter. I did add the bluebird lib for handling promises, but it's not nearly as heavy. I've also upgraded jquery to the 2.x line, which doesn't have all the old ie support, so it should also be much lighter. All in all, the package is half the size it used to be so there's plenty of room for new features. :)"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.7.4",
     "date": "08/15/2012",
     "sections": [
