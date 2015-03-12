@@ -12,9 +12,11 @@ var gulp       = require('gulp'),
     livereload = require('gulp-livereload'),
     newer      = require('gulp-newer'),
     nunjucks   = require('gulp-nunjucks-html'),
+    run        = require('run-sequence'),
     //sass       = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify     = require('gulp-uglify'),
+    zip        = require('gulp-zip'),
     prod       = false,
     path       = {
       app: {
@@ -27,7 +29,7 @@ var gulp       = require('gulp'),
         ]
       },
       assets: [
-        'src/assets/**/*', 'src/*.json'
+        'src/assets/**/*', 'src/*.json', '!src/changelog.json'
       ],
       background: {
         js: [
@@ -110,10 +112,10 @@ function getPipes(key, file) {
   if ( typeof key === 'string' ) {
     if ( key === 'css' ) {
       return [
-        prod && sourcemaps.init(),
+        //prod && sourcemaps.init(),
         concat(file),
         prod && cssmin(),
-        prod && sourcemaps.write('.'),
+        //prod && sourcemaps.write('.'),
         gulp.dest('dist')
       ];
     } else if ( key === 'html' ) {
@@ -142,9 +144,10 @@ function getPipes(key, file) {
       ];
     } else if ( key === 'js' ) {
       return [
-        prod && sourcemaps.init(),
+        //prod && sourcemaps.init(),
         concat(file),
         prod && uglify({preserveComments: 'some'}),
+        //prod && sourcemaps.write('.'),
         gulp.dest('dist')
       ]
     }
@@ -199,20 +202,36 @@ gulp.task('build-scripts', function() {
   build('scripts.js');
 });
 
-gulp.task('build', ['clean'], function() {
-  return gulp.start([
-    'build-app', 'build-assets',
-    'build-background', 'build-options', 'build-scripts'
-  ]);
+gulp.task('build', function(done) {
+  run(
+    'clean',
+    [
+      'build-app', 'build-assets',
+      'build-background', 'build-options', 'build-scripts'
+    ],
+    done
+  );
 });
 
-gulp.task('build-prod', ['update-resources'], function() {
+gulp.task('build-prod', function(done) {
   prod = true;
-  return gulp.start('build');
+  run('build', done);
 });
 
 gulp.task('clean', function(done) {
   del(['dist/**/*'], done);
+});
+
+gulp.task('package', function(done) {
+  run('build-prod', function() {
+    var manifest = getManifest();
+    setTimeout(function() {
+      gulp.src('dist/**')
+        .pipe(zip(manifest.name+'-'+manifest.version+'.zip'))
+        .pipe(gulp.dest('.'));
+      done();
+    }, 1000);
+  });
 });
 
 gulp.task('update-resources', function(done) {
