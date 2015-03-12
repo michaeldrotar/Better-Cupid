@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BetterCupid Options</title>
+  <link rel="stylesheet" type="text/css" href="app.css" />
+  <link rel="stylesheet" type="text/css" href="options.css" />
+</head>
+<body>
+  <div class="page" style="display: none">
+    <header>
+      <h1>BetterCupid Options</h1>
+    </header>
+    <!--
+    <button type="button" class="btn reset-btn" data-open-drawer="reset-confirmation">
+      Reset Settings
+    </button>
+    -->
+    <nav>
+      <ul class="tabgroup">
+        <li>
+          <button type="button" class="tabgroup__tab" data-open-drawer="settings">
+            Settings
+          </button>
+        </li>
+        <li class="float-right">
+          <button type="button" class="tabgroup__tab" data-open-drawer="about">
+            About
+          </button>
+        </li>
+        <li class="float-right">
+          <button type="button" class="tabgroup__tab" data-open-drawer="changelog">
+            Changelog
+          </button>
+        </li>
+      </ul>
+    </nav>
+    <div class="tabgroup__content">
+      <section class="tabgroup__section" data-drawer="settings" data-drawer-key="page-section">
+        <div class="section-nav">
+          <div class="section-nav__title">Modules</div>
+          <ul class="section-nav__menu">
+            {% for module in manifest.modules %}
+              <li class="section-nav__tab" data-open-drawer="module-{{module.id}}">
+                {{module.name}}
+                {% if not module.required %}
+                  <span class="module-enabled-switch {% if module.enabled %}is-enabled{% endif %}" data-module="{{module.id}}">
+                    {% if module.enabled %}
+                      Enabled
+                    {% else %}
+                      Disabled
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="section-nav-content">
+          {% for module in manifest.modules %}
+            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings" data-module="{{module.id}}">
+              <h2>{{module.name}}</h2>
+              <p>{{module.description}}</p>
+              {% if module.depends.length %}
+                <div>Depends On:</div>
+                <ul>
+                  {% for dep in module.depends %}
+                    <li>{{dep.name}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {{ module.contents.options }}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="tabgroup__section" data-drawer="about" data-drawer-key="page-section">
+        <p>
+          I've been a fan of OkCupid since its very early inception as TheSpark. Back then, it was a bunch of random stuff along with fun quizzes to help you figure out anything from your personality type to which Simpsons character you were most like. SparkNotes and SparkMatch grew from the success, and SparkMatch went on to become OkCupid. It took all the fun tests along with their new match-making stuff and created a revolutionary service... compatability by math. It's fun, functional, and free... it's OkCupid.
+        </p>
+        <p>
+          I've been creating small greasemonkey scripts for years. Never anything major, small enhancements for my own use for some of my favorite sites. Recently, I turned my attention to OkCupid. I started finding little things that I wanted to enhance here and there, and as I poked around in the markup, I found that it was organized extremely well. It's a lot of fun to play with the DOM and manipulate things. It's easy to find the data that you need.
+        </p>
+        <p>
+          I had a half dozen or so different scripts sitting around I thought it might be fun to create a real extension and dig deeper into the Chrome Extension API. And from there, it was only natural to see what publishing it would be all about, but that'd require a name and an icon and more concrete information. Thus: BetterCupid was born... OkCupid is great and all, but this made it better.
+        </p>
+      </section>
+      <section class="tabgroup__section" data-drawer="changelog" data-drawer-key="page-section">
+        <div class="section-nav">
+          <div class="section-nav__title">Changelog</div>
+          <ul class="section-nav__menu">
+            {% set last_version = 0 %}
+            {% for entry in manifest.changelog %}
+              {% set version = entry.version | version %}
+              {% if version != last_version %}
+                {% set last_version = version %}
+                <li class="section-nav__tab" data-open-drawer="changelog-{{version}}">
+                  {{version}}
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="section-nav-content">
+          {% set last_version = 0 %}
+          {% for entry in manifest.changelog %}
+            {% set version = entry.version | version %}
+            {% if version != last_version %}
+              {% set last_version = version %}
+                <div class="changelog-section" data-drawer="changelog-{{version}}" data-drawer-key="changelog">
+                  {% for entry in manifest.changelog %}
+                    {% set version = entry.version | version %}
+                    {% if version == last_version %}
+                      <h2>Version {{entry.version}}</h2>
+                      <div class="date">{{entry.date}}</div>
+                      {% for section in entry.sections %}
+                        <h3>{{section.heading}}</h3>
+                        {% for paragraph in section.paragraphs %}
+                          <p>{{paragraph}}</p>
+                        {% endfor %}
+                        {% if section.notes %}
+                          <ul>
+                            {% for note in section.notes %}
+                              <li>{{note}}</li>
+                            {% endfor %}
+                          </ul>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </div>
+            {% endif %}
+          {% endfor %}
+          {% for module in manifest.modules %}
+            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings">
+              <h2>{{module.name}}</h2>
+              <p>{{module.description}}</p>
+              {% if module.depends.length %}
+                <div>Depends On:</div>
+                <ul>
+                  {% for dep in module.depends %}
+                    <li>{{dep.name}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {{ module.contents.options }}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+  
+  <div data-drawer="reset-confirmation" class="modal">
+    <div class="modal-backdrop" data-close-drawer></div>
+    <div class="modal-dialog">
+      <div class="instructions">
+        <div class="page-text">
+          You can choose to reset all of your settings or just the settings on the current page.
+          Please choose carefully. This action cannot be undone.
+        </div>
+        <div class="all-text">
+          This action will reset all of your settings. If you'd like to reset just a particular page
+          of settings, please navigate to that page and push the "Reset Settings" button again.
+          Please choose carefully. This action cannot be undone.
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="reset-page-button" class="btn">Reset Page</button>
+        <button id="reset-all-button" class="btn">Reset All</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

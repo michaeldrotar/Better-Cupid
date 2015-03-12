@@ -1,0 +1,127 @@
+.reset-btn {
+  float: right;
+  margin-right: 5px;
+  width: 120px;
+}
+
+.module-settings-section {
+  display: none;
+}
+
+.module-settings-section.is-open {
+  display: block;
+}
+
+.module-enabled-switch {
+  background-color: #DEDEDE;
+  border-radius: 5px;
+  color: #777777;
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: normal;
+  padding: 2px 5px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+.module-enabled-switch:hover {
+  background-color: #CDCDCD;
+}
+
+.module-enabled-switch.is-enabled {
+  color: #F83265
+}
+
+.module-enabled-switch.is-enabled:hover {
+  background-color: #EFEFEF;
+}
+
+.changelog-section {
+  display: none;
+}
+
+.changelog-section.is-open {
+  display: block;
+}
+
+.options {
+  background-color: #f6f6f6;
+  margin-bottom: 10px;
+  opacity: 1;
+  padding: 0 15px 20px 15px;
+}
+
+.options input {
+  clear: left;
+  float: left;
+}
+
+.options label {
+  color: #333333;
+  cursor: pointer;
+  display: block;
+  float: left;
+  font-size: 11px;
+  margin: 0 0 8px 15px;
+  width: 700px;
+}
+
+#reset_button {
+  float: none;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+
+.setting {
+  display: block;
+  margin-top: 8px;
+}
+
+.label {
+  display: inline-block;
+  width: 150px;
+}
+
+.modal {
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+}
+
+.modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  background-color: rgba(0,0,0,0.3);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.modal-dialog {
+  background-color: white;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 6px;
+  box-shadow: 0 0 16px rgba(0,0,0,0.5);
+  display: block;
+  margin: 30px auto;
+  padding: 30px;
+  position: relative;
+  transform: translate(0,0);
+  transition: transform 0.3s;
+  width: 500px;
+}
