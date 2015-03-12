@@ -130,21 +130,6 @@
                 </div>
             {% endif %}
           {% endfor %}
-          {% for module in manifest.modules %}
-            <div class="module-settings-section" data-drawer="module-{{module.id}}" data-drawer-key="module-settings">
-              <h2>{{module.name}}</h2>
-              <p>{{module.description}}</p>
-              {% if module.depends.length %}
-                <div>Depends On:</div>
-                <ul>
-                  {% for dep in module.depends %}
-                    <li>{{dep.name}}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-              {{ module.contents.options }}
-            </div>
-          {% endfor %}
         </div>
       </section>
     </div>
