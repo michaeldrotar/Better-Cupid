@@ -24,8 +24,8 @@ var gulp       = require('gulp'),
           'src/lib/**/*.css', 'src/app/**/*.scss'
         ],
         js: [
-          'src/lib/jquery/**.js', 'src/lib/**.js',
-          'src/app/prototype.js', 'src/app/core.js', 'src/app/**.js'
+          'src/lib/jquery/**/*.js', 'src/lib/**/*.js',
+          'src/app/prototype.js', 'src/app/core.js', 'src/app/**/*.js'
         ]
       },
       assets: [
@@ -72,7 +72,7 @@ function getManifest() {
   if ( getManifest.manifest ) {
     return getManifest.manifest;
   }
-  
+
   function getFile(path) {
     try {
       return fs.readFileSync(path, 'utf8');
@@ -80,14 +80,14 @@ function getManifest() {
       return '';
     }
   }
-  
+
   var manifest = require('./src/manifest.json'),
       modules = require('./src/modules.json'),
       changelog = require('./src/changelog.json');
-  
+
   manifest.modules = modules;
   manifest.changelog = changelog;
-  
+
   modules.forEach(function(module) {
     module.depends.map(function(dep) {
       var i = modules.length - 1;
@@ -98,12 +98,12 @@ function getManifest() {
       }
       return { id: dep, name: dep };
     });
-    
+
     module.contents = {
       options: getFile('src/modules/'+module.id+'/'+module.id+'.options.html')
     };
   });
-  
+
   getManifest.manifest = manifest;
   return manifest;
 }
@@ -177,7 +177,7 @@ function build(file, pipes) {
   return src;
 }
 
-gulp.task('build-app', function() {  
+gulp.task('build-app', function() {
   build('app.css');
   build('app.js');
 });
@@ -245,13 +245,13 @@ gulp.task('update-resources', function(done) {
       done();
     }
   }
-  
+
   downloadFile(
     'https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog',
     'src/options/changelog.html',
     checkDone
   );
-  
+
   downloadFile(
     'https://github.com/michaeldrotar/Better-Cupid/wiki/About',
     'src/options/about.html',
