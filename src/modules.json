@@ -9,6 +9,15 @@
     }
   },
   {
+    "id": "photo-browser",
+    "name": "Photo Browser",
+    "description": "Modifies the photo browser to display all photos without scrolling.",
+    "depends": [],
+    "required": false,
+    "defaults": {
+    }
+  },
+  {
     "id": "recently-visited",
     "name": "Recently Visited",
     "description": "Provides enhanced functionality for the list of Recently Visited members, including the ability to store and maintain more than just the past 8 visitors.",
