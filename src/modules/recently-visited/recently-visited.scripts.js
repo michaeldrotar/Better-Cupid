@@ -3,11 +3,13 @@ Module.run('recently-visited', function(module, db) {
       maxItemCount = db.maxRowCount * 4,
       visRowCount = db.visibleRowCount,
       visitLog = db.recentlyVisited || [],
-      items = recentlyVisited.getElementsByTagName("li"),
-      itemHeight = items[0].getHeight("outer"),
-      visHeight = Math.floor((visRowCount * itemHeight) + (itemHeight / 3)),
+      items = recentlyVisited && recentlyVisited.getElementsByTagName("li"),
+      itemHeight = items && items.length && items[0].getHeight("outer"),
+      visHeight = itemHeight && Math.floor((visRowCount * itemHeight) + (itemHeight / 3)),
       list, min;
-    
+  
+  if ( !recentlyVisited ) return;
+  
   items.reverseForEach(function(item) {
     var visit = {
       url: item.getElementByTagName("a").href,
