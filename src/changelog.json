@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.9.0",
+    "date": "03/12/2015",
+    "sections": [
+      {
+        "heading": "Photo Browser",
+        "paragraphs": [
+          "I believe this feature had been lost when BetterCupid was modularized.",
+          "The photo browser is the horizontal list of photos on the homepage. I never liked horizontal scrolling much, so I've reformatted the view to showcase all of the photos. Hovering over one will show it's full details.. clicking the details will open the user's profile like before. I've also added a hide link right to the details in case you're seeing people in there that you don't care to see anymore."
+        ]
+      },
+      {
+        "heading": "Bug Fixes",
+        "notes": [
+          "The recently visited module would throw an error if the recently visited section wasn't on the page, such as in the Settings pages. This prevented the screen from ever showing."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.8.0",
     "date": "03/11/2015",
     "sections": [
