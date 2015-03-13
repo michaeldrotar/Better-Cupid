@@ -1,5 +1,17 @@
 [
   {
+    "verison": "0.10.0",
+    "date": "03/13/2015",
+    "sections": [
+      {
+        "heading": "Pearly Whites",
+        "paragraphs": [
+          "New module for users that don't have a photo yet. OkCupid puts a 'shade' up to cover the large photos of other users, but the photos are still there, so this just removes the shade so that they can be seen. You should still work on getting a good photo up. :)"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.9.0",
     "date": "03/12/2015",
     "sections": [
