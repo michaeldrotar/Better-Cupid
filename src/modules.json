@@ -1,5 +1,14 @@
 [
   {
+    "id": "pearly-whites",
+    "name": "Pearly Whites",
+    "description": "OkCupid doesn't let you view other photos without uploading yours, but really they just throw a sheet over the photos, they're still there. This removes the sheet.",
+    "depends": [],
+    "required": false,
+    "defaults": {
+    }
+  },
+  {
     "id": "people-summary",
     "name": "People Summary",
     "description": "Provides a summary of information about the people that have visited you and those that you favorited",
