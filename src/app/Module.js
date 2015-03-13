@@ -4,7 +4,7 @@
         cache: {}
       },
       lib = {};
-  
+
   function Module(data, callback) {
     var _private = $.extend(true,
           {
@@ -27,29 +27,29 @@
         mod = this,
         db = mod.db = {},
         defaults = _private.defaults;
-    
+
     data = _private.db;
-    
+
     mod.id = function() {
       return _private.id;
     };
-    
+
     mod.name = function() {
       return _private.name;
     };
-    
+
     mod.depends = function() {
       return _private.depends;
     };
-    
+
     mod.description = function() {
       return _private.description;
     };
-    
+
     mod.required = function() {
       return !!_private.required;
     };
-    
+
     mod.path = (function() {
       var root = core.rootPath("/modules/"+_private.id);
       return function(path) {
@@ -60,7 +60,7 @@
         return root+"/"+path;
       };
     })();
-    
+
     mod.enabled = function(val) {
       if ( typeof val !== "boolean" ) {
         return _private.required || mod.db.get('enabled');
@@ -69,7 +69,7 @@
         return mod;
       }
     };
-    
+
     mod.state = function(state) {
       if ( typeof state === "string" ) {
         _private.state = state;
@@ -100,7 +100,7 @@
         return "ready";
       }
     };
-    
+
     _private.setdb = function(v, callback) {
       var db = {};
       db[_private.dbkey] = v;
@@ -110,7 +110,7 @@
         }
       });
     };
-    
+
     db.clear = function(callback) {
       var k;
       for ( k in data ) {
@@ -119,13 +119,13 @@
       core.db.remove(_private.dbkey, callback);
       return db;
     };
-      
+
     db.remove = function(k, callback) {
       delete data[k];
       _private.setdb(data, callback);
       return db;
     };
-  
+
     db.get = function(k) {
       if ( typeof k === 'string' ) {
         return data.hasOwnProperty(k) ? data[k] : defaults[k];
@@ -133,7 +133,7 @@
         return $.extend(true, {}, defaults, data);
       }
     };
-  
+
     db.set = function(k, v, callback) {
       if ( typeof k === 'object' ) {
         callback = v;
@@ -147,15 +147,15 @@
       _private.setdb(data, callback);
       return db;
     };
-    
+
     core.db.get(_private.dbkey, function(db) {
       $.extend(true, data, db[_private.dbkey] || {});
       callback();
     });
-    
+
     return mod;
   };
-  
+
   lib.all = function() {
     if ( !_shared.allPromise ) {
       _shared.allPromise = new Promise(function(resolve, reject) {
@@ -175,7 +175,7 @@
     }
     return _shared.allPromise;
   };
-  
+
   lib.get = function(id) {
     return new Promise(function(resolve, reject) {
       lib.all().then(function(modules) {
@@ -190,31 +190,30 @@
       });
     });
   };
-  
+
   if ( core.onContentScript ) {
     (function() {
       var runScripts = {},
           modulesHash,
           ready = false;
-      
-      function runModule(module, callback) {
-        if ( module.enabled() ) {
-          callback(module, module.db.get());
-        }
-      }
-      
+
       function checkAllReady() {
         var k, module;
         if ( modulesHash && ready ) {
-          for ( k in runScripts ) {
+          for ( k in modulesHash ) {
             module = modulesHash[k];
-            runModule(module, runScripts[k]);
+            if ( module.enabled() ) {
+              $('body').addClass('bc-'+module.id());
+              if ( runScripts[k] ) {
+                runScripts[k](module, module.db.get());
+              }
+            }
           }
           runScripts = {};
           document.body.style.visibility = 'visible';
         }
       }
-      
+
       lib.all().then(function(modules) {
         modulesHash = {};
         modules.forEach(function(module) {
@@ -222,31 +221,31 @@
         });
         checkAllReady();
       });
-      
+
       lib.run = function(id, callback) {
         runScripts[id] = callback;
         checkAllReady();
       };
-      
+
       function domReady() {
         ready = true;
         checkAllReady();
       }
-      
+
       function waitForLoaded() {
         if ( document.readyState !== 'loading' ) {
           document.removeEventListener('readystatechange', waitForLoaded, false);
           domReady();
         }
       }
-      
+
       if ( document.readyState !== 'loading' ) {
         domReady();
       } else {
         document.addEventListener('readystatechange', waitForLoaded, false);
       }
-      
-      
+
+
       // For some reason, body stays visible unless we get really aggressive
       // like this and continually keep it hidden
       var hideBody;
@@ -258,10 +257,10 @@
           setTimeout(hideBody, 1);
         }
       }
-      
+
       hideBody();
     })();
   }
-  
+
   window.Module = lib;
 })();
