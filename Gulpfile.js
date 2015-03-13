@@ -13,7 +13,7 @@ var gulp       = require('gulp'),
     newer      = require('gulp-newer'),
     nunjucks   = require('gulp-nunjucks-html'),
     run        = require('run-sequence'),
-    //sass       = require('gulp-sass'),
+    sass       = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify     = require('gulp-uglify'),
     zip        = require('gulp-zip'),
@@ -21,7 +21,7 @@ var gulp       = require('gulp'),
     path       = {
       app: {
         css: [
-          'src/lib/**/*.css', 'src/app/**/*.css'
+          'src/lib/**/*.css', 'src/app/**/*.scss'
         ],
         js: [
           'src/lib/jquery/**.js', 'src/lib/**.js',
@@ -38,7 +38,7 @@ var gulp       = require('gulp'),
       },
       options: {
         css: [
-          'src/options/options.css', 'src/modules/**/*.options.css'
+          'src/options/options.scss', 'src/modules/**/*.options.scss'
         ],
         html: 'src/options/options.html',
         js: [
@@ -47,7 +47,7 @@ var gulp       = require('gulp'),
       },
       scripts: {
         css: [
-          'src/modules/**/*.scripts.css'
+          'src/modules/**/*.scripts.scss'
         ],
         js: [
           'src/modules/**/*.scripts.js'
@@ -114,6 +114,7 @@ function getPipes(key, file) {
       return [
         //prod && sourcemaps.init(),
         concat(file),
+        sass(),
         prod && cssmin(),
         //prod && sourcemaps.write('.'),
         gulp.dest('dist')
