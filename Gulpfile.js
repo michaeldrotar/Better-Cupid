@@ -142,6 +142,14 @@ function exec(cmd, callback) {
   return process;
 }
 
+function getFile(path) {
+  try {
+    return fs.readFileSync(path, 'utf8');
+  } catch ( e ) {
+    return '';
+  }
+}
+
 function downloadFile(url, path, done) {
   var file = fs.createWriteStream(path),
       module = url.indexOf('https') > -1 ? https : http;
@@ -156,21 +164,18 @@ function downloadFile(url, path, done) {
 }
 
 function getManifest() {
-  if ( getManifest.manifest ) {
+  // Cache the manifest for 1 second so that consecutive calls in the same
+  // build don't keep re-building it .. do allow it to rebuild though
+  // for when the json files are changed
+  var now = Date.now(),
+      expires = (getManifest.cacheTime || 0) + 1000;
+  if ( getManifest.manifest && now < expires ) {
     return getManifest.manifest;
   }
 
-  function getFile(path) {
-    try {
-      return fs.readFileSync(path, 'utf8');
-    } catch ( e ) {
-      return '';
-    }
-  }
-
-  var manifest = require('./src/manifest.json'),
-      modules = require('./src/modules.json'),
-      changelog = require('./src/changelog.json');
+  var manifest = JSON.parse(getFile('./src/manifest.json')),
+      modules = JSON.parse(getFile('./src/modules.json')),
+      changelog = JSON.parse(getFile('./src/changelog.json'));
 
   manifest.modules = modules;
   manifest.changelog = changelog;
@@ -193,6 +198,7 @@ function getManifest() {
   });
 
   getManifest.manifest = manifest;
+  getManifest.cacheTime = now;
   return manifest;
 }
 

@@ -1,12 +1,30 @@
 [
   {
-    "verison": "0.10.0",
+    "version": "0.10.0",
     "date": "03/13/2015",
     "sections": [
+      {
+        "heading": "General",
+        "paragraphs": [
+          "I wanted this version to be a really big milestone for BetterCupid. I know I have a habit of refactoring every other day and it gets me excited but nobody else likely cares. With this version, I have refactored yet again... mostly for the benefit of writing modules. The project now has proper API docs (and a proper API), proper unit testing, and a better development workflow. To showcase that, I've also developed more modules! I hope everyone enjoys them. :)"
+        ]
+      },
+      {
+        "heading": "Module Authoring",
+        "paragraphs": [
+          "It's been my ambition to develop a module system for a chrome extension pretty much since this project started, but I haven't had anything to support module authors. Now if you checkout the repo on git, the gulpfile will have all you need for writing tests and generating the API docs."
+        ]
+      },
       {
         "heading": "Pearly Whites",
         "paragraphs": [
           "New module for users that don't have a photo yet. OkCupid puts a 'shade' up to cover the large photos of other users, but the photos are still there, so this just removes the shade so that they can be seen. You should still work on getting a good photo up. :)"
+        ]
+      },
+      {
+        "heading": "Recently Visited",
+        "notes": [
+          "Now ensures each user it grabs is unique -- sometimes the urls would be a little different but for the same person."
         ]
       }
     ]
