@@ -217,6 +217,7 @@ pip-log.txt
 
 #Project folders and files
 \!*
+docs
 node_modules
 *.sublime*
 *.zip

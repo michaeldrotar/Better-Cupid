@@ -13,8 +13,10 @@ var gulp       = require('gulp'),
     newer      = require('gulp-newer'),
     nunjucks   = require('gulp-nunjucks-html'),
     run        = require('run-sequence'),
+    preprocess = require('gulp-preprocess'),
     sass       = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
+    spawn      = require('child_process').spawn,
     uglify     = require('gulp-uglify'),
     zip        = require('gulp-zip'),
     prod       = false,
@@ -25,7 +27,13 @@ var gulp       = require('gulp'),
         ],
         js: [
           'src/lib/jquery/**/*.js', 'src/lib/**/*.js',
-          'src/app/prototype.js', 'src/app/core.js', 'src/app/**/*.js'
+          'src/app/prototype.js', 'src/app/core.js',
+          'src/app/core.error.js',
+          'src/app/core.*.js',
+          'src/app/bc.js',
+          'src/app/util/**/*.js',
+          'src/app/bc.*.js',
+          'src/app/**/*.js'
         ]
       },
       assets: [
@@ -36,11 +44,18 @@ var gulp       = require('gulp'),
           'src/background/background.js', 'src/modules/**/*.background.js'
         ]
       },
+      doc: {
+        js: [
+          'src/**/*.js', '!src/lib/**'
+        ]
+      },
       options: {
         css: [
           'src/options/options.scss', 'src/modules/**/*.options.scss'
         ],
-        html: 'src/options/options.html',
+        html: [
+          'src/options/options.html'
+        ],
         js: [
           'src/options/options.js', 'src/modules/**/*.options.js'
         ]
@@ -52,8 +67,80 @@ var gulp       = require('gulp'),
         js: [
           'src/modules/**/*.scripts.js'
         ]
+      },
+      test: {
+        css: [
+          'node_modules/mocha/mocha.css'
+        ],
+        html: [
+          'test/test.html'
+        ],
+        js: [
+          'node_modules/chai/chai.js',
+          'node_modules/mocha/mocha.js',
+          'test/test.init.js',
+          'test/**/*.js',
+          'test/test.run.js'
+        ]
       }
     };
+
+// Optional dependencies...
+var open;
+try {
+  open = require('opener');
+} catch ( err ) {
+  // fail silently
+}
+if ( !open ) {
+  open = function() {
+    console.log(
+      'Notice: You may run `npm install -g opener` if you wish for this ' +
+      'command to automatically open the resource in your browser.'
+    );
+  };
+}
+
+var throttles = {};
+var throttle_int;
+function throttle(key, fn) {
+  if ( !throttles[key] ) {
+    throttles[key] = {
+      key: key
+    };
+  }
+  throttles[key].fn = fn;
+  throttles[key].requested_at = Date.now();
+  if ( Object.keys(throttles).length === 1 ) {
+    throttle_int = setInterval(function() {
+      var now = Date.now(),
+          k;
+      for ( k in throttles ) {
+        if ( now > throttles[k].requested_at + 100 ) {
+          throttles[k].fn();
+          delete throttles[k];
+          break;
+        }
+      }
+      if ( Object.keys(throttles).length === 0 ) {
+        clearInterval(throttle_int);
+      }
+    }, 100);
+  }
+}
+
+function exec(cmd, callback) {
+  var process = require('child_process').exec(cmd);
+  process.stdout.on('data', console.log);
+  process.stderr.on('data', console.log);
+  process.on('error', function(error) {
+    console.error(error.stack || error.message);
+  });
+  process.on('close', function(code) {
+    callback(code);
+  });
+  return process;
+}
 
 function downloadFile(url, path, done) {
   var file = fs.createWriteStream(path),
@@ -89,16 +176,17 @@ function getManifest() {
   manifest.changelog = changelog;
 
   modules.forEach(function(module) {
-    module.depends.map(function(dep) {
-      var i = modules.length - 1;
-      for ( ; i >= 0; i-- ) {
-        if ( modules[i].id === dep ) {
-          return modules[i];
+    if ( module.depends ) {
+      module.depends.map(function(dep) {
+        var i = modules.length - 1;
+        for ( ; i >= 0; i-- ) {
+          if ( modules[i].id === dep ) {
+            return modules[i];
+          }
         }
-      }
-      return { id: dep, name: dep };
-    });
-
+        return { id: dep, name: dep };
+      });
+    }
     module.contents = {
       options: getFile('src/modules/'+module.id+'/'+module.id+'.options.html')
     };
@@ -121,6 +209,7 @@ function getPipes(key, file) {
       ];
     } else if ( key === 'html' ) {
       return [
+        preprocess({ context: { DEV: !prod }}),
         nunjucks({
           locals: {
             manifest: getManifest()
@@ -147,6 +236,7 @@ function getPipes(key, file) {
       return [
         //prod && sourcemaps.init(),
         concat(file),
+        preprocess({ context: { DEV: !prod }}),
         prod && uglify({preserveComments: 'some'}),
         //prod && sourcemaps.write('.'),
         gulp.dest('dist')
@@ -157,16 +247,29 @@ function getPipes(key, file) {
 }
 
 function build(file, pipes) {
-  var keys = file.split(/\./g),
-      key = keys.pop(),
-      src = path;
-  keys.forEach(function(key) {
-    if ( src[key] ) {
+  var keys, key, src, dest;
+  if ( typeof file === 'string' ) {
+    dest = file;
+    keys = file.split(/\./g);
+    key = keys.pop();
+    src = path;
+    keys.forEach(function(key) {
+      if ( src[key] ) {
+        src = src[key];
+      }
+    });
+    if ( prod ) {
+      src = src[key].concat(['!src/lib/livejs/**']);
+    } else {
       src = src[key];
     }
-  });
-  src = gulp.src(src[key]);
-  getPipes(pipes || key, file).forEach(function(pipe) {
+    src = gulp.src(src);
+  } else {
+    src = file;
+    dest = pipes;
+    pipes = pipes.split(/\./g)[1];
+  }
+  getPipes(pipes || key, dest).forEach(function(pipe) {
     if ( pipe ) {
       src = src.pipe(pipe).on('error', function(error) {
         console.log('An error occured in ' + error.plugin);
@@ -192,6 +295,12 @@ gulp.task('build-background', function() {
   build('background.js');
 });
 
+gulp.task('build-doc', function(done) {
+  build('doc.js').on('end', function() {
+    exec('jsdoc dist/doc.js -d docs', done);
+  });
+});
+
 gulp.task('build-options', function() {
   build('options.css');
   build('options.js');
@@ -203,12 +312,23 @@ gulp.task('build-scripts', function() {
   build('scripts.js');
 });
 
+gulp.task('build-test', function() {
+  build('test.css');
+  build('test.html');
+  build('test.js');
+});
+
 gulp.task('build', function(done) {
   run(
     'clean',
     [
-      'build-app', 'build-assets',
-      'build-background', 'build-options', 'build-scripts'
+      'build-app',
+      'build-assets',
+      'build-background',
+      'build-options',
+      'build-scripts',
+      'build-doc',
+      'build-test'
     ],
     done
   );
@@ -220,14 +340,14 @@ gulp.task('build-prod', function(done) {
 });
 
 gulp.task('clean', function(done) {
-  del(['dist/**/*'], done);
+  del(['dist/**/*', 'docs/**/*'], done);
 });
 
 gulp.task('package', function(done) {
   run('build-prod', function() {
     var manifest = getManifest();
     setTimeout(function() {
-      gulp.src('dist/**')
+      gulp.src('dist/**', '!dist/doc.js', '!dist/test.*')
         .pipe(zip(manifest.name+'-'+manifest.version+'.zip'))
         .pipe(gulp.dest('.'));
       done();
@@ -260,17 +380,36 @@ gulp.task('update-resources', function(done) {
 });
 
 gulp.task('watch', ['build'], function() {
-  livereload.listen();
   gulp.watch(path.app.css,       ['build-app']);
   gulp.watch(path.app.js,        ['build-app']);
   gulp.watch(path.assets,        ['build-assets']);
   gulp.watch(path.background.js, ['build-background']);
+  gulp.watch(['src/*.json'],     ['build-options']);
   gulp.watch(path.options.css,   ['build-options']);
   gulp.watch(path.options.js,    ['build-options']);
   gulp.watch(path.options.html,  ['build-options']);
   gulp.watch(path.scripts.css,   ['build-scripts']);
   gulp.watch(path.scripts.js,    ['build-scripts']);
-  gulp.watch('dist/**').on('change', livereload.changed);
+  gulp.watch(path.doc.js,        ['build-doc']);
+  gulp.watch(path.test.js,       ['build-test']);
+
+  livereload.listen();
+  gulp.watch([
+    'test/test.html',
+    'docs/**',
+    'dist/**', '!dist/doc.js'
+  ]).on('change', function() {
+    livereload.changed.apply(this, arguments);
+  });
+
+  gulp.watch([
+    'test/test.html',
+    'dist/**', '!dist/doc.js'
+  ]).on('change', function() {
+    throttle('reload-extension', function() {
+      //open('http://reload.extensions?extensions=BetterCupid^&refreshTabs=true');
+    });
+  });
 });
 
 gulp.task('default', ['watch']);
