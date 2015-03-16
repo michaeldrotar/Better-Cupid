@@ -4,6 +4,6 @@
   @param arg {*}
   @return {boolean}
 */
-bc.isArray = Array.isArray || function(arg) {
+util.isArray = Array.isArray || function(arg) {
   return arg instanceof Array;
 };

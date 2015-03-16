@@ -4,7 +4,7 @@
   @param array {Array}
   @return {Array}
 */
-bc.cloneArray = function(arr) {
+util.cloneArray = function(arr) {
   var i, l = arr.length, sliced = new Array(length);
   for ( i = 0; i < l; i++ ) {
     sliced[i] = arr[i];

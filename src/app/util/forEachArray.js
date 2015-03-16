@@ -8,7 +8,7 @@
     Takes the form function(value, index, array)
   @return {*}
 */
-bc.forEachArray = function(arr, callback) {
+util.forEachArray = function(arr, callback) {
   var i, l = arr.length, ret;
   for ( i = 0; i < l; i++ ) {
     ret = callback(arr[i], i, arr);

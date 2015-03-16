@@ -20,70 +20,69 @@ var gulp       = require('gulp'),
     uglify     = require('gulp-uglify'),
     zip        = require('gulp-zip'),
     prod       = false,
-    path       = {
-      app: {
-        css: [
-          'src/lib/**/*.css', 'src/app/**/*.scss'
-        ],
-        js: [
-          'src/lib/jquery/**/*.js', 'src/lib/**/*.js',
-          'src/app/prototype.js', 'src/app/core.js',
-          'src/app/core.error.js',
-          'src/app/core.*.js',
-          'src/app/bc.js',
-          'src/app/util/**/*.js',
-          'src/app/bc.*.js',
-          'src/app/**/*.js'
-        ]
-      },
-      assets: [
-        'src/assets/**/*', 'src/*.json', '!src/changelog.json'
-      ],
-      background: {
-        js: [
-          'src/background/background.js', 'src/modules/**/*.background.js'
-        ]
-      },
-      doc: {
-        js: [
-          'src/**/*.js', '!src/lib/**'
-        ]
-      },
-      options: {
-        css: [
-          'src/options/options.scss', 'src/modules/**/*.options.scss'
-        ],
-        html: [
-          'src/options/options.html'
-        ],
-        js: [
-          'src/options/options.js', 'src/modules/**/*.options.js'
-        ]
-      },
-      scripts: {
-        css: [
-          'src/modules/**/*.scripts.scss'
-        ],
-        js: [
-          'src/modules/**/*.scripts.js'
-        ]
-      },
-      test: {
-        css: [
-          'node_modules/mocha/mocha.css'
-        ],
-        html: [
-          'test/test.html'
-        ],
-        js: [
-          'node_modules/chai/chai.js',
-          'node_modules/mocha/mocha.js',
-          'test/test.init.js',
-          'test/**/*.js',
-          'test/test.run.js'
-        ]
-      }
-    };
+    path       = {};
+path.app = {
+  css: [
+    'src/lib/**/*.css', 'src/app/**/*.scss'
+  ],
+  js: [
+    'src/lib/jquery/**/*.js', 'src/lib/**/*.js',
+    'src/app/prototype.js', 'src/app/core.js',
+    'src/app/core.error.js',
+    'src/app/core.*.js',
+    'src/app/bc.js',
+    'src/app/util/util.js',
+    'src/app/util/**/*.js',
+    'src/app/util/util.end.js',
+    'src/app/bc.*.js',
+    'src/app/**/*.js'
+  ]
+};
+path.assets = [
+  'src/assets/**/*', 'src/*.json', '!src/changelog.json'
+];
+path.background = {
+  js: [
+    'src/background/background.js', 'src/modules/**/*.background.js'
+  ]
+};
+path.options = {
+  css: [
+    'src/options/options.scss', 'src/modules/**/*.options.scss'
+  ],
+  html: [
+    'src/options/options.html'
+  ],
+  js: [
+    'src/options/options.js', 'src/modules/**/*.options.js'
+  ]
+};
+path.scripts = {
+  css: [
+    'src/modules/**/*.scripts.scss'
+  ],
+  js: [
+    'src/modules/**/*.scripts.js'
+  ]
+};
+path.doc = {
+  js: path.app.js.concat(['!src/lib/**'])
+};
+path.test = {
+  css: [
+    'node_modules/mocha/mocha.css'
+  ],
+  html: [
+    'test/test.html'
+  ],
+  js: [
+    'node_modules/chai/chai.js',
+    'node_modules/mocha/mocha.js',
+    'test/test.init.js',
+    'test/**/*.js',
+    'test/test.run.js'
+  ]
+};
 
 // Optional dependencies...
 var open;
