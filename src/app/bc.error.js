@@ -2,6 +2,7 @@
 
   /**
     Supplies ability to create custom errors
+
     @alias bc.error
     @namespace
   */

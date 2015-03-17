@@ -1,6 +1,7 @@
 /**
   Returns true if the given argument is an array.
 
+  @method
   @param  {*}       arg The array to check
   @return {boolean}
 */

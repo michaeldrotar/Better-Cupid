@@ -1,3 +1,8 @@
+/**
+  The BetterCupid lib
+
+  @namespace
+*/
 bc = {};
 
 /**

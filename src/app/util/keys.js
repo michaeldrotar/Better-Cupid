@@ -1,6 +1,7 @@
 /**
   Returns an array of all keys for a given object.
 
+  @method
   @param  {Object} arg The object holding the keys
   @return {Array}      The array of keys
 */
