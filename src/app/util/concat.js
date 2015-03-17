@@ -1,23 +1,23 @@
 /**
   Concatenate any number of arguments together into a single array.
 
-  @param  {...Array} item The items to concatenate
-  @return {Array}         The resulting array
+  @param  {...Array} arg The arrays and values to concatenate
+  @return {Array}        The resulting array
 */
 util.concat = function() {
   var length = arguments.length,
-      arr = [],
-      i, item, childLength, j;
+      result = [],
+      i, arg, argLength, x;
   for ( i = 0; i < length; i++ ) {
-    item = arguments[i];
-    if ( util.isArray(item) ) {
-      childLength = item.length;
-      for ( j = 0; j < childLength; j++ ) {
-        arr.push(item[j]);
+    arg = arguments[i];
+    if ( util.isArray(arg) ) {
+      argLength = arg.length;
+      for ( x = 0; x < argLength; x++ ) {
+        result.push(arg[x]);
       }
     } else {
-      arr.push(item);
+      result.push(arg);
     }
   }
-  return arr;
+  return result;
 };

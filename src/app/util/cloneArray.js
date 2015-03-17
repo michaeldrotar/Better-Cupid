@@ -1,13 +1,15 @@
 /**
-  Clone an array or array-like object
+  Shallow clone an array or array-like object
 
-  @param array {Array}
-  @return {Array}
+  @param  {Array} arg The array to clone
+  @return {Array}     The clone of the array
 */
-util.cloneArray = function(arr) {
-  var i, l = arr.length, sliced = new Array(length);
-  for ( i = 0; i < l; i++ ) {
-    sliced[i] = arr[i];
+util.cloneArray = function(arg) {
+  var length = arg.length,
+      result = new Array(length),
+      i;
+  for ( i = 0; i < length; i++ ) {
+    result[i] = arg[i];
   }
-  return sliced;
+  return result;
 };

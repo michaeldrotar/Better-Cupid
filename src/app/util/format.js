@@ -4,13 +4,12 @@
 var reWildcard = /\{([^\s]+)\}/g;
 
 /**
-  Takes a string that has wildcard placeholders and substitutes the
-    passed params.
-  The string may be the first argument passed or may be passed as 'this'.
+  Returns a string that has had its wildcards replaced with the given data.
+  The template may be the first argument passed or may be passed as 'this'.
   If the wildcard is a number, parameters are grabbed based on their index
-    in the arguments.
+  in the arguments.
   If the wildcard is a string, parameters are grabbed as keys off the first
-    argument.
+  argument.
 
   @example
     var place = 'Disneyland',
