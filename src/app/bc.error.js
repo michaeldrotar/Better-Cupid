@@ -226,6 +226,10 @@
       // Get the error message (may be passed as the first arg after the
       // defined properties)
       err.message = values[meta.properties.length];
+      if ( err.message !== undefined ) {
+        // Ensure it's a string else format will error
+        err.message += '';
+      }
       err.message = util.format(err.message || meta.message, err);
 
       // Attach the stack trace
