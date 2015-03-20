@@ -26,6 +26,10 @@ The `npm` command just installs all the node modules defined in the package.json
 
 Once you've gotten your feet wet in the source and have made a contribution that you'd like to add to the main repo, you may submit a [Pull Request](https://help.github.com/articles/using-pull-requests/). That will give me the ability to review the changes and pull them into the repo or make adjustments. :)
 
+## Licensing
+
+I like to develop things that other people can use and, more importantly, learn from. For that reason, Better Cupid is licensed under the simple and permissive MIT license. For more information, see the [License] file.
+
 ## Changelog
 
 ### Version 0.10.0
