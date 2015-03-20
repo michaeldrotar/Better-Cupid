@@ -346,7 +346,7 @@ gulp.task('build-prod', function(done) {
 
 gulp.task('build-readme', function() {
   var manifest = getManifest(),
-      readme = getFile('readme.md'),
+      readme = getFile('README.md'),
       changelog = [];
   if ( readme ) {
     manifest.changelog.forEach(function(entry) {
@@ -374,26 +374,11 @@ gulp.task('build-readme', function() {
     });
     changelog = changelog.join('\n');
 
-    // Remove any existing changelog data then add new changelog
-    (function() {
-      var foundChangelog = false,
-          inChangelog = false,
-          changelogHeaderTest = /^\#\#\s*changelog/i,
-          headerTest = /^\#\#/,
-          lines = readme.replace(/(\r\n|\r)/g, '\n').split(/\n/g),
-          i, line;
-      for ( i = 0; i < lines.length; i++ ) {
-        if ( changelogHeaderTest.test(lines[i]) ) {
-
-        }
-      }
-    })();
-
     readme = readme
         .replace(/(\r\n|\r)/g, '\n')
         .replace(/(\n\s*\#\#\s+changelog[^\n]*)[\s\S]+?(\n\s*\#\#\s+|$)/i, "$1\n"+changelog+"\n$2");
 
-    fs.writeFile('readme.md', readme);
+    fs.writeFile('README.md', readme);
   }
 });
 
