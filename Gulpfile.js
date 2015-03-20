@@ -344,6 +344,59 @@ gulp.task('build-prod', function(done) {
   run('build', done);
 });
 
+gulp.task('build-readme', function() {
+  var manifest = getManifest(),
+      readme = getFile('readme.md'),
+      changelog = [];
+  if ( readme ) {
+    manifest.changelog.forEach(function(entry) {
+      changelog.push('');
+      changelog.push('### Version '+entry.version);
+      changelog.push(entry.date);
+      if ( entry.sections ) {
+        entry.sections.forEach(function(section) {
+          changelog.push('');
+          changelog.push('#### '+section.heading);
+          if ( section.paragraphs ) {
+            section.paragraphs.forEach(function(paragraph) {
+              changelog.push('');
+              changelog.push(paragraph);
+            });
+          }
+          if ( section.notes ) {
+            changelog.push('');
+            section.notes.forEach(function(note) {
+              changelog.push('- '+note);
+            });
+          }
+        });
+      }
+    });
+    changelog = changelog.join('\n');
+
+    // Remove any existing changelog data then add new changelog
+    (function() {
+      var foundChangelog = false,
+          inChangelog = false,
+          changelogHeaderTest = /^\#\#\s*changelog/i,
+          headerTest = /^\#\#/,
+          lines = readme.replace(/(\r\n|\r)/g, '\n').split(/\n/g),
+          i, line;
+      for ( i = 0; i < lines.length; i++ ) {
+        if ( changelogHeaderTest.test(lines[i]) ) {
+
+        }
+      }
+    })();
+
+    readme = readme
+        .replace(/(\r\n|\r)/g, '\n')
+        .replace(/(\n\s*\#\#\s+changelog[^\n]*)[\s\S]+?(\n\s*\#\#\s+|$)/i, "$1\n"+changelog+"\n$2");
+
+    fs.writeFile('readme.md', readme);
+  }
+});
+
 gulp.task('clean', function(done) {
   del(['dist/**/*', 'docs/**/*'], done);
 });
@@ -389,7 +442,7 @@ gulp.task('watch', ['build'], function() {
   gulp.watch(path.app.js,        ['build-app']);
   gulp.watch(path.assets,        ['build-assets']);
   gulp.watch(path.background.js, ['build-background']);
-  gulp.watch(['src/*.json'],     ['build-options']);
+  gulp.watch(['src/*.json'],     ['build-options', 'build-readme']);
   gulp.watch(path.options.css,   ['build-options']);
   gulp.watch(path.options.js,    ['build-options']);
   gulp.watch(path.options.html,  ['build-options']);
