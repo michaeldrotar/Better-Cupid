@@ -34,6 +34,7 @@ path.app = {
     'src/app/util/util.js',
     'src/app/util/**/*.js',
     'src/app/util/util.end.js',
+    'src/app/bc.lang.js',
     'src/app/bc.*.js',
     'src/app/**/*.js'
   ]
