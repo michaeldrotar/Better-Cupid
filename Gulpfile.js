@@ -34,7 +34,10 @@ path.app = {
     'src/app/util/util.js',
     'src/app/util/**/*.js',
     'src/app/util/util.end.js',
+    'src/app/bc.error.js',
     'src/app/bc.lang.js',
+    'src/app/bc.loc.js',
+    'src/app/bc.http.js',
     'src/app/bc.*.js',
     'src/app/**/*.js'
   ]
@@ -44,7 +47,9 @@ path.assets = [
 ];
 path.background = {
   js: [
-    'src/background/background.js', 'src/modules/**/*.background.js'
+    'src/background/background.js',
+    'src/background/**/*.js',
+    'src/modules/**/*.background.js'
   ]
 };
 path.options = {

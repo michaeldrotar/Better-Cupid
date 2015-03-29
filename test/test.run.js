@@ -1,3 +1,12 @@
 mocha.checkLeaks();
-mocha.globals(['jQuery', 'AppView', 'WebView']);
+mocha.globals([
+  // Libs:
+  'jQuery',
+  // Chrome stuff..?
+  'AppView',
+  'ExtensionOptions',
+  'ExtensionView',
+  'SurfaceWorker',
+  'WebView'
+]);
 mocha.run();
