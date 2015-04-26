@@ -86,8 +86,10 @@
     var self = this;
     delete self.data[key];
     db.get(self.id, function(data) {
-      delete data[self.id][key];
-      db.set(data);
+      if ( data[self.id] ) {
+        delete data[self.id][key];
+        db.set(data);
+      }
     });
   };
 
@@ -97,12 +99,15 @@
     if ( typeof key === 'object' ) {
       $.extend(true, data, key);
       db.get(self.id, function(data) {
-        $.extend(true, data[self.id], key);
+        $.extend(true, data[self.id] || {}, key);
         db.set(data);
       });
     } else {
       data[key] = value;
       db.get(self.id, function(data) {
+        if ( !data[self.id] ) {
+          data[self.id] = {};
+        }
         data[self.id][key] = value;
         db.set(data);
       });
