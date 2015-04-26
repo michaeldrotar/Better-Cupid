@@ -3,6 +3,7 @@
     "id": "forget-me-not",
     "name": "Forget Me Not",
     "description": "Remembers everything you see so you don't have to. This module primarily serves to provide data to other modules.",
+    "order": -1,
     "tabs": [ "options", "memory-management", "how-it-works" ],
     "required": false,
     "defaults": {

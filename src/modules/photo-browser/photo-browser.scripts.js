@@ -1,4 +1,4 @@
-Module.run('photo-browser', function(module) {
+bc.Module.run('photo-browser', function(module) {
 
   function getThumbnailHolder(photobrowser) {
     var holder = photobrowser.find('.bc-photo-browser-thumbnail-holder');

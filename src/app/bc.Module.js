@@ -3,9 +3,10 @@
   var db       = bc.namespace('db'),
       loc      = bc.namespace('location'),
       util     = bc.namespace('util'),
+      Module,
       modules;
 
-  Module = bc.Module = function Module(data) {
+  Module = bc.namespace('Module', function Module(data) {
     if ( this instanceof Module === false ) {
       return new Module(data);
     }
@@ -28,7 +29,7 @@
       }
     );
     return this;
-  };
+  });
 
   Module.prototype.clear = function() {
     this.data = {};
@@ -145,11 +146,13 @@
           console.error(err);
         }
       });
-      util.forEach(modules, function(module) {
+      util.sort(function(a,b) {
+        return (a.order || 0) - (b.order || 0);
+      }).forEach(modules, function(module) {
         if ( module.enabled() ) {
           util.forEach(scripts[module.id], function(fn) {
             try {
-              fn(module);
+              fn(module, module.get());
             } catch ( err ) {
               console.error(err);
             }

@@ -1,4 +1,4 @@
-Module.run('recently-visited', function(module, db) {
+bc.Module.run('recently-visited', function(module, db) {
   var recentlyVisited = document.getElementById("section_recent"),
       maxItemCount = db.maxRowCount * 4,
       visRowCount = db.visibleRowCount,
