@@ -146,9 +146,10 @@
           console.error(err);
         }
       });
-      util.sort(function(a,b) {
+      modules = modules.sort(function(a,b) {
         return (a.order || 0) - (b.order || 0);
-      }).forEach(modules, function(module) {
+      });
+      util.forEach(modules, function(module) {
         if ( module.enabled() ) {
           util.forEach(scripts[module.id], function(fn) {
             try {
