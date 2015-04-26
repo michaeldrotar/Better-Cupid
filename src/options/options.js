@@ -1,34 +1,39 @@
 ;(function() {
-  
-  var module_hash = {};
-  
-  var init = {
-    checkbox: function(setting, module) {
-      this.checked = module.db.get(setting);
-      $(this).change();
+
+  var Module = bc.namespace('Module'),
+      moduleList    = {},
+      controlConfig = {};
+
+  controlConfig.checkbox = {
+    init: function(control, setting, module) {
+      control.prop('checked', module.get(setting));
     },
-    text: function(setting, module) {
-      this.value = module.db.get(setting);
-      $(this).change();
+    change: function(control, setting, module) {
+      module.set(setting, control.prop('checked'));
     }
   };
-  
-  var onchange = {
-    checkbox: function(e, setting, module) {
-      module.db.set(setting, this.checked);
+
+  controlConfig.text = {
+    init: function(control, setting, module) {
+      control.val(module.get(setting));
     },
-    text: function(e, setting, module) {
-      var val = this.value;
-      switch ( this.getAttribute("data-type") ) {
-        case "integer":
-          val = parseInt(val);
-        case "float":
-          val = parseFloat(val);
+    change: function(control, setting, module) {
+      module.set(setting, control.val());
+    }
+  };
+
+  controlConfig.number = {
+    init: controlConfig.text.init,
+    change: function(control, setting, module) {
+      var number = parseInt(control.val());
+      if ( isNaN(number) ) {
+        control.val(module.get(setting));
+      } else {
+        module.set(setting, number);
       }
-      module.db.set(setting, val);
     }
   };
-  
+
   $("#reset-all-button").click(function(e) {
     $("[data-module]").each(function() {
       var modName = this.getAttribute("data-module"),
@@ -62,40 +67,107 @@
     });
     $("#reset-confirmation-dialog").dialog("close");
   });
-  
-  $(document)
-    .on('click', '.module-enabled-switch', function(e) {
-      e.stopPropagation(); // don't select the module settings as well
-      var btn = $(this),
-          id = btn.attr('data-module');
-      Module.get(id).then(function(module) {
-        module.enabled(!module.enabled());
-        if ( module.enabled() ) {
-          btn.addClass('is-enabled').text('Enabled');
-        } else {
-          btn.removeClass('is-enabled').text('Disabled');
+
+  var navigating = false;
+  function openPath(path) {
+    path = path || location.hash.substring(1);
+    if ( path ) {
+      navigating = true;
+      bc.util.forEach(path.split(/\//g), function(item) {
+        $('[data-drawer-open="'+item+'"]').click();
+      });
+      navigating = false;
+    }
+  }
+
+  function updateToggles() {
+    $('[data-toggle]').each(function() {
+      var toggle = $(this),
+          id     = toggle.attr('data-toggle'),
+          module = bc.Module.get(id),
+          input  = toggle.find('input'),
+          on     = module.get('enabled'),
+          deps   = module.deps(),
+          depsOn = true;
+      bc.util.forEach(module.needs, function(id) {
+        if ( !deps[id] ) {
+          depsOn = false;
         }
       });
-    });
-    
-  Module.all().then(function(modules) {
-    modules.forEach(function(module) {
-      var btn = $('.module-enabled-switch[data-module="'+module.id()+'"]');
-      if ( module.enabled() ) {
-        btn.addClass('is-enabled').text('Enabled');
+      input.prop('checked', on);
+      if ( depsOn ) {
+        toggle.find('.toggle-switch').removeClass('is-warning');
+      } else {
+        toggle.find('.toggle-switch').addClass('is-warning');
       }
-      
-      var section = $('[data-module="'+module.id()+'"]');
-      section.find('[data-setting]').each(function() {
-        var input = this,
-            setting = input.getAttribute('data-setting');
-        (init[input.type] || init.text).call(input, setting, module);
-        $(input).on('change', function(e) {
-          (onchange[input.type] || onchange.text).call(input, e, setting, module);
-        });
-      });
     });
-    $('.page').show();
+  }
+
+  $('[data-toggle').on('click', function() {
+    var toggle = $(this),
+        id     = toggle.attr('data-toggle'),
+        module = bc.Module.get(id);
+    module.set('enabled', toggle.find('input').prop('checked'));
+    updateToggles();
   });
-  
+
+  Module.ready(function() {
+    var modules = Module.all();
+    bc.util.forEach(modules, function(module) {
+      moduleList[module.id] = module;
+      $('[data-module="'+module.id+'"] [data-setting]').each(function() {
+        var control = $(this),
+            setting = control.attr('data-setting'),
+            type    = control.attr('type') || 'text',
+            config  = controlConfig[type];
+        if ( config ) {
+          bc.util.forEach(config, function(fn, key) {
+            if ( key === 'init' ) {
+              fn(control, setting, module);
+            } else {
+              control.on(key, function(e) {
+                fn(control, setting, module);
+              });
+            }
+          });
+        } else {
+          console.warn('no configuration for type '+type);
+        }
+      });
+      updateToggles();
+    });
+    openPath();
+    $('.container').show();
+  });
+
+  function getOpenDrawer(parent) {
+    var key = parent.find('[data-drawer-key]').attr('data-drawer-key');
+    return parent.find('[data-drawer-key="'+key+'"].is-open:eq(0)');
+  }
+
+  function getCurrentPath(item) {
+    var path = [],
+        parent = $(document),
+        drawer = getOpenDrawer(parent);
+    while ( drawer.length ) {
+      path.push(drawer.attr('data-drawer'));
+      parent = drawer;
+      drawer = getOpenDrawer(parent);
+    }
+    return path.join('/');
+  }
+
+  $('[data-drawer-open]').on('click', function(e) {
+    setTimeout(function() {
+      if ( !navigating ) {
+        var toggle = $(this);
+        location.hash = getCurrentPath();
+      }
+    }, 100);
+  });
+
+  $(window).on('hashchange', function() {
+    openPath();
+  });
+
 })();

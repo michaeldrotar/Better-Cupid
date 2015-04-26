@@ -36,8 +36,10 @@ path.app = {
     'src/app/util/util.end.js',
     'src/app/bc.error.js',
     'src/app/bc.lang.js',
-    'src/app/bc.loc.js',
+    'src/app/bc.location.js',
     'src/app/bc.http.js',
+    'src/app/bc.db.js',
+    'src/app/bc.manifest.js',
     'src/app/bc.*.js',
     'src/app/**/*.js'
   ]
@@ -70,9 +72,6 @@ path.scripts = {
   js: [
     'src/modules/**/*.scripts.js'
   ]
-};
-path.doc = {
-  js: path.app.js.concat(['!src/lib/**'])
 };
 path.test = {
   css: [
@@ -185,21 +184,37 @@ function getManifest() {
   manifest.modules = modules;
   manifest.changelog = changelog;
 
-  modules.forEach(function(module) {
-    if ( module.depends ) {
-      module.depends.map(function(dep) {
-        var i = modules.length - 1;
-        for ( ; i >= 0; i-- ) {
-          if ( modules[i].id === dep ) {
-            return modules[i];
-          }
-        }
-        return { id: dep, name: dep };
+  function getModule(id) {
+    var mod;
+    modules.forEach(function(module) {
+      if ( module.id === id ) {
+        mod = module;
+      }
+    });
+    return mod;
+  }
+
+  function linkModuleProperty(module, property) {
+    if ( module[property] ) {
+      module[property] = module[property].map(function(id) {
+        return getModule(id);
       });
     }
-    module.contents = {
-      options: getFile('src/modules/'+module.id+'/'+module.id+'.options.html')
-    };
+  }
+
+  modules.forEach(function(module) {
+    linkModuleProperty(module, 'needs');
+    linkModuleProperty(module, 'wants');
+    module.tabs = module.tabs || [ 'options' ];
+    module.tabs = module.tabs.map(function(id) {
+      var tab = { id: id };
+      tab.name = id.replace(/(^\w|-\w)/g, function(match) {
+        return match.replace('-', ' ').toUpperCase();
+      });
+      tab.filename = module.id+'.'+id+'.html';
+      tab.content = getFile('src/modules/'+module.id+'/'+tab.filename);
+      return tab;
+    });
   });
 
   getManifest.manifest = manifest;
@@ -306,12 +321,6 @@ gulp.task('build-background', function() {
   build('background.js');
 });
 
-gulp.task('build-doc', function(done) {
-  build('doc.js').on('end', function() {
-    exec('jsdoc dist/doc.js -d docs', done);
-  });
-});
-
 gulp.task('build-options', function() {
   build('options.css');
   build('options.js');
@@ -338,7 +347,6 @@ gulp.task('build', function(done) {
       'build-background',
       'build-options',
       'build-scripts',
-      'build-doc',
       'build-test'
     ],
     done
@@ -389,14 +397,14 @@ gulp.task('build-readme', function() {
 });
 
 gulp.task('clean', function(done) {
-  del(['dist/**/*', 'docs/**/*'], done);
+  del(['dist/**/*'], done);
 });
 
 gulp.task('package', function(done) {
   run('build-prod', function() {
     var manifest = getManifest();
     setTimeout(function() {
-      gulp.src('dist/**', '!dist/doc.js', '!dist/test.*')
+      gulp.src('dist/**', '!dist/test.*')
         .pipe(zip(manifest.name+'-'+manifest.version+'.zip'))
         .pipe(gulp.dest('.'));
       done();
@@ -437,23 +445,22 @@ gulp.task('watch', ['build'], function() {
   gulp.watch(path.options.css,   ['build-options']);
   gulp.watch(path.options.js,    ['build-options']);
   gulp.watch(path.options.html,  ['build-options']);
+  gulp.watch('src/modules/**/*.options.html', ['build-options']);
   gulp.watch(path.scripts.css,   ['build-scripts']);
   gulp.watch(path.scripts.js,    ['build-scripts']);
-  gulp.watch(path.doc.js,        ['build-doc']);
   gulp.watch(path.test.js,       ['build-test']);
 
   livereload.listen();
   gulp.watch([
     'test/test.html',
-    'docs/**',
-    'dist/**', '!dist/doc.js'
+    'dist/**'
   ]).on('change', function() {
     livereload.changed.apply(this, arguments);
   });
 
   gulp.watch([
     'test/test.html',
-    'dist/**', '!dist/doc.js'
+    'dist/**'
   ]).on('change', function() {
     throttle('reload-extension', function() {
       //open('http://reload.extensions?extensions=BetterCupid^&refreshTabs=true');

@@ -33,7 +33,7 @@ I like to develop things that other people can use and, more importantly, learn 
 ## Changelog
 
 ### Version 0.10.0
-03/13/2015
+
 
 #### Introduction
 
@@ -41,7 +41,7 @@ I wanted this version to be a really big milestone for BetterCupid. I know I hav
 
 #### Data
 
-In v0.8.0, I switched from using localStorage to Chrome's sync storage and hoped that it would be the last major change to storage. I was wrong. After more research, the size of sync storage is very small and I want the flexibility to offer features which use larger amounts of data, like the forget-me-not module which tries to remember everything you've ever seen. For that reason, I've switch over to using Chrome's local storage in addition to adding the unlimitedStorage permission so that storage concerns won't be an issue.
+In v0.8.0, I switched from using localStorage to Chrome's sync storage and hoped that it would be the last major change to storage. I was wrong. After more research, the size of sync storage is very small and I want the flexibility to offer features which use larger amounts of data, like the forget-me-not module which tries to remember everything you've ever seen. For that reason, I've switched over to using Chrome's local storage in addition to adding the unlimitedStorage permission so that storage concerns won't be an issue.
 
 However, syncing can still be an awesome idea, so I have plans for a future version which will allow you to choose what data to sync. This has the added benefit of allowing you to opt-in to what data of yours goes to the cloud and what stays local, and you can choose those features that are important for you to sync and those that aren't.
 

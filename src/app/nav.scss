@@ -1,0 +1,27 @@
+.nav {
+  display: block;
+  float: left;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__item {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__action {
+  background: none;
+  border-style: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font-size: 1em;
+  padding: 0;
+}
+
+.nav--right {
+  float: right;
+}

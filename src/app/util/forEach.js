@@ -13,7 +13,7 @@
 util.forEach = function(arg, callback) {
   if ( util.isArray(arg) ) {
     return util.forEachArray(arg, callback);
-  } else {
+  } else if ( util.isObject(arg) ) {
     return util.forEachObject(arg, callback);
   }
 };

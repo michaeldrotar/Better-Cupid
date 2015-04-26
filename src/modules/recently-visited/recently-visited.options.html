@@ -1,9 +1,23 @@
-<label class="setting">
-	<span class="label">Visible Row Count</span>
-	<input type="number" data-setting="visibleRowCount" data-type="integer" />
-</label>
+<div class="form form--horizontal">
 
-<label class="setting">
-	<span class="label">Max Row Count</span>
-	<input type="number" data-setting="maxRowCount" data-type="integer" />
-</label>
+  <label class="form-field">
+    <div class="form-label col-4">Visible Rows</div>
+    <div class="col-8">
+      <input type="number" class="form-control" data-setting="visibleRowCount" />
+      <div class="form-field-description">
+        The number of rows to visibly show on the page.
+      </div>
+    </div>
+  </label>
+
+  <label class="form-field">
+    <div class="form-label col-4">Stored Rows</div>
+    <div class="col-8">
+      <input type="number" class="form-control" data-setting="maxRowCount" />
+      <div class="form-field-description">
+        The max number of rows to store in memory.
+      </div>
+    </div>
+  </label>
+
+</div>

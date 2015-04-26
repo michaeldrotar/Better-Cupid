@@ -8,6 +8,8 @@
   "icons": {
     "128": "icon128.png",
     "48": "icon48.png",
+    "38": "icon38.png",
+    "19": "icon19.png",
     "16": "icon16.png"
   },
 
@@ -20,7 +22,10 @@
   "options_page": "options.html",
 
   "browser_action": {
-    "default_icon": "icon19.png"
+    "default_icon": {
+      "19": "icon19.png",
+      "38": "icon38.png"
+    }
   },
 
   "content_scripts": [

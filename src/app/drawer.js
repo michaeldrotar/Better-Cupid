@@ -12,9 +12,9 @@ function getDrawerTriggers(drawer) {
       triggers = [];
   if ( drawerName ) {
     triggers = triggers.concat($(
-      '[data-open-drawer="'+drawerName+'"]'+
-      ',[data-close-drawer="'+drawerName+'"]'+
-      ',[data-toggle-drawer="'+drawerName+'"]'
+      '[data-drawer-open="'+drawerName+'"]'+
+      ',[data-drawer-close="'+drawerName+'"]'+
+      ',[data-drawer-toggle="'+drawerName+'"]'
     ).toArray());
   }
   triggers = triggers.concat(
@@ -30,7 +30,7 @@ function getDrawerTriggers(drawer) {
 function openDrawer(drawer) {
   drawer.addClass('is-open');
   getDrawerTriggers(drawer).addClass('is-open');
-  
+
   var drawerKey = drawer.attr('data-drawer-key');
   if ( drawerKey ) {
     $('[data-drawer][data-drawer-key="'+drawerKey+'"].is-open')
@@ -55,20 +55,25 @@ function toggleDrawer(drawer) {
 }
 
 $(document)
-  .on('click', '[data-open-drawer]', function(e) {
-    openDrawer(getDrawer(e.target, 'data-open-drawer'));
+  .on('click', '[data-drawer-open]', function(e) {
+    openDrawer(getDrawer(this, 'data-drawer-open'));
   })
-  .on('click', '[data-close-drawer]', function(e) {
-    closeDrawer(getDrawer(e.target, 'data-close-drawer'));
+  .on('click', '[data-drawer-close]', function(e) {
+    closeDrawer(getDrawer(this, 'data-drawer-close'));
   })
-  .on('click', '[data-toggle-drawer]', function(e) {
-    toggleDrawer(getDrawer(e.target, 'data-toggle-drawer'));
+  .on('click', '[data-drawer-toggle]', function(e) {
+    toggleDrawer(getDrawer(this, 'data-drawer-toggle'));
   })
   .on('click focusin', function(e) {
     $('[data-drawer][data-drawer--auto-close].is-open')
-      .not(getDrawer(e.target))
-      .each(function(i, drawer) {
-        closeDrawer($(drawer));
+      .filter(function() {
+        if ( $(e.target).parent(this).length ) {
+          return false;
+        }
+        return true;
+      })
+      .each(function() {
+        closeDrawer($(this));
       });
   });
 
