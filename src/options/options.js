@@ -73,7 +73,7 @@
     path = path || location.hash.substring(1);
     if ( path ) {
       navigating = true;
-      bc.util.forEach(path.split(/\//g), function(item) {
+      bc.util.each(path.split(/\//g), function(item) {
         $('[data-drawer-open="'+item+'"]').click();
       });
       navigating = false;
@@ -89,7 +89,7 @@
           on     = module.get('enabled'),
           deps   = module.deps(),
           depsOn = true;
-      bc.util.forEach(module.needs, function(id) {
+      bc.util.each(module.needs, function(id) {
         if ( !deps[id] ) {
           depsOn = false;
         }
@@ -113,7 +113,7 @@
 
   Module.ready(function() {
     var modules = Module.all();
-    bc.util.forEach(modules, function(module) {
+    bc.util.each(modules, function(module) {
       moduleList[module.id] = module;
       $('[data-module="'+module.id+'"] [data-setting]').each(function() {
         var control = $(this),
@@ -121,7 +121,7 @@
             type    = control.attr('type') || 'text',
             config  = controlConfig[type];
         if ( config ) {
-          bc.util.forEach(config, function(fn, key) {
+          bc.util.each(config, function(fn, key) {
             if ( key === 'init' ) {
               fn(control, setting, module);
             } else {

@@ -114,9 +114,9 @@
   // their handlers, if any.
   chrome.storage.onChanged.addListener(function(changes, namespace) {
     if ( namespace === 'local' ) {
-      util.forEach(changes, function(value, key) {
+      util.each(changes, function(value, key) {
         var all = util.concat(handlers[key] || [], handlers['']);
-        util.forEach(all, function(handler) {
+        util.each(all, function(handler) {
           try {
             handler(key, value);
           } catch ( err ) {

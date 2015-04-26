@@ -9,6 +9,7 @@ var gulp       = require('gulp'),
     htmlmin    = require('gulp-htmlmin'),
     http       = require('http'),
     https      = require('https'),
+    include    = require('gulp-include'),
     livereload = require('gulp-livereload'),
     newer      = require('gulp-newer'),
     nunjucks   = require('gulp-nunjucks-html'),
@@ -26,14 +27,12 @@ path.app = {
     'src/lib/**/*.css', 'src/app/**/*.scss'
   ],
   js: [
-    'src/lib/jquery/**/*.js', 'src/lib/**/*.js',
+    'src/lib/jquery/**/*.js', 'src/lib/**/*.js', '!src/lib/livejs/**',
     'src/app/prototype.js', 'src/app/core.js',
     'src/app/core.error.js',
     'src/app/core.*.js',
     'src/app/bc.js',
-    'src/app/util/util.js',
-    'src/app/util/**/*.js',
-    'src/app/util/util.end.js',
+    'src/app/bc.util.js',
     'src/app/bc.error.js',
     'src/app/bc.lang.js',
     'src/app/bc.location.js',
@@ -41,7 +40,9 @@ path.app = {
     'src/app/bc.db.js',
     'src/app/bc.manifest.js',
     'src/app/bc.*.js',
-    'src/app/**/*.js'
+    'src/app/**/*.js',
+    'src/modules/**/*.app.js',
+    '!src/app/util/**/*'
   ]
 };
 path.assets = [
@@ -49,6 +50,7 @@ path.assets = [
 ];
 path.background = {
   js: [
+    'src/lib/livejs/*.js',
     'src/background/background.js',
     'src/background/**/*.js',
     'src/modules/**/*.background.js'
@@ -62,6 +64,7 @@ path.options = {
     'src/options/options.html'
   ],
   js: [
+    'src/lib/livejs/*.js',
     'src/options/options.js', 'src/modules/**/*.options.js'
   ]
 };
@@ -81,6 +84,7 @@ path.test = {
     'test/test.html'
   ],
   js: [
+    'src/lib/livejs/*.js',
     'node_modules/chai/chai.js',
     'node_modules/mocha/mocha.js',
     'test/test.init.js',
@@ -103,34 +107,6 @@ if ( !open ) {
       'command to automatically open the resource in your browser.'
     );
   };
-}
-
-var throttles = {};
-var throttle_int;
-function throttle(key, fn) {
-  if ( !throttles[key] ) {
-    throttles[key] = {
-      key: key
-    };
-  }
-  throttles[key].fn = fn;
-  throttles[key].requested_at = Date.now();
-  if ( Object.keys(throttles).length === 1 ) {
-    throttle_int = setInterval(function() {
-      var now = Date.now(),
-          k;
-      for ( k in throttles ) {
-        if ( now > throttles[k].requested_at + 100 ) {
-          throttles[k].fn();
-          delete throttles[k];
-          break;
-        }
-      }
-      if ( Object.keys(throttles).length === 0 ) {
-        clearInterval(throttle_int);
-      }
-    }, 100);
-  }
 }
 
 function exec(cmd, callback) {
@@ -227,6 +203,7 @@ function getPipes(key, file) {
     if ( key === 'css' ) {
       return [
         //prod && sourcemaps.init(),
+        include(),
         concat(file),
         sass(),
         prod && cssmin(),
@@ -235,6 +212,7 @@ function getPipes(key, file) {
       ];
     } else if ( key === 'html' ) {
       return [
+        include(),
         preprocess({ context: { DEV: !prod }}),
         nunjucks({
           locals: {
@@ -261,6 +239,7 @@ function getPipes(key, file) {
     } else if ( key === 'js' ) {
       return [
         //prod && sourcemaps.init(),
+        include(),
         concat(file),
         preprocess({ context: { DEV: !prod }}),
         prod && uglify({preserveComments: 'some'}),
@@ -439,13 +418,16 @@ gulp.task('update-resources', function(done) {
 gulp.task('watch', ['build'], function() {
   gulp.watch(path.app.css,       ['build-app']);
   gulp.watch(path.app.js,        ['build-app']);
+  gulp.watch(['src/app/util/**/*'],
+                                 ['build-app']);
   gulp.watch(path.assets,        ['build-assets']);
   gulp.watch(path.background.js, ['build-background']);
   gulp.watch(['src/*.json'],     ['build-options', 'build-readme']);
   gulp.watch(path.options.css,   ['build-options']);
   gulp.watch(path.options.js,    ['build-options']);
   gulp.watch(path.options.html,  ['build-options']);
-  gulp.watch('src/modules/**/*.options.html', ['build-options']);
+  gulp.watch('src/modules/**/*.options.html',
+                                 ['build-options']);
   gulp.watch(path.scripts.css,   ['build-scripts']);
   gulp.watch(path.scripts.js,    ['build-scripts']);
   gulp.watch(path.test.js,       ['build-test']);
@@ -456,15 +438,6 @@ gulp.task('watch', ['build'], function() {
     'dist/**'
   ]).on('change', function() {
     livereload.changed.apply(this, arguments);
-  });
-
-  gulp.watch([
-    'test/test.html',
-    'dist/**'
-  ]).on('change', function() {
-    throttle('reload-extension', function() {
-      //open('http://reload.extensions?extensions=BetterCupid^&refreshTabs=true');
-    });
   });
 });
 

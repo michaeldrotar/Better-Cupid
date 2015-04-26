@@ -1,20 +1,22 @@
-util.clone = function(arg) {
+util.each = function(arg, callback) {
   var keys, length, result, i, key;
   if ( util.isArrayLike(arg) ) {
     length = arg.length;
-    result = new Array(length);
     for ( i = 0; i < length; i++ ) {
-      result[i] = arg[i];
+      result = callback(arg[i], i, arg);
+      if ( result !== undefined ) {
+        return result;
+      }
     }
-    return result;
   } else if ( util.isObject(arg) ) {
     keys = util.keys(arg);
     length = keys.length;
-    result = {};
     for ( i = 0; i < length; i++ ) {
       key = keys[i];
-      result[key] = arg[key];
+      result = callback(arg[key], key, arg);
+      if ( result !== undefined ) {
+        return result;
+      }
     }
-    return result;
   }
 };

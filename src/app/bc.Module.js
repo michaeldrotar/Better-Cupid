@@ -4,13 +4,14 @@
       loc      = bc.namespace('location'),
       util     = bc.namespace('util'),
       Module,
-      modules;
+      modules,
+      persist;
 
   Module = bc.namespace('Module', function Module(data) {
     if ( this instanceof Module === false ) {
       return new Module(data);
     }
-    $.extend(true, this,
+    util.extend(true, this,
       {
         id: '',
         name: '',
@@ -31,6 +32,27 @@
     return this;
   });
 
+  persist = (function() {
+    var records = {},
+        timeout;
+    function exec() {
+      db.get(function(data) {
+        util.extend(data, records);
+        records = {};
+        timeout = null;
+
+        db.set(data);
+      });
+    }
+
+    return function(id, record) {
+      records[id] = record;
+      if ( !timeout ) {
+        timeout = setTimeout(exec, 100);
+      }
+    };
+  })();
+
   Module.prototype.clear = function() {
     this.data = {};
     db.remove(this.id);
@@ -40,7 +62,7 @@
     var needs = this.needs,
         wants = this.wants,
         deps  = {};
-    util.forEach(util.concat(needs, wants), function(id) {
+    util.each(util.concat(needs, wants), function(id) {
       var module = Module.get(id);
       if ( module.enabled() ) {
         deps[id] = module;
@@ -55,14 +77,14 @@
     if ( typeof key === 'string' ) {
       return data.hasOwnProperty(key) ? data[key] : defaults[key];
     } else {
-      return $.extend(true, {}, defaults, data);
+      return util.extend(true, {}, defaults, data);
     }
   };
 
   Module.prototype.enabled = function(value) {
     if ( arguments.length === 0 ) {
       var needsEnabled = true;
-      util.forEach(this.needs, function(id) {
+      util.each(this.needs, function(id) {
         var module = Module.get(id);
         if ( !module.enabled() ) {
           needsEnabled = false;
@@ -83,39 +105,23 @@
   };
 
   Module.prototype.remove = function(key) {
-    var self = this;
-    delete self.data[key];
-    db.get(self.id, function(data) {
-      if ( data[self.id] ) {
-        delete data[self.id][key];
-        db.set(data);
-      }
-    });
+    this.data[key] = undefined; // NOTE: using delete won't persist the value
+    persist(this.id, this.data);
   };
 
   Module.prototype.set = function(key, value) {
     var self = this,
         data = self.data;
     if ( typeof key === 'object' ) {
-      $.extend(true, data, key);
-      db.get(self.id, function(data) {
-        $.extend(true, data[self.id] || {}, key);
-        db.set(data);
-      });
+      util.extend(true, data, key);
     } else {
       data[key] = value;
-      db.get(self.id, function(data) {
-        if ( !data[self.id] ) {
-          data[self.id] = {};
-        }
-        data[self.id][key] = value;
-        db.set(data);
-      });
     }
+    persist(this.id, this.data);
   };
 
   Module.get = function(id) {
-    return util.forEach(modules, function(module) {
+    return util.each(modules, function(module) {
       if ( module.id === id ) {
         return module;
       }
@@ -138,13 +144,13 @@
         return false;
       }
       if ( !init && onContentScript ) {
-        util.forEach(modules, function(module) {
+        util.each(modules, function(module) {
           if ( module.enabled() ) {
             $('body').addClass('bc-'+module.id);
           }
         });
       }
-      util.forEach(scripts.all, function(fn) {
+      util.each(scripts.all, function(fn) {
         try {
           fn();
         } catch ( err ) {
@@ -154,9 +160,9 @@
       modules = modules.sort(function(a,b) {
         return (a.order || 0) - (b.order || 0);
       });
-      util.forEach(modules, function(module) {
+      util.each(modules, function(module) {
         if ( module.enabled() ) {
-          util.forEach(scripts[module.id], function(fn) {
+          util.each(scripts[module.id], function(fn) {
             try {
               fn(module, module.get());
             } catch ( err ) {
@@ -188,9 +194,9 @@
       });
 
       var count = modules.length;
-      util.forEach(modules, function(module) {
+      util.each(modules, function(module) {
         db.get(module.id, function(data) {
-          $.extend(true, module.data, data[module.id] || {});
+          util.extend(true, module.data, data[module.id] || {});
           count--;
           if ( count === 0 ) {
             modulesReady = true;

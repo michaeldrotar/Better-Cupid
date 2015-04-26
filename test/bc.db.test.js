@@ -11,7 +11,7 @@ describe('bc.db', function() {
         stringtest:'my string'
       },
       testKeys = [];
-  bc.util.forEach(testData, function(value, key) {
+  bc.util.each(testData, function(value, key) {
     testKeys.push(key);
   });
   beforeEach(function(done) {
@@ -22,7 +22,7 @@ describe('bc.db', function() {
   });
   it('should retrieve all data from storage if there\'s no key', function(done) {
     db.get(function(data) {
-      bc.util.forEach(testKeys, function(key) {
+      bc.util.each(testKeys, function(key) {
         expect(data[key]).to.exist;
       });
       done();
@@ -53,7 +53,7 @@ describe('bc.db', function() {
     obj[testKeys[3]] = 'test';
     db.set(obj, function() {
       db.get(function(data) {
-        bc.util.forEach(obj, function(value, key) {
+        bc.util.each(obj, function(value, key) {
           expect(data[key]).to.equal(value);
         });
         done();

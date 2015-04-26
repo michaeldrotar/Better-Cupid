@@ -1,9 +1,3 @@
-/**
-  Concatenate any number of arguments together into a single array.
-
-  @param  {...Array} arg The arrays and values to concatenate
-  @return {Array}        The resulting array
-*/
 util.concat = function() {
   var length = arguments.length,
       result = [],

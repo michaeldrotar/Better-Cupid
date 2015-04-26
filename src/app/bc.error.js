@@ -167,12 +167,12 @@
         meta.properties = [];
       }
     } else if ( util.isArray(meta.properties) ) {
-      meta.properties = util.cloneArray(meta.properties);
+      meta.properties = util.clone(meta.properties);
       if ( util.isObject(meta.properties[meta.properties.length-1]) ) {
         meta.hash = meta.properties.splice(meta.properties.length-1)[0];
       }
     } else if ( util.isObject(meta.properties) ) {
-      meta.hash = util.cloneObject(meta.properties);
+      meta.hash = util.clone(meta.properties);
       meta.properties = [];
     } else {
       throw new TypeError(
@@ -209,14 +209,14 @@
 
       // Assign the defaults
       if ( meta.hash ) {
-        util.forEach(meta.hash, function(value, key) {
+        util.each(meta.hash, function(value, key) {
           err[key] = value;
         });
       }
 
       // Iterate the args defined in the create function, assign the values,
       // in order, to properties denoted by the args
-      util.forEach(meta.properties, function(arg, i) {
+      util.each(meta.properties, function(arg, i) {
         var value = values[i];
         if ( value !== undefined ) {
           err[arg] = values[i];
