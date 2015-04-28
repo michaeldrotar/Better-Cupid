@@ -1,17 +1,26 @@
+var hasOwnProperty = Object.prototype.hasOwnProperty,
+    getKeys = Object.keys;
+
 function UtilObject(arg) {
   if ( this instanceof UtilObject === false ) {
     return new UtilObject(arg);
   }
 
+  var key;
   if ( util.isObject(arg) ) {
-    util.extend(this, arg);
+    for ( key in arg ) {
+      if ( hasOwnProperty.call(arg, key) ) {
+        this[key] = arg[key];
+      }
+    }
   }
+
   return this;
 }
 
 UtilObject.prototype = {
   clone: function() {
-    return util.object(util.clone(this));
+    return util.object(this);
   },
   extend: function(deep) {
     var args = util.clone(arguments);
@@ -25,37 +34,81 @@ UtilObject.prototype = {
     util.extend.apply(window, args);
     return this;
   },
-  each: function() {
-    var args = util.clone(arguments);
-    args.unshift(this);
-    return util.each.apply(window, args);
+  each: function(callback) {
+    var keys = getKeys(this),
+        index = keys.length - 1,
+        key,
+        result;
+    for ( ; index >= 0; index-- ) {
+      key = keys[index];
+      result = callback(this[key], key, this);
+      if ( result !== undefined ) {
+        return result;
+      }
+    }
   },
-  filter: function() {
-    var args = util.clone(arguments);
-    args.unshift(this);
-    return util.filter.apply(window, args);
+  filter: function(callback) {
+    var keys = getKeys(this),
+        index = keys.length - 1,
+        key;
+    for ( ; index >= 0; index-- ) {
+      key = keys[index];
+      if ( !callback(this[key], key, this) ) {
+        delete this[key];
+      }
+    }
   },
   hasKeys: function() {
-    return util.hasKeys(this);
+    var key;
+    for ( key in this ) {
+      if ( hasOwnProperty.call(this, key) ) {
+        return true;
+      }
+    }
+    return false;
   },
   keys: function() {
-    return util.array(util.keys(this));
+    return getKeys(this);
   },
-  map: function() {
-    var args = util.clone(arguments);
-    args.unshift(this);
-    return util.object(util.map.apply(window, args));
+  map: function(callback) {
+    var keys = getKeys(this),
+        index = keys.length - 1,
+        key;
+    for ( ; index >= 0; index-- ) {
+      key = keys[index];
+      this[key] = callback(this[key], key, this);
+    }
+    return this;
   },
-  reduce: function() {
-    var args = util.clone(arguments);
-    args.unshift(this);
-    return util.reduce.apply(window, args);
+  reduce: function(callback, value) {
+    var keys = getKeys(this),
+        index = keys.length - 1,
+        key;
+    if ( arguments.length < 2 ) {
+      value = this[keys[index]];
+      index--;
+    }
+    for ( ; index >= 0; index-- ) {
+      key = keys[index];
+      value = callback(value, this[key], key, this);
+    }
+    return value;
   },
   toObject: function() {
     return this.reduce(function(obj, value, key) {
       obj[key] = value;
       return obj;
     }, {});
+  },
+  values: function() {
+    var keys = getKeys(this),
+        length = keys.length,
+        index = length - 1,
+        result = new Array(length);
+    for ( ; index >= 0; index-- ) {
+      result[index] = this[keys[index]];
+    }
+    return result;
   }
 };
 
