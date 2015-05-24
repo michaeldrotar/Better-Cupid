@@ -39,9 +39,10 @@
         var recentlyVisited = db['module-db--recently-visited'],
             visitLog = recentlyVisited ? recentlyVisited.recentlyVisited : null;
         if ( visitLog ) {
-          // Reformat any urls
+          // Reformat any urls and add username
           visitLog.forEach(function(profile) {
             profile.url = profile.url.replace(/\?.+$/, '');
+            profile.username = profile.url.substring(profile.url.lastIndexOf('/')+1);
           });
           // Remove any dupes
           visitLog = util.remove(visitLog, function(olderProfile, i) {
@@ -61,11 +62,11 @@
         if ( recentlyVisited ) {
           // Rename some keys
           if ( recentlyVisited.visibleRowCount !== undefined ) {
-            recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 4;
+            recentlyVisited.visible = recentlyVisited.visibleRowCount * 4;
             delete recentlyVisited.visibleRowCount;
           }
           if ( recentlyVisited.maxRowCount !== undefined ) {
-            recentlyVisited.maxCount = recentlyVisited.maxRowCount * 4;
+            recentlyVisited.max = recentlyVisited.maxRowCount * 4;
             delete recentlyVisited.maxRowCount;
           }
         }
