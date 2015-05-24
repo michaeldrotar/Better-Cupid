@@ -1,5 +1,6 @@
 (function() {
-  var migrations;
+  var util = bc.util,
+      migrations;
   migrations = [
     { version: '0.8', run: function(done) {
       // Move all settings into chrome's sync storage
@@ -22,6 +23,15 @@
       chrome.storage.sync.set(db, done);
     }},
     { version: '0.10', run: function(done) {
+      // The module data wasn't cleared in 0.8 after being migrated,
+      // do it here to clean it up
+      util.each(
+        ['people-summary', 'recently-visited', 'you-might-like'],
+        function(id) {
+          localStorage.removeItem('module-db--'+id);
+        }
+      );
+
       // Move everything to local chrome storage, simplify the module
       // keys and fix the urls stored by recently-visited to not
       // include any query params
@@ -34,46 +44,47 @@
             profile.url = profile.url.replace(/\?.+$/, '');
           });
           // Remove any dupes
-          visitLog.reverseForEach(function(olderProfile, i) {
-            var newerProfile, x;
-            for ( x = i - 1; x >= 0; x-- ) {
-              newerProfile = visitLog[x];
-              if ( newerProfile.url === olderProfile.url ) {
-                visitLog.splice(i, 1);
-                break;
-              }
+          visitLog = util.remove(visitLog, function(olderProfile, i) {
+            if ( i > 0 ) {
+              return util.each(visitLog, 0, i-1, function(newerProfile) {
+                if ( newerProfile.url === olderProfile.url ) {
+                  return true;
+                }
+              });
             }
           });
           // Store the data back and rename key
           recentlyVisited.log = visitLog;
-          recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 3;
-          recentlyVisited.max = recentlyVisited.maxRowCount * 3;
           delete recentlyVisited.recentlyVisited;
-          delete recentlyVisited.visibleRowCount;
-          delete recentlyVisited.maxRowCount;
+        }
 
-          // Create storage for basic stuff
-          db.bc = {
-            version: db.version
-          };
-          delete db.version;
+        if ( recentlyVisited ) {
+          // Rename some keys
+          if ( recentlyVisited.visibleRowCount !== undefined ) {
+            recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 3;
+            delete recentlyVisited.visibleRowCount;
+          }
+          if ( recentlyVisited.maxRowCount !== undefined ) {
+            recentlyVisited.maxCount = recentlyVisited.maxRowCount * 3;
+            delete recentlyVisited.maxRowCount;
+          }
+        }
 
-          // Simplify module keys
-          var k;
-          for ( k in db ) {
-            if ( db.hasOwnProperty(k) ) {
-              if ( k.indexOf('module-db--') === 0 ) {
-                db[bc.util.camelize(k.replace('module-db--', ''))] = db[k];
-                delete db[k];
-              }
+        // Simplify module keys
+        var k;
+        for ( k in db ) {
+          if ( db.hasOwnProperty(k) ) {
+            if ( k.indexOf('module-db--') === 0 ) {
+              db[util.camelize(k.replace('module-db--', ''))] = db[k];
+              delete db[k];
             }
           }
-
-          // Store back to local storage and remove sync storage
-          chrome.storage.local.set(db, function() {
-            chrome.storage.sync.clear(done);
-          });
         }
+
+        // Store back to local storage and remove sync storage
+        chrome.storage.local.set(db, function() {
+          chrome.storage.sync.clear(done);
+        });
       });
     }}
   ];
@@ -116,7 +127,6 @@
 
           var migration = migrations[i];
           i++;
-
           if ( compareVersions(version, migration.version) < 0 ) {
             migration.run(runNextMigration);
           } else {
