@@ -1,0 +1,28 @@
+@font-face {
+	font-family: 'icomoon';
+	src:url('chrome-extension://__MSG_@@extension_id__/fonts/icomoon.eot?j1gdfl');
+	src:url('chrome-extension://__MSG_@@extension_id__/fonts/icomoon.eot?#iefixj1gdfl') format('embedded-opentype'),
+		url('chrome-extension://__MSG_@@extension_id__/fonts/icomoon.woff?j1gdfl') format('woff'),
+		url('chrome-extension://__MSG_@@extension_id__/fonts/icomoon.ttf?j1gdfl') format('truetype'),
+		url('chrome-extension://__MSG_@@extension_id__/fonts/icomoon.svg?j1gdfl#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-search:before {
+	content: "\e986";
+}

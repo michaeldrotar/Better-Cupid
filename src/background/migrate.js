@@ -45,8 +45,12 @@
             }
           });
           // Store the data back and rename key
-          db['module-db--recently-visited'].log = visitLog;
-          delete db['module-db--recently-visited'].recentlyVisited;
+          recentlyVisited.log = visitLog;
+          recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 3;
+          recentlyVisited.max = recentlyVisited.maxRowCount * 3;
+          delete recentlyVisited.recentlyVisited;
+          delete recentlyVisited.visibleRowCount;
+          delete recentlyVisited.maxRowCount;
 
           // Create storage for basic stuff
           db.bc = {
@@ -59,7 +63,7 @@
           for ( k in db ) {
             if ( db.hasOwnProperty(k) ) {
               if ( k.indexOf('module-db--') === 0 ) {
-                db[k.replace('module-db--', '')] = db[k];
+                db[bc.util.camelize(k.replace('module-db--', ''))] = db[k];
                 delete db[k];
               }
             }
@@ -93,34 +97,35 @@
   }
 
   function migrate(version) {
-    bc.manifest(function(manifest) {
-      function migrationsDone() {
-        chrome.storage.local.set({ bc: { version: manifest.version } });
-      }
-      if ( !version ) {
-        migrationsDone();
-      } else if ( compareVersions(version, manifest.version) !== 0 ) {
-        (function() {
-          var i = 0, l = migrations.length, runNextMigration;
-          runNextMigration = function() {
-            if ( i >= l ) {
-              migrationsDone();
-              return;
-            }
+    var manifest = bc.manifest;
 
-            var migration = migrations[i];
-            i++;
+    function migrationsDone() {
+      chrome.storage.local.set({ bc: { version: manifest.version } });
+    }
 
-            if ( compareVersions(version, migration.version) < 0 ) {
-              migration.run(runNextMigration);
-            } else {
-              setTimeout(runNextMigration, 1);
-            }
-          };
-          runNextMigration();
-        })();
-      }
-    });
+    if ( !version ) {
+      migrationsDone();
+    } else if ( compareVersions(version, manifest.version) !== 0 ) {
+      (function() {
+        var i = 0, l = migrations.length, runNextMigration;
+        runNextMigration = function() {
+          if ( i >= l ) {
+            migrationsDone();
+            return;
+          }
+
+          var migration = migrations[i];
+          i++;
+
+          if ( compareVersions(version, migration.version) < 0 ) {
+            migration.run(runNextMigration);
+          } else {
+            setTimeout(runNextMigration, 1);
+          }
+        };
+        runNextMigration();
+      })();
+    }
   }
 
   chrome.storage.local.get(function(db) {

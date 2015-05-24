@@ -8132,9 +8132,9 @@ jQuery.extend({
 		strAbort = "abort";
 
 		// Install callbacks on deferreds
-		for ( i in { success: 1, error: 1, complete: 1 } ) {
+		jQuery.each({ success: 1, error: 1, complete: 1 }, function(i) {
 			jqXHR[ i ]( s[ i ] );
-		}
+		});
 
 		// Get transport
 		transport = inspectPrefiltersOrTransports( transports, s, options, jqXHR );

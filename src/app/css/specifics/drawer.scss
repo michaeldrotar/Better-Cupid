@@ -1,0 +1,13 @@
+.drawer {
+  display: none;
+
+  &:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+}
+
+.drawer.is-open {
+  display: block;
+}

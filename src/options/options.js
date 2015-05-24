@@ -1,6 +1,11 @@
 ;(function() {
 
-  var Module = bc.namespace('Module'),
+  // @ifdef DEV
+  include('/lib/livejs/**/*.js');
+  // @endif
+
+  var Module = bc.Module,
+      util   = bc.util,
       moduleList    = {},
       controlConfig = {};
 
@@ -77,6 +82,8 @@
         $('[data-drawer-open="'+item+'"]').click();
       });
       navigating = false;
+    } else {
+      drawerjs.init();
     }
   }
 
@@ -103,7 +110,7 @@
     });
   }
 
-  $('[data-toggle').on('click', function() {
+  $('[data-toggle]').on('click', function() {
     var toggle = $(this),
         id     = toggle.attr('data-toggle'),
         module = bc.Module.get(id);
@@ -111,34 +118,33 @@
     updateToggles();
   });
 
-  Module.ready(function() {
-    var modules = Module.all();
-    bc.util.each(modules, function(module) {
-      moduleList[module.id] = module;
-      $('[data-module="'+module.id+'"] [data-setting]').each(function() {
-        var control = $(this),
-            setting = control.attr('data-setting'),
-            type    = control.attr('type') || 'text',
-            config  = controlConfig[type];
-        if ( config ) {
-          bc.util.each(config, function(fn, key) {
-            if ( key === 'init' ) {
+/*
+  var modules = Module.all();
+  console.log(modules);
+  bc.util.each(modules, function(module) {
+    moduleList[module.id] = module;
+    $('[data-module="'+module.id+'"] [data-setting]').each(function() {
+      var control = $(this),
+          setting = control.attr('data-setting'),
+          type    = control.attr('type') || 'text',
+          config  = controlConfig[type];
+      if ( config ) {
+        bc.util.each(config, function(fn, key) {
+          if ( key === 'init' ) {
+            fn(control, setting, module);
+          } else {
+            control.on(key, function(e) {
               fn(control, setting, module);
-            } else {
-              control.on(key, function(e) {
-                fn(control, setting, module);
-              });
-            }
-          });
-        } else {
-          console.warn('no configuration for type '+type);
-        }
-      });
-      updateToggles();
+            });
+          }
+        });
+      } else {
+        console.warn('no configuration for type '+type);
+      }
     });
-    openPath();
-    $('.container').show();
+    updateToggles();
   });
+*/
 
   function getOpenDrawer(parent) {
     var key = parent.find('[data-drawer-key]').attr('data-drawer-key');
@@ -157,7 +163,7 @@
     return path.join('/');
   }
 
-  $('[data-drawer-open]').on('click', function(e) {
+  $(document).on('click', '[data-drawer-open]', function(e) {
     setTimeout(function() {
       if ( !navigating ) {
         var toggle = $(this);
@@ -169,5 +175,91 @@
   $(window).on('hashchange', function() {
     openPath();
   });
+
+  options = {};
+  options.modules = Module.all();
+  util.each(options.modules, function(module) {
+    // If it has settings other than the enabled setting
+    // then it must also have an options template
+    if ( util.keys(module.defaults).length > 1 ) {
+      module.optionsTemplate = 'bc-'+util.dasherize(module.id)+'-options-template';
+    }
+  });
+  options.changelog = {};
+  options.changelog.entries = bc.manifest.changelog;
+  util.each(options.changelog.entries, function(entry) {
+    var res = /^\d+\.\d+/.exec(entry.version);
+    if ( res && res.length ) {
+      entry.majorVersion = res[0];
+    } else {
+      entry.majorVersion = entry.version;
+    }
+  });
+  (function() {
+    var lastVersion = 0,
+        version;
+    options.changelog.byVersion = util.reduce(
+      options.changelog.entries,
+      function(collection, entry) {
+        var version = entry.majorVersion,
+            arr;
+        util.each(collection, function(item) {
+          if ( item.version === version ) {
+            arr = item.entries;
+            return true;
+          }
+        });
+        if ( !arr ) {
+          collection.push({
+            version: version,
+            entries: [ entry ]
+          });
+        } else {
+          arr.push(entry);
+        }
+        return collection;
+      }, []
+    );
+  })();
+
+  Module.ready(function() {
+    var container = $('.js-container');
+    ko.applyBindings(options, container[0]);
+    container.show();
+    drawerjs.init();
+    openPath();
+  });
+
+  ko.bindingHandlers.setting = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      console.log('init', arguments);
+      element.value = ko.unwrap(valueAccessor());
+      $(element).on('change', function() {
+        var type = element.type,
+            value = valueAccessor(),
+            newValue;
+        if ( typeof value === 'function' ) {
+          switch ( type ) {
+            case 'number':
+              newValue = parseInt(element.value);
+              if ( isNaN(newValue) ) {
+                newValue = undefined;
+              }
+              break;
+            default:
+              newValue = element.value;
+              if ( !newValue ) {
+                newValue = undefined;
+              }
+          }
+          value(newValue);
+        }
+      });
+    },
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      console.log('update', arguments);
+      element.value = ko.unwrap(valueAccessor());
+    }
+  };
 
 })();

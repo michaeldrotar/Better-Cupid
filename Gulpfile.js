@@ -1,147 +1,18 @@
 'use strict';
 
-var gulp       = require('gulp'),
-    bump       = require('gulp-bump'),
-    concat     = require('gulp-concat'),
-    cssmin     = require('gulp-cssmin'),
-    del        = require('del'),
-    fs         = require('fs'),
-    htmlmin    = require('gulp-htmlmin'),
-    http       = require('http'),
-    https      = require('https'),
-    include    = require('gulp-include'),
-    livereload = require('gulp-livereload'),
-    newer      = require('gulp-newer'),
-    nunjucks   = require('gulp-nunjucks-html'),
-    run        = require('run-sequence'),
-    preprocess = require('gulp-preprocess'),
-    sass       = require('gulp-sass'),
-    sourcemaps = require('gulp-sourcemaps'),
-    spawn      = require('child_process').spawn,
-    uglify     = require('gulp-uglify'),
-    zip        = require('gulp-zip'),
-    prod       = false,
-    path       = {};
-path.app = {
-  css: [
-    'src/lib/**/*.css', 'src/app/**/*.scss'
-  ],
-  js: [
-    'src/lib/jquery/**/*.js', 'src/lib/**/*.js', '!src/lib/livejs/**',
-    'src/app/prototype.js', 'src/app/core.js',
-    'src/app/core.error.js',
-    'src/app/core.*.js',
-    'src/app/bc.js',
-    'src/app/bc.util.js',
-    'src/app/bc.error.js',
-    'src/app/bc.lang.js',
-    'src/app/bc.location.js',
-    'src/app/bc.http.js',
-    'src/app/bc.db.js',
-    'src/app/bc.manifest.js',
-    'src/app/bc.*.js',
-    'src/app/**/*.js',
-    'src/modules/**/*.app.js',
-    '!src/app/util/**/*'
-  ]
-};
-path.assets = [
-  'src/assets/**/*', 'src/*.json', '!src/changelog.json'
-];
-path.background = {
-  js: [
-    'src/lib/livejs/*.js',
-    'src/background/background.js',
-    'src/background/**/*.js',
-    'src/modules/**/*.background.js'
-  ]
-};
-path.options = {
-  css: [
-    'src/options/options.scss', 'src/modules/**/*.options.scss'
-  ],
-  html: [
-    'src/options/options.html'
-  ],
-  js: [
-    'src/lib/livejs/*.js',
-    'src/options/options.js', 'src/modules/**/*.options.js'
-  ]
-};
-path.scripts = {
-  css: [
-    'src/modules/**/*.scripts.scss'
-  ],
-  js: [
-    'src/modules/**/*.scripts.js'
-  ]
-};
-path.test = {
-  css: [
-    'node_modules/mocha/mocha.css'
-  ],
-  html: [
-    'test/test.html'
-  ],
-  js: [
-    'src/lib/livejs/*.js',
-    'node_modules/chai/chai.js',
-    'node_modules/mocha/mocha.js',
-    'test/test.init.js',
-    'test/**/*.js',
-    'test/test.run.js'
-  ]
-};
-
-// Optional dependencies...
-var open;
-try {
-  open = require('opener');
-} catch ( err ) {
-  // fail silently
-}
-if ( !open ) {
-  open = function() {
-    console.log(
-      'Notice: You may run `npm install -g opener` if you wish for this ' +
-      'command to automatically open the resource in your browser.'
-    );
-  };
-}
-
-function exec(cmd, callback) {
-  var process = require('child_process').exec(cmd);
-  process.stdout.on('data', console.log);
-  process.stderr.on('data', console.log);
-  process.on('error', function(error) {
-    console.error(error.stack || error.message);
-  });
-  process.on('close', function(code) {
-    callback(code);
-  });
-  return process;
-}
-
-function getFile(path) {
-  try {
-    return fs.readFileSync(path, 'utf8');
-  } catch ( e ) {
-    return '';
-  }
-}
-
-function downloadFile(url, path, done) {
-  var file = fs.createWriteStream(path),
-      module = url.indexOf('https') > -1 ? https : http;
-  module.get(url, function(res) {
-    res.on('data', function(chunk) {
-      file.write(chunk);
-    }).on('end', function() {
-      file.end();
-      done();
-    });
-  });
-}
+var gulp        = require('gulp'),
+    cssmin      = require('gulp-cssmin'),
+    del         = require('del'),
+    htmlmin     = require('gulp-htmlmin'),
+    include     = require('./gulp/include'),
+    path        = require('path'),
+    run         = require('run-sequence'),
+    preprocess  = require('gulp-preprocess'),
+    sass        = require('gulp-sass'),
+    sourcemaps  = require('gulp-sourcemaps'),
+    uglify      = require('gulp-uglify'),
+    zip         = require('gulp-zip'),
+    prod        = false;
 
 function getManifest() {
   // Cache the manifest for 1 second so that consecutive calls in the same
@@ -198,13 +69,12 @@ function getManifest() {
   return manifest;
 }
 
-function getPipes(key, file) {
+function getPipes(key) {
   if ( typeof key === 'string' ) {
-    if ( key === 'css' ) {
+    if ( key === 'scss' ) {
       return [
         //prod && sourcemaps.init(),
-        include(),
-        concat(file),
+        include({rootPath: './src'}),
         sass(),
         prod && cssmin(),
         //prod && sourcemaps.write('.'),
@@ -214,34 +84,59 @@ function getPipes(key, file) {
       return [
         include(),
         preprocess({ context: { DEV: !prod }}),
-        nunjucks({
-          locals: {
-            manifest: getManifest()
-          },
-          searchPaths: ['src'],
-          setUp: function(env) {
-            env.addFilter('version', function(version) {
-              var res = /^\d+\.\d+/.exec(version);
-              if ( res && res.length ) {
-                return res[0];
-              }
-              return version;
-            });
-            return env;
-          }
-        }),
         htmlmin({
           removeComments: true,
-          collapseWhitespace: true
+          collapseWhitespace: true,
+          ignoreCustomComments: [
+            /^\s+ko/,
+            /\/ko\s+$/
+          ]
         }),
         gulp.dest('dist')
       ];
     } else if ( key === 'js' ) {
       return [
         //prod && sourcemaps.init(),
-        include(),
-        concat(file),
+        include({rootPath: './src'}),
+        include({
+          cmd: 'requirejs',
+          rootPath: './src',
+          item: {
+            pre: '(function() { var exports;\n',
+            post: '\nreturn exports;})()'
+          },
+          glob: {
+            pre: '[',
+            sep: ',',
+            post: ']'
+          }
+        }),
         preprocess({ context: { DEV: !prod }}),
+        include({
+          cmd: 'requirejson',
+          rootPath: './src'
+        }),
+        include({
+          cmd: 'kotemplates',
+          rootPath: './src',
+          pipes: [
+            htmlmin({collapseWhitespace: true})
+          ],
+          item: function(content, file) {
+            var id;
+            id = path.basename(file.path, '.html');
+            id = 'bc-'+id.replace(/\./g, '-');
+            return '\'<script type="text/html" id="'+id+'">'
+              + content
+                .replace(/(\r?\n|\r)/g, '\\n')
+                .replace(/(')/g, '\\$1')
+                .trim()
+              + '</script>\'';
+          },
+          glob: {
+            sep: "\n+"
+          }
+        }),
         prod && uglify({preserveComments: 'some'}),
         //prod && sourcemaps.write('.'),
         gulp.dest('dist')
@@ -251,30 +146,14 @@ function getPipes(key, file) {
   return key;
 }
 
-function build(file, pipes) {
-  var keys, key, src, dest;
-  if ( typeof file === 'string' ) {
-    dest = file;
-    keys = file.split(/\./g);
-    key = keys.pop();
-    src = path;
-    keys.forEach(function(key) {
-      if ( src[key] ) {
-        src = src[key];
-      }
-    });
-    if ( prod ) {
-      src = src[key].concat(['!src/lib/livejs/**']);
-    } else {
-      src = src[key];
-    }
-    src = gulp.src(src);
-  } else {
-    src = file;
-    dest = pipes;
-    pipes = pipes.split(/\./g)[1];
-  }
-  getPipes(pipes || key, dest).forEach(function(pipe) {
+function build(file) {
+  var ext, src;
+
+  ext = file.split(/\./g);
+  ext = ext[ext.length-1];
+
+  src = gulp.src(file);
+  getPipes(ext).forEach(function(pipe) {
     if ( pipe ) {
       src = src.pipe(pipe).on('error', function(error) {
         console.log('An error occured in ' + error.plugin);
@@ -286,35 +165,26 @@ function build(file, pipes) {
 }
 
 gulp.task('build-app', function() {
-  build('app.css');
-  build('app.js');
+  build('src/app/css/app.scss');
+  build('src/app/js/app.js');
 });
 
 gulp.task('build-assets', function() {
-  build('assets', [
-    gulp.dest('dist')
-  ]);
+  gulp.src('src/assets/**')
+    .pipe(gulp.dest('dist'));
+  gulp.src('src/lib/icomoon/fonts/*')
+    .pipe(gulp.dest('dist/fonts'));
+  gulp.src('src/manifest.json')
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('build-background', function() {
-  build('background.js');
+  build('src/background/background.js');
 });
 
 gulp.task('build-options', function() {
-  build('options.css');
-  build('options.js');
-  build('options.html');
-});
-
-gulp.task('build-scripts', function() {
-  build('scripts.css');
-  build('scripts.js');
-});
-
-gulp.task('build-test', function() {
-  build('test.css');
-  build('test.html');
-  build('test.js');
+  build('src/options/options.js');
+  build('src/options/options.html');
 });
 
 gulp.task('build', function(done) {
@@ -324,9 +194,7 @@ gulp.task('build', function(done) {
       'build-app',
       'build-assets',
       'build-background',
-      'build-options',
-      'build-scripts',
-      'build-test'
+      'build-options'
     ],
     done
   );
@@ -391,54 +259,8 @@ gulp.task('package', function(done) {
   });
 });
 
-gulp.task('update-resources', function(done) {
-  var count = 0,
-      changelog,
-      about;
-  function checkDone() {
-    count++;
-    if ( count == 2 ) {
-      done();
-    }
-  }
-
-  downloadFile(
-    'https://github.com/michaeldrotar/Better-Cupid/wiki/Changelog',
-    'src/options/changelog.html',
-    checkDone
-  );
-
-  downloadFile(
-    'https://github.com/michaeldrotar/Better-Cupid/wiki/About',
-    'src/options/about.html',
-    checkDone
-  );
-});
-
 gulp.task('watch', ['build'], function() {
-  gulp.watch(path.app.css,       ['build-app']);
-  gulp.watch(path.app.js,        ['build-app']);
-  gulp.watch(['src/app/util/**/*'],
-                                 ['build-app']);
-  gulp.watch(path.assets,        ['build-assets']);
-  gulp.watch(path.background.js, ['build-background']);
-  gulp.watch(['src/*.json'],     ['build-options', 'build-readme']);
-  gulp.watch(path.options.css,   ['build-options']);
-  gulp.watch(path.options.js,    ['build-options']);
-  gulp.watch(path.options.html,  ['build-options']);
-  gulp.watch('src/modules/**/*.options.html',
-                                 ['build-options']);
-  gulp.watch(path.scripts.css,   ['build-scripts']);
-  gulp.watch(path.scripts.js,    ['build-scripts']);
-  gulp.watch(path.test.js,       ['build-test']);
-
-  livereload.listen();
-  gulp.watch([
-    'test/test.html',
-    'dist/**'
-  ]).on('change', function() {
-    livereload.changed.apply(this, arguments);
-  });
+  gulp.watch('src/**/*', ['build']);
 });
 
 gulp.task('default', ['watch']);

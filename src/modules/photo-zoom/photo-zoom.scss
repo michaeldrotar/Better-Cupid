@@ -1,0 +1,31 @@
+.bc-photo-zoom-magnifier {
+  color: white;
+  cursor: pointer;
+  display: none;
+  opacity: 0.4;
+  position: absolute;
+  text-align: center;
+  text-shadow: 0 0 1px black;
+}
+
+.bc-photo-zoom-magnifier.is-visible {
+  display: block;
+}
+
+.bc-photo-zoom-overlay {
+  background-color: rgba(255,255,255,0.5);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  bottom: 0;
+  display: none;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 90001; // appear over header
+}
+
+.bc-photo-zoom-overlay.is-visible {
+  display: block;
+}

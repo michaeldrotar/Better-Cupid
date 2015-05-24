@@ -1,112 +1,107 @@
 describe('bc.util', function() {
   var util = bc.util;
-  var arr, arr2, obj, obj2, str, str2;
-  beforeEach(function() {
-    arr = ['Disneyland','Mickey',1,2,true,false,undefined];
-    arr2 = [function(){},{one:'fish',two:'fish'},[1,{}]];
-    obj = {name:'bob',age:32,married:false};
-    obj2 = {name:{first:'beth',last:'smith'},age:45,children:['mary','sue']};
-    str = 'Hello {1}, welcome to {0}!';
-    str2 = '{name} is {age} years old';
-  });
-
-  describe('.array', function() {
-    it('should create an array with extended methods', function() {
-      var arr3 = util.array();
-      arr3.push(1);
-      expect(arr3.clone()).to.not.equal(arr3);
-      expect(arr3.clone().clone).to.be.a('function');
-      expect(arr3.concat(2,[3]).length).to.equal(3);
-      expect(arr3.length).to.equal(1);
-      expect(util.isArray(arr3)).to.be.ok;
-      expect(util.isArrayLike(arr3)).to.be.ok;
-      expect(arr3.keys().length).to.equal(arr3.length);
-      expect(util.array([1,2,3]).reverse().toArray()).to.deep.equal([3,2,1]);
+  describe('.camelize', function() {
+    it('should camelize a string', function() {
+      expect(util.camelize(' test-me here_now 2')).to.equal('testMeHereNow2');
     });
-    it('should allow providing a default array', function() {
-      var arr3 = util.array(arr);
-      expect(arr3.length).to.equal(arr.length);
-      expect(arr3).to.not.equal(arr);
-      expect(arr3.toArray()).to.deep.equal(arr);
+  });
+  describe('.capitalize', function() {
+    it('should capitalize the first letter of a string', function() {
+      expect(util.capitalize('test me')).to.equal('Test me');
     });
   });
   describe('.clone', function() {
     it('should create a duplicate of the array itself', function() {
-      var arr3 = util.clone(arr);
-      expect(arr3).to.not.equal(arr);
-      util.each(arr3, function(value, key) {
-        expect(value).to.equal(arr[key]);
-      });
+      var a = [1,2,3],
+          b = util.clone(a);
+      expect(a).to.deep.equal(b);
+      expect(a).to.not.equal(b);
     });
     it('should create a duplicate of an array-like object', function() {
-      var args = util.clone(arguments);
-      expect(args.length).to.equal(0);
+      function checkArgs() {
+        return util.clone(arguments);
+      }
+      var args = checkArgs(1,2,3);
+      expect(args).to.deep.equal([1,2,3]);
     });
     it('should create a duplicate of the object itself', function() {
-      var obj2 = util.clone(obj);
-      expect(obj2).to.not.equal(obj);
-      util.each(obj2, function(value, key) {
-        expect(value).to.equal(obj[key]);
-      });
+      var a = {a:1,b:2,c:3},
+          b = util.clone(a);
+      expect(a).to.deep.equal(b);
+      expect(a).to.not.equal(b);
     });
   });
   describe('.concat', function() {
-    it('should join multiple arrays together', function() {
-      var arr3 = util.concat(arr, arr2);
-      expect(arr3.length).to.equal(arr.length+arr2.length);
-    });
-    it('should add non-array arguments to the final array', function() {
-      var arr3 = util.concat('one', [1,2,3], undefined, false, [['inner','array']]);
-      expect(arr3.length).to.equal(7);
+    it('should join multiple array-likes and values together', function() {
+      var a = {0:6,1:7,length:2};
+      expect(util.concat([1,2],3,[[4],5],a)).to.deep.equal([1,2,3,[4],5,6,7]);
     });
   });
   describe('.each', function() {
     it('should iterate each item in an array', function() {
-      var count = 0;
-      util.each(arr, function(value) {
-        count++;
-      });
-      expect(count).to.equal(arr.length);
+      var a = [1,2,3],
+          count = 0;
+      util.each(a, function() { count++; });
+      expect(count).to.equal(3);
     });
     it('should iterate each key in an object', function() {
-      var count = 0;
-      util.each(obj, function(value) {
-        count++;
-      });
-      expect(count).to.equal(Object.keys(obj).length);
+      var a = {a:1,b:2,c:3},
+          count = 0;
+      util.each(a, function() { count++; });
+      expect(count).to.equal(3);
     });
     it('should abort if a value is returned while iterating an array and provide the value', function() {
-      var count = 0;
-      var ret = util.each(arr, function(value) {
+      var a = [1,2,3],
+          count = 0,
+          v;
+      v = util.each(a, function() {
         count++;
-        return 'test';
+        if ( count > 1 ) {
+          return 'test';
+        }
       });
-      expect(count).to.equal(1);
-      expect(ret).to.equal('test');
+      expect(count).to.equal(2);
+      expect(v).to.equal('test');
     });
     it('should abort if a value is returned while iterating an object and provide the value', function() {
-      var count = 0;
-      var ret = util.each(obj, function(value) {
+      var a = {a:1,b:2,c:3},
+          count = 0,
+          v;
+      v = util.each(a, function() {
         count++;
-        return 'test';
+        if ( count > 1 ) {
+          return 'test';
+        }
       });
-      expect(count).to.equal(1);
-      expect(ret).to.equal('test');
+      expect(count).to.equal(2);
+      expect(v).to.equal('test');
+    });
+  });
+  describe('.empty', function() {
+    it('should indicate when an array or object has no data', function() {
+      expect(util.empty([])).to.be.ok;
+      expect(util.empty([1])).to.not.be.ok;
+      expect(util.empty({})).to.be.ok;
+      expect(util.empty({a:1})).to.not.be.ok;
     });
   });
   describe('.extend', function() {
     it('should shallow extend an object with other objects', function() {
-      var obj3 = util.extend({}, obj, obj2);
-      util.each(obj3, function(value, key) {
-        expect([obj[key], obj2[key]]).to.contain(value);
-        if ( obj[key] && obj2[key] ) {
-          expect(value).to.equal(obj2[key]);
-        }
-      });
-      expect(obj3).to.not.equal(obj);
-      expect(obj3).to.not.equal(obj2);
+      var a = {a:1,b:2},
+          b = {c:3,a:a},
+          e = util.extend({}, a, b);
+      expect(e).to.deep.equal({a:{a:1,b:2},b:2,c:3});
+      expect(e.a).to.equal(a);
+    });
+    it('should deep extend an object with other objects', function() {
+      var a = {a:1,b:2},
+          b = {c:3,a:a},
+          e = util.extend(true, {}, a, b);
+      expect(e).to.deep.equal({a:{a:1,b:2},b:2,c:3});
+      expect(e.a).to.not.equal(a);
     });
   });
+  /*
   describe('.filter', function() {
     it('should filter an array down to only those items which match a condition', function() {
       var arr3 = util.filter(arr, function(value) {
@@ -125,45 +120,31 @@ describe('bc.util', function() {
       expect(obj3).to.not.equal(obj);
     });
   });
-  describe('.format', function() {
-    it('should replace numerical wildcards with the arguments', function() {
-      var ret = util.format(str, arr[0], arr[1]);
-      expect(ret).to.have.string(arr[0]);
-      expect(ret).to.have.string(arr[1]);
-      expect(ret.length).to.be.above(arr[0].length+arr[1].length);
-    });
-    it('should replace named wildcards with the object keys', function() {
-      var ret = util.format(str2, obj),
-          length = 0,
-          k;
-      for ( k in obj ) {
-        if ( typeof obj[k] === 'string' ) {
-          expect(ret).to.have.string(obj[k]);
-          length += obj[k].length;
-        }
-      }
-      expect(ret.length).to.be.above(length);
-    });
-    it('should allow passing the string as \'this\'', function() {
-      var ret = util.format.apply(str, arr);
-      expect(ret).to.have.string(arr[0]);
-      expect(ret).to.have.string(arr[1]);
-      expect(ret.length).to.be.above(arr[0].length+arr[1].length);
+  */
+  describe('.flatten', function() {
+    it('should join multiple array-likes and values together into a flat array', function() {
+      var a = {0:6,1:7,length:2};
+      expect(util.flatten([1,2],3,[[4],5],a)).to.deep.equal([1,2,3,4,5,6,7]);
     });
   });
-  describe('.hasKeys', function() {
-    it('should determine if an array or object has keys', function() {
-      expect(util.hasKeys(arr)).to.be.ok;
-      expect(util.hasKeys([])).to.not.be.ok;
-      expect(util.hasKeys(obj)).to.be.ok;
-      expect(util.hasKeys({})).to.not.be.ok;
+  describe('.format', function() {
+    it('should replace numerical wildcards with the arguments', function() {
+      var a = util.format('Welcome to {1}, {0}!', 'Mickey', 'Disney');
+      expect(a).to.equal('Welcome to Disney, Mickey!');
+    });
+    it('should replace named wildcards with the object keys', function() {
+      var a = { name: 'Mickey', place: 'Disney' },
+          b = util.format('Welcome to {place}, {name}!', a);
+      expect(b).to.equal('Welcome to Disney, Mickey!');
+    });
+    it('should allow passing the string as \'this\'', function() {
+      var a = util.format.apply('Welcome to {1}, {0}!', ['Mickey', 'Disney']);
+      expect(a).to.equal('Welcome to Disney, Mickey!');
     });
   });
   describe('.isArray', function() {
-    it('should identify arrays', function() {
-      expect(util.isArray(arr)).to.be.ok;
-    });
-    it('should not identify other objects', function() {
+    it('should only identify arrays', function() {
+      expect(util.isArray([])).to.be.ok;
       expect(util.isArray({})).to.not.be.ok;
       expect(util.isArray()).to.not.be.ok;
       expect(util.isArray(null)).to.not.be.ok;
@@ -171,18 +152,13 @@ describe('bc.util', function() {
       expect(util.isArray('array')).to.not.be.ok;
       expect(util.isArray(true)).to.not.be.ok;
       expect(util.isArray(1)).to.not.be.ok;
-      expect(util.isArray({forEach:function(){}})).to.not.be.ok;
       expect(util.isArray(arguments)).to.not.be.ok;
       expect(util.isArray({length:0})).to.not.be.ok;
     });
   });
   describe('.isArrayLike', function() {
-    it('should identify arrays and array-like objects', function() {
-      expect(util.isArrayLike(arr)).to.be.ok;
-      expect(util.isArrayLike(arguments)).to.be.ok;
-      expect(util.isArrayLike({length:0})).to.be.ok;
-    });
-    it('should not identify other objects', function() {
+    it('should only identify arrays and array-like objects', function() {
+      expect(util.isArrayLike([])).to.be.ok;
       expect(util.isArrayLike({})).to.not.be.ok;
       expect(util.isArrayLike()).to.not.be.ok;
       expect(util.isArrayLike(null)).to.not.be.ok;
@@ -190,74 +166,39 @@ describe('bc.util', function() {
       expect(util.isArrayLike('array')).to.not.be.ok;
       expect(util.isArrayLike(true)).to.not.be.ok;
       expect(util.isArrayLike(1)).to.not.be.ok;
-      expect(util.isArrayLike({forEach:function(){}})).to.not.be.ok;
+      expect(util.isArrayLike(arguments)).to.be.ok;
+      expect(util.isArrayLike({length:0})).to.be.ok;
     });
   });
   describe('.isObject', function() {
-    it('should not identify null', function() {
+    it('should only identify objects', function() {
       expect(util.isObject(null)).to.not.be.ok;
-    });
-    it('should identify any other type of object', function() {
       expect(util.isObject({})).to.be.ok;
       expect(util.isObject([])).to.be.ok;
-      expect(util.isObject(window)).to.be.ok;
+      expect(util.isObject(this)).to.be.ok;
       expect(util.isObject(arguments)).to.be.ok;
     });
   });
   describe('.keys', function() {
     it('should provide the indices for an array', function() {
-      expect(util.keys(arr).length).to.equal(arr.length);
+      expect(util.keys(['a','b','c'])).to.deep.equal([0,1,2]);
     });
     it('should provide the keys for an object', function() {
-      var keys = util.keys(obj),
-          count = 0,
-          key;
-      for ( key in obj ) {
-        if ( obj.hasOwnProperty(key) ) {
-          count++;
-          expect(keys).to.contain(key);
-        }
-      }
-      expect(keys.length).to.equal(count);
+      expect(util.keys({a:1,b:2,c:3})).to.deep.equal(['a','b','c']);
     });
   });
   describe('.map', function() {
     it('should map an array\'s values onto a new array', function() {
-      var arr3 = util.map(arr, function(value) {
-        if ( typeof value === 'number' ) {
-          return value + 1;
-        }
-      });
-      expect(arr3).to.not.deep.equal(arr);
-      expect(arr3.length).to.equal(arr.length);
+      var a = [1,2,3],
+          b = util.map(a, function(v) { return v++; });
+      expect(a).to.not.equal(b);
+      expect(b).to.deep.equal([2,3,4]);
     });
     it('should map an object\'s values onto a new object', function() {
-      var obj3 = util.map(obj, function(value) {
-        if ( typeof value === 'number' ) {
-          return value + 1;
-        }
-      });
-      expect(obj3).to.not.deep.equal(obj);
-      expect(Object.keys(obj3).length).to.equal(Object.keys(obj).length);
-    });
-  });
-  describe('.object', function() {
-    it('should create an object with extended methods', function() {
-      var obj3 = util.object();
-      obj3.key = true;
-      expect(obj3.clone()).to.not.equal(obj3);
-      expect(obj3.clone().clone).to.be.a('function');
-      expect(util.isArray(obj3)).to.not.be.ok;
-      expect(util.isArrayLike(obj3)).to.not.be.ok;
-      expect(util.isObject(obj3)).to.be.ok;
-      expect(obj3.keys().length).to.equal(1);
-    });
-    it('should allow providing a default object', function() {
-      var obj3 = util.object(obj);
-      console.log(obj3, obj);
-      expect(obj3.keys().length).to.equal(Object.keys(obj).length);
-      expect(obj3).to.not.equal(obj);
-      expect(obj3.toObject()).to.deep.equal(obj);
+      var a = {a:1,b:2},
+          b = util.map(a, function(v) { return v++; });
+      expect(a).to.not.equal(b);
+      expect(b).to.deep.equal({a:2,b:3});
     });
   });
   describe('.reduce', function() {
@@ -268,56 +209,82 @@ describe('bc.util', function() {
       value = util.reduce({a:1,b:2,c:3}, function(n,v) { return n+v; });
       expect(value).to.equal(6);
     });
-    it('should reduce an array down to a single value', function() {
-      var value = util.reduce(arr, function(sum, item) {
-        if ( typeof item === 'number' ) {
-          sum += item;
-        }
-        return sum;
-      }, 0);
-      expect(value).to.be.above(0);
+    it('should reduce to a single value', function() {
+      var r = function(sum, item) {
+            return sum + item;
+          },
+          a = [1,2,3],
+          b = {a:1,b:2,c:3};
+      expect(util.reduce(a,r)).to.equal(6);
+      expect(util.reduce(b,r)).to.equal(6);
     });
-    it('should reduce an object down to a single value', function() {
-      var value = util.reduce(obj, function(sum, item) {
-        if ( typeof item === 'number' ) {
-          sum += item;
-        }
-        return sum;
-      }, 0);
-      expect(value).to.be.above(0);
-    });
-    it('should act to combine map and filter with arrays', function() {
-      var arr3 = util.reduce(arr, function(value, item) {
-        if ( typeof item === 'number' ) {
-          value.push(item+1);
-        }
-        return value;
-      }, []);
-      expect(arr3.length).to.be.below(arr.length);
-      expect(arr3.length).to.be.above(0);
-      var value = util.reduce(arr3, function(sum, item) {
-        return sum = sum + item;
-      }, 0);
-      expect(value).to.be.above(0);
-    });
-    it('should act to combine map and filter with objects', function() {
-      var obj3 = util.reduce(obj, function(value, item, key) {
-        if ( typeof item === 'number' ) {
-          value[key] = item+1;
-        }
-        return value;
-      }, {});
-      expect(Object.keys(obj3).length).to.be.below(Object.keys(obj).length);
-      expect(Object.keys(obj3).length).to.be.above(0);
-      var value = util.reduce(obj3, function(sum, item) {
-        return sum = sum + item;
-      }, 0);
-      expect(value).to.be.above(0);
+    it('should act to combine map and filter', function() {
+      var r = function(value, item) {
+            if ( typeof item === 'number' ) {
+              value.push(item+1);
+            }
+            return value;
+          },
+          a = [1,2,'a','b',3],
+          b = {a:1,b:2,c:'a',d:'b',e:3};
+      expect(util.reduce(a,r,[])).to.deep.equal([1,2,3]);
+      expect(util.reduce(b,r,{})).to.deep.equal({a:1,b:2,e:3});
     });
   });
+  /*
   describe('.reverse', function() {
     it('should reverse the order of an array', function() {
       expect(util.reverse([1,2,3])).to.deep.equal([3,2,1]);
+    });
+  });
+  */
+  describe('.runFunctions', function() {
+    it('should accept arguments and ignore failures', function() {
+      var count = 0,
+          a = function(v) { count += v; },
+          b = function(v) { d++; count += v; },
+          c = a;
+      util.runFunctions([a,b,c], [2]);
+      expect(count).to.equal(4);
+    });
+  });
+  describe('.sortBy', function() {
+    it('should sort an array of objects by the given properties', function() {
+      var a = [
+            { first: 'bob', last: 'smith', age: 32, likes: { games: true } },
+            { first: 'Bob', last: 'smith', age: 10, likes: { games: true } },
+            { first: 'bob', last: 'johnson', age: 29, likes: { games: true } },
+            { first: 'ann', last: 'johnson', age: 32, likes: { games: false } }
+          ];
+      util.sortBy(a, 'first', true);
+      console.log(a);
+      expect(a[0].first).to.equal('ann');
+      expect(a[3].first).to.equal('Bob');
+      util.sortBy(a, 'first');
+      console.log(a);
+      expect(a[0].first).to.equal('ann');
+      expect(['bob','Bob']).to.contain(a[1].first);
+      util.sortBy(a, ['last', 'first']);
+      console.log(a);
+      expect(a[0].last).to.equal('johnson');
+      expect(a[0].first).to.equal('ann');
+      util.sortBy(a, ['last', '-first']);
+      console.log(a);
+      expect(a[0].last).to.equal('johnson');
+      expect(a[0].first).to.equal('bob');
+      util.sortBy(a, ['age']);
+      console.log(a);
+      expect(a[0].age).to.equal(10);
+      util.sortBy(a, ['likes.games']);
+      console.log(a);
+      expect(a[0].likes.games).to.not.be.ok;
+      expect(a[3].likes.games).to.be.ok;
+    });
+  });
+  describe('.words', function() {
+    it('should provide the words in a string', function() {
+      expect(util.words('area 52')).to.deep.equal(['area', '52']);
+      expect(util.words('_ one, & two')).to.deep.equal(['one', 'two']);
     });
   });
 });

@@ -32,24 +32,24 @@
     {
       "matches": ["http://*.okcupid.com/*", "https://*.okcupid.com/*"],
       "css": [
-        "scripts.css"
+        "app.css"
       ],
       "js": [
-        "app.js",
-        "scripts.js"
+        "app.js"
       ],
       "run_at": "document_start"
     }
   ],
 
   "web_accessible_resources": [
-    "manifest.json",
-    "modules.json"
+    "fonts/*"
   ],
 
   "permissions": [
     "storage",
     "tabs",
     "unlimitedStorage"
-  ]
+  ],
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

@@ -1,0 +1,44 @@
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+}
+
+body {
+  background-color: $color-secondary;
+  color: $color-white;
+  font: normal 12pt Verdana, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-weight: inherit;
+  font-size: 1em;
+  padding: 0;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.5em;
+  line-height: 38px;
+  margin-bottom: 8px;
+}
+
+h3 {
+  font-size: 1.2em;
+  line-height: 38px;
+}
+
+p {
+  color: $color-subtle;
+}

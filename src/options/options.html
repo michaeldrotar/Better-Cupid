@@ -3,20 +3,9 @@
 <head>
   <title>BetterCupid Options</title>
   <link rel="stylesheet" type="text/css" href="app.css" />
-  <link rel="stylesheet" type="text/css" href="options.css" />
 </head>
 <body class="options">
-  {% macro toggle(setting='', css='', attrs='', off='off', on='ON') %}
-    <label class="toggle-switch-container {{css}}" {{attrs}}>
-      <input type="checkbox" data-setting="{{setting}}">
-      <div class="toggle-switch">
-        <div class="toggle-switch-off-text">{{off}}</div>
-        <div class="toggle-switch-on-text">{{on}}</div>
-      </div>
-    </label>
-  {% endmacro %}
-
-  <div class="container" style="display: none">
+  <div class="container js-container" style="display: none">
     <header>
       <h1 class="title">
         <img src="title.png" alt="better cupid">
@@ -59,75 +48,63 @@
             <div class="navbar__title">
               Modules
             </div>
-            <ul class="nav">
-              {% for module in manifest.modules %}
-                <li class="nav__item">
-                  <button type="button" class="nav__action"
-                      data-drawer-open="module-{{module.id}}">
-                    {{module.name}}
-                  </button>
-                  {% if not module.required %}
-                    {{ toggle(setting="enabled", attrs="data-toggle='"+module.id+"'") }}
-                  {% endif %}
-                </li>
-              {% endfor %}
+            <ul class="nav" data-bind="foreach: modules">
+              <li class="nav__item">
+                <button type="button" class="nav__action"
+                    data-bind="attr: { 'data-drawer-open': id }">
+                  <span data-bind="text: name"></span>
+                </button>
+                <span data-bind="if: !required">
+                  <span data-bind="template: { name: 'bc-toggle-switch', data: {
+                    value: enabled
+                  }"></span>
+                </span>
+              </li>
             </ul>
           </nav>
         </div>
-        <div class="col-8 col-pull-4">
-          {% for module in manifest.modules %}
-            <div class="drawer" data-drawer="module-{{module.id}}"
-                data-drawer-key="module-settings" data-module="{{module.id}}">
-              <h2>{{module.name}}</h2>
-              <p class="text-subtle">{{module.description}}</p>
-              <div class="row">
-                {% if module.needs.length %}
-                  <div class="col-6">
-                    <div>Requires the following:</div>
-                    <ul>
-                      {% for mod in module.needs %}
-                        <li>{{mod.name}}</li>
-                      {% endfor %}
-                    </ul>
-                  </div>
-                {% endif %}
-                {% if module.wants.length %}
-                  <div class="col-6">
-                    <div>Pairs well with the following:</div>
-                    <ul>
-                      {% for mod in module.wants %}
-                        <li>{{mod.name}}</li>
-                      {% endfor %}
-                    </ul>
-                  </div>
-                {% endif %}
+        <div class="col-8 col-pull-4" data-bind="foreach: { data: modules, as: 'module' }">
+          <div class="drawer"
+              data-module="{{module.id}}"
+              data-bind="attr: { 'data-drawer': id, 'data-drawer-key': 'module-settings' }">
+            <h2 data-bind="text: name"></h2>
+            <p class="text-subtle" data-bind="text: description"></p>
+            <div class="row">
+              <div class="col-6" data-bind="if: module.needs.length">
+                <div>Requires the following:</div>
+                <ul data-bind="foreach: module.needs">
+                  <li data-bind="text: name"></li>
+                </ul>
               </div>
-              {% if module.tabs.length > 1 %}
-                <nav class="navbar navbar--tabs">
-                  <ul class="nav">
-                    {% for tab in module.tabs %}
-                      <li class="nav__item">
-                        <button type="button" class="nav__action"
-                            data-drawer-open="{{module.id}}-{{tab.id}}">
-                          {{tab.name}}
-                        </button>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </nav>
-                <div>
-                  {% for tab in module.tabs %}
-                    <div class="drawer" data-drawer="{{module.id}}-{{tab.id}}"
-                        data-drawer-key="{{module.id}}-tab">
-                      {% include "modules/" + module.id + "/" + tab.filename %}
-                    </div>
-                  {% endfor %}
-                </div>
-              {% else %}
-                {{ module.tabs[0].content }}
-              {% endif %}
+              <div class="col-6" data-bind="if: module.wants.length">
+                <div>Pairs well with the following:</div>
+                <ul data-bind="foreach: module.wants">
+                  <li data-bind="text: name"></li>
+                </ul>
+              </div>
             </div>
-          {% endfor %}
+            <!--
+            <div data-bind="if: module.tabs.length > 1">
+              <nav class="navbar navbar--tabs">
+                <ul class="nav" data-bind="foreach: { data: tabs, as: 'tab' }">
+                  <li class="nav__item">
+                    <button type="button" class="nav__action"
+                        data-bind="attr: { 'data-drawer-open': module.id+'-'+tab.id }, text: tab.name">
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+              <div class="drawer"
+                  data-bind="foreach: { data: tabs as 'tab' }, attr: { 'data-drawer': module.id+'-'+tab.id, 'data-drawer-key': module.id+'-tab' }">
+                <div data-bind="template: 'bc-'+tab.template"></div>
+              </div>
+            </div>
+            <div data-bind="if: module.tabs.length < 1">-->
+            <!-- ko if: module.optionsTemplate -->
+              <div data-bind="template: { name: module.optionsTemplate, data: $data }"></div>
+            <!-- /ko -->
+            <!--</div>-->
+          </div>
         </div>
       </section>
       <section class="drawer row" data-drawer="changelog"
@@ -135,56 +112,36 @@
         <div class="col-4 col-push-8">
           <nav class="navbar navbar--stacked">
             <div class="navbar__title">Changelog</div>
-            <ul class="nav">
-              {% set last_version = 0 %}
-              {% for entry in manifest.changelog %}
-                {% set version = entry.version | version %}
-                {% if version != last_version %}
-                  {% set last_version = version %}
-                  <li class="nav__item">
-                    <button type="button" class="nav__action"
-                         data-drawer-open="changelog-{{version}}">
-                      {{version}}
-                    </button>
-                  </li>
-                {% endif %}
-              {% endfor %}
+            <ul class="nav" data-bind="foreach: changelog.byVersion">
+              <li class="nav__item">
+                <button type="button" class="nav__action"
+                    data-bind="attr: { 'data-drawer-open': 'changelog-'+version }, text: version">
+                </button>
+              </li>
             </ul>
           </nav>
         </div>
-        <div class="col-8 col-pull-4">
-          {% set last_version = 0 %}
-          {% for entry in manifest.changelog %}
-            {% set version = entry.version | version %}
-            {% if version != last_version %}
-              {% set last_version = version %}
-                <div class="drawer" data-drawer="changelog-{{version}}"
-                    data-drawer-key="changelog">
-                  {% for entry in manifest.changelog %}
-                    {% set version = entry.version | version %}
-                    {% if version == last_version %}
-                      <div class="changelog">
-                        <h2>Version {{entry.version}}</h2>
-                        <div class="changelog__date">{{entry.date}}</div>
-                        {% for section in entry.sections %}
-                          <h3>{{section.heading}}</h3>
-                          {% for paragraph in section.paragraphs %}
-                            <p>{{paragraph}}</p>
-                          {% endfor %}
-                          {% if section.notes %}
-                            <ul>
-                              {% for note in section.notes %}
-                                <li>{{note}}</li>
-                              {% endfor %}
-                            </ul>
-                          {% endif %}
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-            {% endif %}
-          {% endfor %}
+        <div class="col-8 col-pull-4" data-bind="foreach: changelog.byVersion">
+          <div class="drawer" data-drawer-key="changelog"
+              data-bind="attr: { 'data-drawer': 'changelog-'+version }">
+            <!-- ko foreach: entries -->
+              <div class="changelog">
+                <h2 data-bind="text: 'Version '+version"></h2>
+                <div class="changelog__date" data-bind="text: date"></div>
+                <!-- ko foreach: $data.sections -->
+                  <h3 data-bind="text: heading"></h3>
+                  <!-- ko foreach: $data.paragraphs -->
+                    <p data-bind="text: $data"></p>
+                  <!-- /ko -->
+                  <!-- ko if: $data.notes -->
+                    <ul data-bind="foreach: notes">
+                      <li data-bind="text: $data"></li>
+                    </ul>
+                  <!-- /ko -->
+                <!-- /ko -->
+              </div>
+            <!-- /ko -->
+          </div>
         </div>
       </section>
       <section class="drawer" data-drawer="about"
