@@ -16,7 +16,6 @@ exports = {
     $('body').append(self.magnifier, self.overlay);
 
     $(document).on('mouseenter', self.imageSelector, function(e) {
-      console.log('check it');
       if ( self.imageTest.test(this.src) ) {
         self.bindTo(this);
       }

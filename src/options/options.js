@@ -232,14 +232,15 @@
 
   ko.bindingHandlers.setting = {
     init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-      console.log('init', arguments);
-      element.value = ko.unwrap(valueAccessor());
       $(element).on('change', function() {
         var type = element.type,
             value = valueAccessor(),
             newValue;
         if ( typeof value === 'function' ) {
           switch ( type ) {
+            case 'checkbox':
+              newValue = $(element).prop('checked');
+              break;
             case 'number':
               newValue = parseInt(element.value);
               if ( isNaN(newValue) ) {
@@ -257,8 +258,14 @@
       });
     },
     update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-      console.log('update', arguments);
-      element.value = ko.unwrap(valueAccessor());
+      var value = ko.unwrap(valueAccessor());
+      switch ( element.type ) {
+        case 'checkbox':
+          $(element).prop('checked', value);
+          break;
+        default:
+          element.value = value;
+      }
     }
   };
 

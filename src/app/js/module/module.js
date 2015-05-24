@@ -53,6 +53,42 @@ Module = function(data) {
 };
 
 function defineProperties(module) {
+  var reset = false;
+  function isEnabled() {
+    var enabled = module.get('enabled');
+    util.each(module.needs, function(id) {
+      if ( !bc[id].enabled() ) {
+        enabled = false;
+      }
+    });
+    return enabled;
+  }
+  module.enabled = ko.observable(isEnabled());
+  module.enabled.subscribe(function(value) {
+    if ( module.required ) {
+      value = true;
+    }
+    if ( !reset ) {
+      module.set('enabled', value);
+    }
+    if ( value === undefined ) {
+      reset = true;
+      module.enabled(isEnabled());
+    }
+    reset = false;
+    if ( value === true ) {
+      util.each(module.needs, function(id) {
+        bc[id].enabled(true);
+      });
+    } else if ( value === false ) {
+      util.each(Module.all(), function(mod) {
+        if ( util.contains(mod.needs, module.id) ) {
+          mod.enabled(false);
+        }
+      });
+    }
+  });
+
   util.each(module.defaults, function(_, key) {
     var value,
         reset = false;
@@ -75,6 +111,16 @@ function defineProperties(module) {
       });
     }
   });
+
+  util.each(module.properties, function(value, key) {
+    if ( typeof value === 'function' ) {
+      module[key] = ko.computed(value.bind(module));
+    } else if ( util.isArray(value) ) {
+      module[key] = ko.observableArray(value);
+    } else {
+      module[key] = ko.observable(value);
+    }
+  });
 }
 
 Module.all = requirejs('statics/all.js');
@@ -88,7 +134,6 @@ Module.prototype = {
   */
   clear: requirejs('clear.js'),
   get: requirejs('get.js'),
-  enabled: requirejs('enabled.js'),
   path: requirejs('path.js'),
   remove: requirejs('remove.js'),
   set: requirejs('set.js')
@@ -100,20 +145,15 @@ modules = modules.map(function(data) {
 });
 
 util.sortBy(modules, 'order');
-console.log(util.map(modules, function(module) { return module.id; }));
+
 modules.sort(function(a,b) {
-  console.log(a,b);
   if ( util.contains(a.deps, b.id) ) {
-    console.log(a.id, '>', b.id);
     return 1;
   } else if ( util.contains(b.deps, a.id) ) {
-    console.log(a.id, '<', b.id);
     return -1;
   }
   return 0;
 });
-
-console.log(util.map(modules, function(module) { return module.id; }));
 
 (function() {
   var onContentScript = loc.onContentScript,

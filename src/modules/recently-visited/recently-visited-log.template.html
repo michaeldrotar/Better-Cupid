@@ -1,0 +1,20 @@
+<div class="bc-visited-list-container" data-bind="style: { maxHeight: containerHeight()+'px' }">
+  <ul class="visited-list" data-bind="foreach: log">
+    <li class="visited-list-item">
+      <a class="user_image" data-profile-popover data-bind="attr: { href: $data.url }">
+        <img border="0" height="50" width="50" data-bind="attr: { src: $data.image }" />
+      </a>
+      <div class="profile_info">
+        <div class="username">
+          <a class="name __web-inspector-hide-shortcut__" data-bind="attr: { href: $data.url }, text: $data.username"></a>
+        </div>
+        <!-- ko if: $data.age -->
+          <div class="userinfo">
+            <span class="age" data-bind="text: $data.age"></span>
+            <span class="dot">·</span>
+            <span class="location" data-bind="text: $data.location"></span>
+          </div>
+        <!-- /ko -->
+      </div>
+  </ul>
+</div>

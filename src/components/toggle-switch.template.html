@@ -1,7 +1,7 @@
-<label class="toggle-switch-container" data-bind="css: css, attr: attr">
-  <input type="checkbox" data-bind="value: value">
+<label class="toggle-switch-container" data-bind="css: $data.css, attr: $data.attr">
+  <input type="checkbox" data-bind="setting: value">
   <div class="toggle-switch">
-    <div class="toggle-switch-off-text" data-bind="text: off || 'off'"></div>
-    <div class="toggle-switch-on-text" data-bind="text: on || 'ON'"></div>
+    <div class="toggle-switch-off-text" data-bind="text: $data.off || 'off'"></div>
+    <div class="toggle-switch-on-text" data-bind="text: $data.on || 'ON'"></div>
   </div>
 </label>

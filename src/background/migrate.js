@@ -61,11 +61,11 @@
         if ( recentlyVisited ) {
           // Rename some keys
           if ( recentlyVisited.visibleRowCount !== undefined ) {
-            recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 3;
+            recentlyVisited.visibleCount = recentlyVisited.visibleRowCount * 4;
             delete recentlyVisited.visibleRowCount;
           }
           if ( recentlyVisited.maxRowCount !== undefined ) {
-            recentlyVisited.maxCount = recentlyVisited.maxRowCount * 3;
+            recentlyVisited.maxCount = recentlyVisited.maxRowCount * 4;
             delete recentlyVisited.maxRowCount;
           }
         }
