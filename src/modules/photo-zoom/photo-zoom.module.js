@@ -15,6 +15,24 @@ exports = {
     $(document).on('mouseenter', self.imageSelector, function(e) {
       if ( self.enabled() && self.imageTest.test(this.src) ) {
         self.bindTo(this);
+        if ( !$._data(self.magnifier[0], 'events') ) {
+          // Events get destroyed if parent node disappears so
+          // must check to re-create them
+          self.magnifier.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.show(self.target);
+          }).on('mouseout', function(e) {
+            self.magnifier.removeClass('is-visible');
+          });
+
+          self.enabled.subscribe(function(enabled) {
+            if ( !enabled ) {
+              self.overlay.removeClass('is-visible');
+              self.magnifier.removeClass('is-visible');
+            }
+          });
+        }
       }
     });
 
@@ -22,20 +40,6 @@ exports = {
       self.overlay.removeClass('is-visible');
     });
 
-    self.magnifier.on('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      self.show(self.target);
-    }).on('mouseout', function(e) {
-      self.magnifier.removeClass('is-visible');
-    });
-
-    self.enabled.subscribe(function(enabled) {
-      if ( !enabled ) {
-        self.overlay.removeClass('is-visible');
-        self.magnifier.removeClass('is-visible');
-      }
-    });
   },
   bindTo: function(img) {
     img = $(img);
