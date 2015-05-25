@@ -71,6 +71,9 @@
           }
         }
 
+        // Remove old version, new one gets set when all migrations are done
+        delete db.version;
+
         // Simplify module keys
         var k;
         for ( k in db ) {

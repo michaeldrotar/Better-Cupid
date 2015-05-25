@@ -25,7 +25,7 @@ persist = (function() {
   return function(id, record) {
     records[id] = record;
     if ( !timeout ) {
-      timeout = setTimeout(exec, 100);
+      timeout = setTimeout(exec, 1000);
     }
   };
 })();
@@ -120,6 +120,12 @@ function defineProperties(module) {
     } else {
       module[key] = ko.observable(value);
     }
+  });
+
+  db.onChanged(module.id, function(values, id) {
+    util.each(values.newValue, function(value, key) {
+      module[key](value);
+    });
   });
 }
 
