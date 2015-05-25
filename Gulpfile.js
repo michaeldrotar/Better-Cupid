@@ -15,61 +15,6 @@ var gulp        = require('gulp'),
     zip         = require('gulp-zip'),
     prod        = false;
 
-function getManifest() {
-  // Cache the manifest for 1 second so that consecutive calls in the same
-  // build don't keep re-building it .. do allow it to rebuild though
-  // for when the json files are changed
-  var now = Date.now(),
-      expires = (getManifest.cacheTime || 0) + 1000;
-  if ( getManifest.manifest && now < expires ) {
-    return getManifest.manifest;
-  }
-
-  var manifest = JSON.parse(getFile('./src/manifest.json')),
-      modules = JSON.parse(getFile('./src/modules.json')),
-      changelog = JSON.parse(getFile('./src/changelog.json'));
-
-  manifest.modules = modules;
-  manifest.changelog = changelog;
-
-  function getModule(id) {
-    var mod;
-    modules.forEach(function(module) {
-      if ( module.id === id ) {
-        mod = module;
-      }
-    });
-    return mod;
-  }
-
-  function linkModuleProperty(module, property) {
-    if ( module[property] ) {
-      module[property] = module[property].map(function(id) {
-        return getModule(id);
-      });
-    }
-  }
-
-  modules.forEach(function(module) {
-    linkModuleProperty(module, 'needs');
-    linkModuleProperty(module, 'wants');
-    module.tabs = module.tabs || [ 'options' ];
-    module.tabs = module.tabs.map(function(id) {
-      var tab = { id: id };
-      tab.name = id.replace(/(^\w|-\w)/g, function(match) {
-        return match.replace('-', ' ').toUpperCase();
-      });
-      tab.filename = module.id+'.'+id+'.html';
-      tab.content = getFile('src/modules/'+module.id+'/'+tab.filename);
-      return tab;
-    });
-  });
-
-  getManifest.manifest = manifest;
-  getManifest.cacheTime = now;
-  return manifest;
-}
-
 function getPipes(key) {
   if ( typeof key === 'string' ) {
     if ( key === 'scss' ) {
@@ -98,6 +43,7 @@ function getPipes(key) {
     } else if ( key === 'js' ) {
       return [
         //prod && sourcemaps.init(),
+        preprocess({ context: { DEV: !prod }}),
         include({rootPath: './src'}),
         include({
           cmd: 'requirejs',
@@ -165,37 +111,53 @@ function build(file) {
   return src;
 }
 
-gulp.task('build-app', function() {
-  build('src/app/css/app.scss');
-  build('src/app/js/app.js');
+gulp.task('build-app-css', function() {
+  return build('src/app/css/app.scss');
+});
+
+gulp.task('build-app-js', function() {
+  return build('src/app/js/app.js');
 });
 
 gulp.task('build-assets', function() {
-  gulp.src('src/assets/**')
-    .pipe(gulp.dest('dist'));
-  gulp.src('src/lib/icomoon/fonts/*')
-    .pipe(gulp.dest('dist/fonts'));
-  gulp.src('src/manifest.json')
+  return gulp.src('src/assets/**')
     .pipe(gulp.dest('dist'));
 });
 
 gulp.task('build-background', function() {
-  build('src/background/background.js');
+  return build('src/background/background.js');
 });
 
-gulp.task('build-options', function() {
-  build('src/options/options.js');
-  build('src/options/options.html');
+gulp.task('build-icomoon-fonts', function() {
+  return gulp.src('src/lib/icomoon/fonts/*')
+    .pipe(gulp.dest('dist/fonts'));
+});
+
+gulp.task('build-manifest', function() {
+  return gulp.src('src/manifest.json')
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('build-options-html', function() {
+  return build('src/options/options.html');
+});
+
+gulp.task('build-options-js', function() {
+  return build('src/options/options.js');
 });
 
 gulp.task('build', function(done) {
   run(
     'clean',
     [
-      'build-app',
+      'build-app-css',
+      'build-app-js',
       'build-assets',
       'build-background',
-      'build-options'
+      'build-icomoon-fonts',
+      'build-manifest',
+      'build-options-html',
+      'build-options-js'
     ],
     done
   );
@@ -258,16 +220,11 @@ gulp.task('clean', function(done) {
   del(['dist/**/*'], done);
 });
 
-gulp.task('package', function(done) {
-  run('build-prod', function() {
-    var manifest = getManifest();
-    setTimeout(function() {
-      gulp.src('dist/**', '!dist/test.*')
-        .pipe(zip(manifest.name+'-'+manifest.version+'.zip'))
-        .pipe(gulp.dest('.'));
-      done();
-    }, 1000);
-  });
+gulp.task('package', ['build-prod'], function() {
+  var manifest = require('./dist/manifest.json');
+  return gulp.src('dist/**')
+    .pipe(zip(manifest.name+'-'+manifest.version+'.zip'))
+    .pipe(gulp.dest('.'));
 });
 
 gulp.task('watch', ['build', 'build-readme'], function() {

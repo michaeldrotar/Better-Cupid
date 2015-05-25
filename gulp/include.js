@@ -13,13 +13,18 @@ function getCmdRe(cmd) {
 
 function getFiles(str, relPath, opts) {
   return str.trim().split(/\s+/g).map(function(str) {
-    return str.trim().replace(/[^\w\.\/\*]+/g, '');
+    return str.trim().replace(/[^\w\.\/\*\!]+/g, '');
   }).map(function(str) {
-    if ( str.indexOf('/') === 0 ) {
-      return path.join(opts.rootPath, str);
-    } else {
-      return path.join(relPath, str);
+    var negate = str.indexOf('!') === 0;
+    if ( negate ) {
+      str = str.substring(1);
     }
+    if ( str.indexOf('/') === 0 ) {
+      str = path.join(opts.rootPath, str);
+    } else {
+      str = path.join(relPath, str);
+    }
+    return ( negate ? '!' : '' ) + str;
   });
 }
 

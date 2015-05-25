@@ -44,7 +44,6 @@ db.set = function(key, value, callback) {
     obj[key] = value;
   }
   storage.set(obj, callback);
-  console.log('setting storage', obj);
   return db;
 };
 

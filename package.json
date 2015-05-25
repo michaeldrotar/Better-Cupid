@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/michaeldrotar/Better-Cupid",
   "devDependencies": {
-    "chai": "^2.1.1",
     "del": "^1.1.1",
     "gulp": "^3.8.11",
     "gulp-cssmin": "^0.1.6",
