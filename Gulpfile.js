@@ -10,6 +10,7 @@ var gulp        = require('gulp'),
     preprocess  = require('gulp-preprocess'),
     sass        = require('gulp-sass'),
     sourcemaps  = require('gulp-sourcemaps'),
+    through     = require('through2'),
     uglify      = require('gulp-uglify'),
     zip         = require('gulp-zip'),
     prod        = false;
@@ -206,41 +207,51 @@ gulp.task('build-prod', function(done) {
 });
 
 gulp.task('build-readme', function() {
-  var manifest = getManifest(),
-      readme = getFile('README.md'),
-      changelog = [];
-  if ( readme ) {
-    manifest.changelog.forEach(function(entry) {
-      changelog.push('');
-      changelog.push('### Version '+entry.version);
-      changelog.push(entry.date);
-      if ( entry.sections ) {
-        entry.sections.forEach(function(section) {
-          changelog.push('');
-          changelog.push('#### '+section.heading);
-          if ( section.paragraphs ) {
-            section.paragraphs.forEach(function(paragraph) {
-              changelog.push('');
-              changelog.push(paragraph);
-            });
-          }
-          if ( section.notes ) {
-            changelog.push('');
-            section.notes.forEach(function(note) {
-              changelog.push('- '+note);
-            });
-          }
-        });
-      }
-    });
-    changelog = changelog.join('\n');
+  gulp.src('README.md')
+    .pipe(through.obj(function(file, enc, done) {
+      var self = this,
+          readme = file,
+          contents = String(readme.contents),
+          changelog = '';
+      gulp.src('src/changelog.json')
+        .pipe(through.obj(function(file, enc, cb) {
+          var lines = [];
+          JSON.parse(String(file.contents)).forEach(function(entry) {
+            lines.push('');
+            lines.push('### Version '+entry.version);
+            lines.push(entry.date);
+            if ( entry.sections ) {
+              entry.sections.forEach(function(section) {
+                lines.push('');
+                lines.push('#### '+section.heading);
+                if ( section.paragraphs ) {
+                  section.paragraphs.forEach(function(paragraph) {
+                    lines.push('');
+                    lines.push(paragraph);
+                  });
+                }
+                if ( section.notes ) {
+                  lines.push('');
+                  section.notes.forEach(function(note) {
+                    lines.push('- '+note);
+                  });
+                }
+              });
+            }
+          });
+          changelog = lines.join('\n');
 
-    readme = readme
-        .replace(/(\r\n|\r)/g, '\n')
-        .replace(/(\n\s*\#\#\s+changelog[^\n]*)[\s\S]+?(\n\s*\#\#\s+|$)/i, "$1\n"+changelog+"\n$2");
+          contents = contents
+              .replace(/(\r\n|\r)/g, '\n')
+              .replace(/(\n\s*\#\#\s+changelog[^\n]*)[\s\S]+?(\n\s*\#\#\s+|$)/i, "$1\n"+changelog+"\n$2");
 
-    fs.writeFile('README.md', readme);
-  }
+          cb();
+          readme.contents = new Buffer(contents);
+          self.push(readme);
+          done();
+        }))
+    }))
+    .pipe(gulp.dest('.'));
 });
 
 gulp.task('clean', function(done) {
@@ -259,8 +270,9 @@ gulp.task('package', function(done) {
   });
 });
 
-gulp.task('watch', ['build'], function() {
+gulp.task('watch', ['build', 'build-readme'], function() {
   gulp.watch('src/**/*', ['build']);
+  gulp.watch('src/changelog.json', ['build-readme']);
 });
 
 gulp.task('default', ['watch']);

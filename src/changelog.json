@@ -1,38 +1,41 @@
 [
   {
     "version": "0.10.0",
-    "date": "",
+    "date": "05/24/2015",
     "sections": [
       {
         "heading": "Introduction",
         "paragraphs": [
-          "I wanted this version to be a really big milestone for BetterCupid. I know I have a habit of refactoring every other day and it gets me excited but nobody else likely cares. With this version, I have refactored yet again... mostly for the benefit of writing modules. The project now has proper API docs (and a proper API), proper unit testing, and a better development workflow. To showcase that, I've also developed more modules! I hope everyone enjoys them. :)"
+          "I wanted this version to be a really big milestone for BetterCupid. I had grand ideas of implementing a real test suite and an API doc and making modules super easy to write -- unfortunately, it had me spinning my gears for a few weeks, during which okcupid launched a revamped layout that completely broke the extension.",
+          "I also had created a new module dubbed Pearly Whites that would remove the ugly overlay obscuring the view of user's profiles when you yourself didn't have a photo yet. Well, the revamped okcupid no longer has that overlay and just completely blocks access to those other photos -- so that module will never see the light of day. :(",
+          "However, I have developed a new module that's been asked for multiple times: photo zoom. Also, module settings dynamically update now -- which is pretty neat itself, but it also opens the door for just having a much more lively experience even across tabs."
         ]
       },
       {
         "heading": "Data",
         "paragraphs": [
-          "In v0.8.0, I switched from using localStorage to Chrome's sync storage and hoped that it would be the last major change to storage. I was wrong. After more research, the size of sync storage is very small and I want the flexibility to offer features which use larger amounts of data, like the forget-me-not module which tries to remember everything you've ever seen. For that reason, I've switched over to using Chrome's local storage in addition to adding the unlimitedStorage permission so that storage concerns won't be an issue.",
+          "In v0.8.0, I switched from using localStorage to Chrome's sync storage and hoped that it would be the last major change to storage. I was wrong. After more research, the size of sync storage is very small and I want the flexibility to offer features which use larger amounts of data, like the forget-me-not module which tries to remember everything you've ever seen (not yet finished). For that reason, I've switched over to using Chrome's local storage in addition to adding the unlimitedStorage permission so that storage concerns won't be an issue.",
           "However, syncing can still be an awesome idea, so I have plans for a future version which will allow you to choose what data to sync. This has the added benefit of allowing you to opt-in to what data of yours goes to the cloud and what stays local, and you can choose those features that are important for you to sync and those that aren't.",
-          "Once the ability to choose synced data is implemented, I will have to stop changing the data structure since it's possible two computers could be on two different versions and expecting different formats, but I believe I'm quickly getting to a place where I'm going to name things well enough that it won't be an issue."
+          "Once the ability to choose synced data is implemented, I will likely have to stop changing the data structure since it's possible two computers could be on two different versions and expecting different formats, but I believe I'm quickly getting to a place where I'm going to name things well enough that it won't be an issue."
         ]
       },
       {
-        "heading": "Modules",
+        "heading": "Photo Zoom",
         "paragraphs": [
-          "It's been my ambition to develop a module system for a chrome extension pretty much since this project started, but I haven't had anything to support module authors. Now if you checkout the repo on git, the gulpfile will have all you need for writing tests and generating the API docs."
+          "Brand new module! Provides a magnifying glass over any user photos on the site. Clicking it will not only show the full image but will make it as large as will fit in your browser. Clicking the image will then dismiss it."
         ]
       },
       {
-        "heading": "Pearly Whites",
+        "heading": "Photobrowser",
         "paragraphs": [
-          "New module for users that don't have a photo yet. OkCupid puts a 'shade' up to cover the large photos of other users, but the photos are still there, so this just removes the shade so that they can be seen. You should still work on getting a good photo up. :)"
+          "Temporarily disabled"
         ]
       },
       {
         "heading": "Recently Visited",
-        "notes": [
-          "Now ensures each user it grabs is unique -- sometimes the urls would be a little different but for the same person."
+        "paragraphs": [
+          "Updated to work with the new layout, which provides the user's age and location as well. Any old log entries will be missing the new data, but they'll still display just fine.",
+          "Also, recently visited will now stay synced across tabs. It doesn't update when visiting a new user just yet since the profile page doesn't show the recently visited list, but it will update on all tabs when any tab shows the list."
         ]
       }
     ]
