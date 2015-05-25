@@ -10,22 +10,38 @@ exports = {
     log: []
   },
   properties: {
-    containerHeight: function() {
-      var visible = this.visible(),
-          itemHeight = $('#recently_visited .visited-list-item').outerHeight();
-      if ( !itemHeight || itemHeight < 10 ) {
-        itemHeight = 71;
-      }
-      return itemHeight * visible;
-    }
+    itemHeight: 50
   },
   init: function() {
-  },
-  runScript: function() {
-    var section = $('#recently_visited');
+    var section = $('#recently_visited'),
+        visitedList = section.find('.visited-list');
     if ( section.length ) {
+      this.itemHeight(section.find('.visited-list-item').outerHeight(true));
       this.updateLog(section);
       this.injectTemplate(section);
+      this.enabled.subscribe(function(enabled) {
+        if ( enabled ) {
+          if ( this.visible() === 0 ) {
+            section.hide();
+          } else {
+            visitedList.hide();
+          }
+          $('.bc-visited-list-container').show();
+        } else {
+          section.show();
+          visitedList.show();
+          $('.bc-visited-list-container').hide();
+        }
+      }.bind(this));
+      this.visible.subscribe(function(visible) {
+        if ( this.enabled() ) {
+          if ( this.visible() === 0 ) {
+            section.hide();
+          } else {
+            section.show();
+          }
+        }
+      }.bind(this));
     }
   },
   updateLog: function(section) {

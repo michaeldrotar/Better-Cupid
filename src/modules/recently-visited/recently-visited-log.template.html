@@ -1,4 +1,4 @@
-<div class="bc-visited-list-container" data-bind="style: { maxHeight: containerHeight()+'px' }">
+<div class="bc-visited-list-container" data-bind="style: { maxHeight: (itemHeight()*visible())+'px' }">
   <ul class="visited-list" data-bind="foreach: log">
     <li class="visited-list-item">
       <a class="user_image" data-profile-popover data-bind="attr: { href: $data.url }">

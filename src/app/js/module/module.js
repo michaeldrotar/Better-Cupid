@@ -174,29 +174,14 @@ modules.sort(function(a,b) {
     if ( init ) {
       return;
     }
-
-    var enabledModules;
-    enabledModules = util.keep(modules, function(module) {
-      return module.enabled();
+    util.each(modules, function(module) {
+      defineProperties(module);
     });
-
-    if ( onContentScript ) {
-      util.each(enabledModules, function(module) {
-        document.body.className += ' bc-'+module.id;
-      });
-    }
-    util.each(enabledModules, function(module) {
+    util.each(modules, function(module) {
       if ( module.init ) {
         module.init();
       }
     });
-    if ( onContentScript ) {
-      util.each(enabledModules, function(module) {
-        if ( module.runScript ) {
-          module.runScript();
-        }
-      });
-    }
     util.runFunctions(callbacks);
     document.body.style.visibility = 'visible';
     init = true;
@@ -217,7 +202,6 @@ modules.sort(function(a,b) {
       if ( d ) {
         util.extend(true, module.data, d);
       }
-      defineProperties(module);
     });
     modulesReady = true;
     checkReady();
