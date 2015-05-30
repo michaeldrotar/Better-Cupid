@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.10.1",
+    "date": "05/30/2015",
+    "sections": [
+      {
+        "heading": "Photo Zoom",
+        "notes": [
+          "Fix to no longer zoom on the profile button, was preventing the profile menu from coming up.",
+          "Fix to zoom on visitor images.. they have a weird overlay that was preventing the mouse-over detection."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.10.0",
     "date": "05/24/2015",
     "sections": [

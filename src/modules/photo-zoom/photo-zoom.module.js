@@ -12,28 +12,15 @@ exports = {
     var self = this;
     $('body').append(self.magnifier, self.overlay);
 
-    $(document).on('mouseenter', self.imageSelector, function(e) {
-      if ( self.enabled() && self.imageTest.test(this.src) ) {
-        self.bindTo(this);
-        if ( !$._data(self.magnifier[0], 'events') ) {
-          // Events get destroyed if parent node disappears so
-          // must check to re-create them
-          self.magnifier.on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            self.show(self.target);
-          }).on('mouseout', function(e) {
-            self.magnifier.removeClass('is-visible');
-          });
-
-          self.enabled.subscribe(function(enabled) {
-            if ( !enabled ) {
-              self.overlay.removeClass('is-visible');
-              self.magnifier.removeClass('is-visible');
-            }
-          });
-        }
+    $(document).on('mouseenter', '.link_cover', function(e) {
+      var image = $(this).parent().find('.user_image img');
+      if ( image.length ) {
+        self.onHover(image[0]);
       }
+    });
+
+    $(document).on('mouseenter', self.imageSelector, function(e) {
+      self.onHover(this);
     });
 
     self.overlay.on('click', function() {
@@ -57,8 +44,37 @@ exports = {
     }).addClass('is-visible');
     this.target = img[0];
   },
+  checkImage: function(img) {
+    var properUrl = this.imageTest.test(img.src),
+        inNav     = $(img).closest('#navigation').length > 0;
+    return properUrl && !inNav;
+  },
   hideIndicator: function() {
     this.magnifier.removeClass('is-visible');
+  },
+  onHover: function(img) {
+    var self = this;
+    if ( self.enabled() && self.checkImage(img) ) {
+      self.bindTo(img);
+      if ( !$._data(self.magnifier[0], 'events') ) {
+        // Events get destroyed if parent node disappears so
+        // must check to re-create them
+        self.magnifier.on('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          self.show(self.target);
+        }).on('mouseout', function(e) {
+          self.magnifier.removeClass('is-visible');
+        });
+
+        self.enabled.subscribe(function(enabled) {
+          if ( !enabled ) {
+            self.overlay.removeClass('is-visible');
+            self.magnifier.removeClass('is-visible');
+          }
+        });
+      }
+    }
   },
   show: function(img) {
     var match = this.imageTest.exec(img.src),

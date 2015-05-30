@@ -34,6 +34,14 @@ I like to develop things that other people can use and, more importantly, learn 
 
 ## Changelog
 
+### Version 0.10.1
+05/30/2015
+
+#### Photo Zoom
+
+- Fix to no longer zoom on the profile button, was preventing the profile menu from coming up.
+- Fix to zoom on visitor images.. they have a weird overlay that was preventing the mouse-over detection.
+
 ### Version 0.10.0
 05/24/2015
 
