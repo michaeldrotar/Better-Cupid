@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.10.2",
+    "date": "10/28/2026",
+    "sections": [
+      {
+        "heading": "Security",
+        "notes": [
+          "Update bundled jQuery to 3.7.1 to address known security advisories while retaining compatibility with Knockout 3.3.0."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.10.1",
     "date": "05/30/2015",
     "sections": [
